@@ -50,7 +50,7 @@ option(BUILD_TESTING "Build the testing tree." OFF)
 #  endif()
 #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_COMPILER_IS_GNUCXX AND BUILD_TESTING)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND BUILD_TESTING)
   message("CTEST is ENABLED")
   enable_testing()
   add_test(AllTests math_tests)
