@@ -23,9 +23,9 @@ jobs:
         build-type : [Debug]
         compiler   : [gcc, clang]
         exclude:
-          # Only default compiler on macos-latest and windows-latest
+          # Only default compiler on windows-latest
           - os: macos-latest
-            compiler: clang
+            compiler: gcc
           - os: windows-latest
             compiler: clang
             
