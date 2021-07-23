@@ -33,8 +33,7 @@ add_executable(math_tests tests/tests_main.cpp
 set_target_properties(math_tests PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
 #uncomment this to add code coverage
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_COMPILER_IS_GNUCXX)
   LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake_modules")
   include(CodeCoverage)
   APPEND_COVERAGE_COMPILER_FLAGS()
@@ -45,5 +44,4 @@ if (CMAKE_COMPILER_IS_GNUCXX)
                                        EXECUTABLE      math_tests
                                        BASE_DIRECTORY  "${PROJECT_SOURCE_DIR}"
                                        EXCLUDE         "${PROJECT_SOURCE_DIR}/tests/*")  
-endif()
 endif()
