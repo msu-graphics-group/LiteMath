@@ -14,4 +14,4 @@ script:
   - bash coverage2.sh
 
 after_success: 
-  - bash <(curl -s https://codecov.io/bash) -f LiteMath.h.gcov
+  - bash <(curl -s https://codecov.io/bash) -f LiteMath.h.gcov -t 56ae1d95-6267-4047-9a8e-ab8e19daddec
