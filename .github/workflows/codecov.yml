@@ -17,6 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: InstallQmake
+      run : sudo apt-get install qt5-qmake
+    
     - name: AutoCodeCoverage
       working-directory: ${{github.workspace}}
       run: bash coverage2.sh
