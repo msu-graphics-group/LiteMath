@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: InstallQmake
-      run : sudo ap-get install qmake 
+      run : sudo apt-get install qmake 
     
     - name: AutoCodeCoverage
       working-directory: ${{github.workspace}}
