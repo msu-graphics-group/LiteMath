@@ -1,4 +1,4 @@
-name: CMake
+name: CodeCov
 
 on:
   push:
@@ -17,14 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: InstallQmake
-      run : sudo apt-get install qt5-default qt5-qmake
-    
-    - name: AutoCodeCoverage
+    - name: code-coverage
       working-directory: ${{github.workspace}}
-      run: bash coverage2.sh
+      run: bash coverage.sh
 
-    - name: UploadCodeCoverage
+    - name: upload-coverage
       working-directory: ${{github.workspace}}
-      run: bash <(curl -s https://codecov.io/bash) -f LiteMath.h.gcov
+      run: bash <(curl -s https://codecov.io/bash) -f coverage/coverage.xml
       
