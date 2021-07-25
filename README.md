@@ -1,7 +1,7 @@
 # LiteMath
 Lightweight single source math library for graphics without issues
 
-[![codecov.io](https://codecov.io/github/msu-graphics-group/LiteMath/src/main/LiteMath.h?branch=master)]
+[![codecov.io](https://codecov.io/github/msu-graphics-group/LiteMath?branch=master)](https://codecov.io/github/msu-graphics-group/LiteMath?branch=master)
 
 ## How to get code coverage in HTML
 
