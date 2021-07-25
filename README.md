@@ -1,7 +1,7 @@
 # LiteMath
 Lightweight single source math library for graphics without issues
 
-[![codecov.io](https://codecov.io/github/richelbilderbeek/coverage2/coverage.svg?branch=master)](https://codecov.io/github/richelbilderbeek/coverage2?branch=master)
+[![codecov.io]](https://codecov.io/github/richelbilderbeek/coverage2?branch=master)
 
 ## How to get code coverage in HTML
 
