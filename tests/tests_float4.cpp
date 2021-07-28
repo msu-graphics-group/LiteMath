@@ -586,7 +586,30 @@ bool test129_cstcnv_float4()
 
 bool test130_other_float4() // dummy test
 {
-  return true;
+  const float CxData[4] = {  float(1),  float(2),  float(-3),  float(4)};
+  const float4  Cx1(CxData);
+  const float4  Cx2(float4(1));
+ 
+  const float4  Cx3 = Cx1 + Cx2;
+  float result1[4];
+  float result2[4];
+  float result3[4];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<4; i++)
+  {
+
+    if (fabs(result1[i] + float(1) - result3[i]) > 1e-10f || fabs(result2[i] - float(1) > 1e-10f) )
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

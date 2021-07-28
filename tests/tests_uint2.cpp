@@ -432,7 +432,30 @@ bool test169_cstcnv_uint2()
 
 bool test170_other_uint2() // dummy test
 {
-  return true;
+  const uint CxData[2] = {  uint(1),  uint(2)};
+  const uint2  Cx1(CxData);
+  const uint2  Cx2(uint2(1));
+ 
+  const uint2  Cx3 = Cx1 + Cx2;
+  uint result1[2];
+  uint result2[2];
+  uint result3[2];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<2; i++)
+  {
+
+    if (result1[i] + uint(1) != result3[i] || result2[i] != uint(1))
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

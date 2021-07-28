@@ -512,7 +512,30 @@ bool test109_cstcnv_uint4()
 
 bool test110_other_uint4() // dummy test
 {
-  return true;
+  const uint CxData[4] = {  uint(1),  uint(2),  uint(4294967293),  uint(4)};
+  const uint4  Cx1(CxData);
+  const uint4  Cx2(uint4(1));
+ 
+  const uint4  Cx3 = Cx1 + Cx2;
+  uint result1[4];
+  uint result2[4];
+  uint result3[4];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<4; i++)
+  {
+
+    if (result1[i] + uint(1) != result3[i] || result2[i] != uint(1))
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

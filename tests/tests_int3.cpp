@@ -481,7 +481,30 @@ bool test149_cstcnv_int3()
 
 bool test150_other_int3() // dummy test
 {
-  return true;
+  const int CxData[3] = {  int(1),  int(2),  int(-3)};
+  const int3  Cx1(CxData);
+  const int3  Cx2(int3(1));
+ 
+  const int3  Cx3 = Cx1 + Cx2;
+  int result1[3];
+  int result2[3];
+  int result3[3];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<3; i++)
+  {
+
+    if (result1[i] + int(1) != result3[i] || result2[i] != int(1))
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

@@ -473,7 +473,30 @@ bool test139_cstcnv_uint3()
 
 bool test140_other_uint3() // dummy test
 {
-  return true;
+  const uint CxData[3] = {  uint(1),  uint(2),  uint(4294967293)};
+  const uint3  Cx1(CxData);
+  const uint3  Cx2(uint3(1));
+ 
+  const uint3  Cx3 = Cx1 + Cx2;
+  uint result1[3];
+  uint result2[3];
+  uint result3[3];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<3; i++)
+  {
+
+    if (result1[i] + uint(1) != result3[i] || result2[i] != uint(1))
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

@@ -440,7 +440,30 @@ bool test179_cstcnv_int2()
 
 bool test180_other_int2() // dummy test
 {
-  return true;
+  const int CxData[2] = {  int(1),  int(2)};
+  const int2  Cx1(CxData);
+  const int2  Cx2(int2(1));
+ 
+  const int2  Cx3 = Cx1 + Cx2;
+  int result1[2];
+  int result2[2];
+  int result3[2];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<2; i++)
+  {
+
+    if (result1[i] + int(1) != result3[i] || result2[i] != int(1))
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

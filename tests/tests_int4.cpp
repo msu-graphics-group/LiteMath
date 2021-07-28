@@ -520,7 +520,30 @@ bool test119_cstcnv_int4()
 
 bool test120_other_int4() // dummy test
 {
-  return true;
+  const int CxData[4] = {  int(1),  int(2),  int(-3),  int(4)};
+  const int4  Cx1(CxData);
+  const int4  Cx2(int4(1));
+ 
+  const int4  Cx3 = Cx1 + Cx2;
+  int result1[4];
+  int result2[4];
+  int result3[4];
+  store_u(result1, Cx1);
+  store_u(result2, Cx2);
+  store_u(result3, Cx3);
+
+  bool passed = true;
+  for (int i=0; i<4; i++)
+  {
+
+    if (result1[i] + int(1) != result3[i] || result2[i] != int(1))
+
+    {
+      passed = false;
+      break;
+    }
+  }
+  return passed;
 }
 
 

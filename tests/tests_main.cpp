@@ -28,6 +28,7 @@ int main(int argc, const char** argv)
                       {test010_faceforward,   "test010_faceforward"},
                       {test011_mattranspose,  "test011_mattranspose"},
 
+
                       {test100_basev_uint4,         "test100_basev_uint4"},
                       {test101_basek_uint4,         "test101_basek_uint4"},
                       {test102_unaryv_uint4,        "test102_unaryv_uint4"},
@@ -36,9 +37,13 @@ int main(int argc, const char** argv)
                       {test104_shuffle_uint4,       "test104_shuffle_uint4"},
                       {test105_exsplat_uint4,       "test105_exsplat_uint4"},
                       {test107_funcv_uint4,         "test107_funcv_uint4"},
+
                       {test108_logicv_uint4,        "test108_logicv_uint4"},
                       {test109_cstcnv_uint4,        "test109_cstcnv_uint4"},
+
                       {test110_other_uint4,        "test110_other_uint4"},
+
+
 
                       {test110_basev_int4,         "test110_basev_int4"},
                       {test111_basek_int4,         "test111_basek_int4"},
@@ -48,8 +53,10 @@ int main(int argc, const char** argv)
                       {test114_shuffle_int4,       "test114_shuffle_int4"},
                       {test115_exsplat_int4,       "test115_exsplat_int4"},
                       {test117_funcv_int4,         "test117_funcv_int4"},
+
                       {test118_logicv_int4,        "test118_logicv_int4"},
                       {test119_cstcnv_int4,        "test119_cstcnv_int4"},
+
                       {test120_other_int4,        "test120_other_int4"},
 
 
@@ -62,9 +69,13 @@ int main(int argc, const char** argv)
                       {test124_shuffle_float4,       "test124_shuffle_float4"},
                       {test125_exsplat_float4,       "test125_exsplat_float4"},
                       {test127_funcv_float4,         "test127_funcv_float4"},
+
                       {test128_funcfv_float4,        "test128_funcfv_float4"},
                       {test129_cstcnv_float4,        "test129_cstcnv_float4"},
+
                       {test130_other_float4,        "test130_other_float4"},
+
+
 
                       {test130_basev_uint3,         "test130_basev_uint3"},
                       {test131_basek_uint3,         "test131_basek_uint3"},
@@ -74,8 +85,10 @@ int main(int argc, const char** argv)
                       {test134_shuffle_uint3,       "test134_shuffle_uint3"},
                       {test135_exsplat_uint3,       "test135_exsplat_uint3"},
                       {test137_funcv_uint3,         "test137_funcv_uint3"},
+
                       {test138_logicv_uint3,        "test138_logicv_uint3"},
                       {test139_cstcnv_uint3,        "test139_cstcnv_uint3"},
+
                       {test140_other_uint3,        "test140_other_uint3"},
 
 
