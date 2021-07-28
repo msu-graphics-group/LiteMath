@@ -1291,15 +1291,6 @@ namespace LiteMath
       m_col[3] = float4{ 0.0f, 0.0f, 0.0f, 1.0f };
     }
 
-    inline float4x4 operator*(const float4x4& rhs)
-    {
-      // transpose will change multiplication order (due to we use column major uactually!)
-      //
-      float4x4 res;
-      mat4_rowmajor_mul_mat4((float*)res.m_col, (const float*)rhs.m_col, (const float*)m_col); 
-      return res;
-    }
-
     inline float4 get_col(int i) const                { return m_col[i]; }
     inline void   set_col(int i, const float4& a_col) { m_col[i] = a_col; }
 
@@ -1344,7 +1335,22 @@ namespace LiteMath
     return res;
   }
 
+  static inline float4 mul(const float4x4& m, const float4& v)
+  {
+    float4 res;
+    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v);
+    return res;
+  }
+
   static inline float3 operator*(const float4x4& m, const float3& v)
+  {
+    float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
+    float4 res;                             
+    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
+    return to_float3(res);
+  }
+
+  static inline float3 mul(const float4x4& m, const float3& v)
   {
     float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
     float4 res;                             
@@ -1405,17 +1411,7 @@ namespace LiteMath
     res.set_col(3, float4{     0.0f,     0.0f, 0.0f, 1.0f  });
     return res;
   }
-
-  static inline float4 mul(float4x4 m, float4 v)
-  {
-    float4 res;
-    res.x = m.get_row(0).x*v.x + m.get_row(0).y*v.y + m.get_row(0).z*v.z + m.get_row(0).w*v.w;
-    res.y = m.get_row(1).x*v.x + m.get_row(1).y*v.y + m.get_row(1).z*v.z + m.get_row(1).w*v.w;
-    res.z = m.get_row(2).x*v.x + m.get_row(2).y*v.y + m.get_row(2).z*v.z + m.get_row(2).w*v.w;
-    res.w = m.get_row(3).x*v.x + m.get_row(3).y*v.y + m.get_row(3).z*v.z + m.get_row(3).w*v.w;
-    return res;
-  }
-
+  
   static inline float4x4 mul(float4x4 m1, float4x4 m2)
   {
     const float4 column1 = mul(m1, m2.col(0));
