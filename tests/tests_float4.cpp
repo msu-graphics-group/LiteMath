@@ -609,6 +609,37 @@ bool test130_other_float4() // dummy test
       break;
     }
   }
+
+
+  const float  dat3 = dot3(Cx1, Cx2);
+  const float  dat4 = dot4(Cx1, Cx2);
+  const float4   crs4 = cross3(Cx1, Cx2);
+
+  const float  dat5 = dot  (Cx1, Cx2);
+
+  const float4   crs3 = cross(Cx1, Cx2);
+  const float crs_ref[3] = { Cx1[1]*Cx2[2] - Cx1[2]*Cx2[1], 
+                                      Cx1[2]*Cx2[0] - Cx1[0]*Cx2[2], 
+                                      Cx1[0]*Cx2[1] - Cx1[1]*Cx2[0] };
+
+
+
+  passed = passed && (std::abs(dat3 - (Cx1.x*Cx2.x + Cx1.y*Cx2.y + Cx1.z*Cx2.z)) < 1e-6f);
+  passed = passed && (std::abs(dat4 - (Cx1.x*Cx2.x + Cx1.y*Cx2.y + Cx1.z*Cx2.z + Cx1.w*Cx2.w)) < 1e-6f);
+  passed = passed && (std::abs(dot(crs4-crs3, crs4-crs3)) < 1e-6f);
+
+  {
+    float sum = float(0);
+    for(int i=0;i<4;i++)
+      sum += Cx1[i]*Cx2[i];
+    passed = passed && (std::abs(sum - dat5) < 1e-6f);
+
+    for(int i=0;i<3;i++)
+      passed = passed && (std::abs(crs3[i] - crs_ref[i]) < 1e-6f);
+
+  }
+
+
   return passed;
 }
 

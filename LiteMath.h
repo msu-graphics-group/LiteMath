@@ -185,8 +185,7 @@ namespace LiteMath
   static inline uint4 clamp(const uint4 u, uint a, uint b) { return uint4{clamp(u.x, a, b), clamp(u.y, a, b), clamp(u.z, a, b), clamp(u.w, a, b)}; }
   
   static inline  uint dot(const uint4 a, const uint4 b)  { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
-  static inline  uint length(const uint4 a) { return std::sqrt(dot(a,a)); }
-  static inline  uint4 normalize(const uint4 a) { uint lenInv = uint(1)/length(a); return a*lenInv; }
+
 
   static inline uint  dot3(const uint4 a, const uint4 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
   static inline uint  dot4(const uint4 a, const uint4 b)  { return dot(a,b); } 
@@ -299,8 +298,7 @@ namespace LiteMath
   static inline int4 sign(const int4 a) { return int4{sign(a.x), sign(a.y), sign(a.z), sign(a.w)}; }
   
   static inline  int dot(const int4 a, const int4 b)  { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
-  static inline  int length(const int4 a) { return std::sqrt(dot(a,a)); }
-  static inline  int4 normalize(const int4 a) { int lenInv = int(1)/length(a); return a*lenInv; }
+
 
   static inline int  dot3(const int4 a, const int4 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
   static inline int  dot4(const int4 a, const int4 b)  { return dot(a,b); } 
@@ -413,8 +411,10 @@ namespace LiteMath
   static inline float4 inversesqrt(const float4 a)          { return 1.0f/sqrt(a); }
   
   static inline  float dot(const float4 a, const float4 b)  { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
+
   static inline  float length(const float4 a) { return std::sqrt(dot(a,a)); }
   static inline  float4 normalize(const float4 a) { float lenInv = float(1)/length(a); return a*lenInv; }
+
 
   static inline float  dot3(const float4 a, const float4 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
   static inline float  dot4(const float4 a, const float4 b)  { return dot(a,b); } 
@@ -537,8 +537,7 @@ namespace LiteMath
   static inline uint3 clamp(const uint3 u, uint a, uint b) { return uint3{clamp(u.x, a, b), clamp(u.y, a, b), clamp(u.z, a, b)}; }
   
   static inline  uint dot(const uint3 a, const uint3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
-  static inline  uint length(const uint3 a) { return std::sqrt(dot(a,a)); }
-  static inline  uint3 normalize(const uint3 a) { uint lenInv = uint(1)/length(a); return a*lenInv; }
+
 
   static inline uint3 blend(const uint3 a, const uint3 b, const uint3 mask) { return uint3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
 
@@ -642,8 +641,7 @@ namespace LiteMath
   static inline int3 sign(const int3 a) { return int3{sign(a.x), sign(a.y), sign(a.z)}; }
   
   static inline  int dot(const int3 a, const int3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
-  static inline  int length(const int3 a) { return std::sqrt(dot(a,a)); }
-  static inline  int3 normalize(const int3 a) { int lenInv = int(1)/length(a); return a*lenInv; }
+
 
   static inline int3 blend(const int3 a, const int3 b, const uint3 mask) { return int3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
 
@@ -747,8 +745,10 @@ namespace LiteMath
   static inline float3 inversesqrt(const float3 a)          { return 1.0f/sqrt(a); }
   
   static inline  float dot(const float3 a, const float3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
+
   static inline  float length(const float3 a) { return std::sqrt(dot(a,a)); }
   static inline  float3 normalize(const float3 a) { float lenInv = float(1)/length(a); return a*lenInv; }
+
 
   static inline float3 blend(const float3 a, const float3 b, const uint3 mask) { return float3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
 
@@ -849,8 +849,7 @@ namespace LiteMath
   static inline uint2 clamp(const uint2 u, uint a, uint b) { return uint2{clamp(u.x, a, b), clamp(u.y, a, b)}; }
   
   static inline  uint dot(const uint2 a, const uint2 b)  { return a.x*b.x + a.y*b.y; }
-  static inline  uint length(const uint2 a) { return std::sqrt(dot(a,a)); }
-  static inline  uint2 normalize(const uint2 a) { uint lenInv = uint(1)/length(a); return a*lenInv; }
+
 
   static inline uint2 blend(const uint2 a, const uint2 b, const uint2 mask) { return uint2{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y}; }
 
@@ -942,8 +941,7 @@ namespace LiteMath
   static inline int2 sign(const int2 a) { return int2{sign(a.x), sign(a.y)}; }
   
   static inline  int dot(const int2 a, const int2 b)  { return a.x*b.x + a.y*b.y; }
-  static inline  int length(const int2 a) { return std::sqrt(dot(a,a)); }
-  static inline  int2 normalize(const int2 a) { int lenInv = int(1)/length(a); return a*lenInv; }
+
 
   static inline int2 blend(const int2 a, const int2 b, const uint2 mask) { return int2{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y}; }
 
@@ -1035,8 +1033,10 @@ namespace LiteMath
   static inline float2 inversesqrt(const float2 a)          { return 1.0f/sqrt(a); }
   
   static inline  float dot(const float2 a, const float2 b)  { return a.x*b.x + a.y*b.y; }
+
   static inline  float length(const float2 a) { return std::sqrt(dot(a,a)); }
   static inline  float2 normalize(const float2 a) { float lenInv = float(1)/length(a); return a*lenInv; }
+
 
   static inline float2 blend(const float2 a, const float2 b, const uint2 mask) { return float2{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y}; }
 

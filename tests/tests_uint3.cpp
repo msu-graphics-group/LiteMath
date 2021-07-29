@@ -496,6 +496,29 @@ bool test140_other_uint3() // dummy test
       break;
     }
   }
+
+
+  const uint  dat5 = dot  (Cx1, Cx2);
+
+  const uint3   crs3 = cross(Cx1, Cx2);
+  const uint crs_ref[3] = { Cx1[1]*Cx2[2] - Cx1[2]*Cx2[1], 
+                                      Cx1[2]*Cx2[0] - Cx1[0]*Cx2[2], 
+                                      Cx1[0]*Cx2[1] - Cx1[1]*Cx2[0] };
+
+
+
+  {
+    uint sum = uint(0);
+    for(int i=0;i<3;i++)
+      sum += Cx1[i]*Cx2[i];
+    passed = passed && (sum == dat5);
+
+    for(int i=0;i<3;i++)
+      passed = passed && (crs3[i] == crs_ref[i]);
+
+  }
+
+
   return passed;
 }
 

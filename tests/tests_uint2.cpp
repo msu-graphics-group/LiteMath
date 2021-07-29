@@ -455,6 +455,21 @@ bool test170_other_uint2() // dummy test
       break;
     }
   }
+
+
+  const uint  dat5 = dot  (Cx1, Cx2);
+
+
+
+  {
+    uint sum = uint(0);
+    for(int i=0;i<2;i++)
+      sum += Cx1[i]*Cx2[i];
+    passed = passed && (sum == dat5);
+
+  }
+
+
   return passed;
 }
 

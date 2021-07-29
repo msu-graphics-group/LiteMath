@@ -529,6 +529,21 @@ bool test190_other_float2() // dummy test
       break;
     }
   }
+
+
+  const float  dat5 = dot  (Cx1, Cx2);
+
+
+
+  {
+    float sum = float(0);
+    for(int i=0;i<2;i++)
+      sum += Cx1[i]*Cx2[i];
+    passed = passed && (std::abs(sum - dat5) < 1e-6f);
+
+  }
+
+
   return passed;
 }
 

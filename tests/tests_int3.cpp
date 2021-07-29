@@ -504,6 +504,29 @@ bool test150_other_int3() // dummy test
       break;
     }
   }
+
+
+  const int  dat5 = dot  (Cx1, Cx2);
+
+  const int3   crs3 = cross(Cx1, Cx2);
+  const int crs_ref[3] = { Cx1[1]*Cx2[2] - Cx1[2]*Cx2[1], 
+                                      Cx1[2]*Cx2[0] - Cx1[0]*Cx2[2], 
+                                      Cx1[0]*Cx2[1] - Cx1[1]*Cx2[0] };
+
+
+
+  {
+    int sum = int(0);
+    for(int i=0;i<3;i++)
+      sum += Cx1[i]*Cx2[i];
+    passed = passed && (sum == dat5);
+
+    for(int i=0;i<3;i++)
+      passed = passed && (crs3[i] == crs_ref[i]);
+
+  }
+
+
   return passed;
 }
 

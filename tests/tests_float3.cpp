@@ -570,6 +570,29 @@ bool test160_other_float3() // dummy test
       break;
     }
   }
+
+
+  const float  dat5 = dot  (Cx1, Cx2);
+
+  const float3   crs3 = cross(Cx1, Cx2);
+  const float crs_ref[3] = { Cx1[1]*Cx2[2] - Cx1[2]*Cx2[1], 
+                                      Cx1[2]*Cx2[0] - Cx1[0]*Cx2[2], 
+                                      Cx1[0]*Cx2[1] - Cx1[1]*Cx2[0] };
+
+
+
+  {
+    float sum = float(0);
+    for(int i=0;i<3;i++)
+      sum += Cx1[i]*Cx2[i];
+    passed = passed && (std::abs(sum - dat5) < 1e-6f);
+
+    for(int i=0;i<3;i++)
+      passed = passed && (std::abs(crs3[i] - crs_ref[i]) < 1e-6f);
+
+  }
+
+
   return passed;
 }
 
