@@ -1,6 +1,15 @@
+#ifndef LITE_MATH_G
+#define LITE_MATH_G
+#ifdef __OPENCL_VERSION__
+  #include "LiteMathGPU.h"  // if this file is included in OpenCL shaders 
+#else
+
+#include <cstdint>
 #include <cmath>
 #include <limits>           // for std::numeric_limits
 #include <cstring>          // for memcpy
+#include <algorithm>        // for std::min/std::max 
+#include <initializer_list> //
 
 #ifdef M_PI
 #undef M_PI // same if we have such macro some-where else ...
@@ -14,16 +23,15 @@
 #undef min // if we on windows, need thid due to macro definitions in windows.h; same if we have such macro some-where else.
 #endif
 
-#include <algorithm>        // for std::min/std::max 
-#include <initializer_list> //
-
 #if defined(_MSC_VER)
 #define CVEX_ALIGNED(x) __declspec(align(x))
 #else
-#if defined(__GNUC__)
+//#if defined(__GNUC__)
 #define CVEX_ALIGNED(x) __attribute__ ((aligned(x)))
+//#endif
 #endif
-#endif
+
+#define __global 
 
 namespace LiteMath
 { 
@@ -481,7 +489,11 @@ namespace LiteMath
     union
     {
       struct { uint x, y, z; };
+      #ifdef LAYOUT_STD140
+      uint M[4];
+      #else
       uint M[3];
+      #endif
     };
   };
 
@@ -582,7 +594,11 @@ namespace LiteMath
     union
     {
       struct { int x, y, z; };
+      #ifdef LAYOUT_STD140
+      int M[4];
+      #else
       int M[3];
+      #endif
     };
   };
 
@@ -686,7 +702,11 @@ namespace LiteMath
     union
     {
       struct { float x, y, z; };
+      #ifdef LAYOUT_STD140
+      float M[4];
+      #else
       float M[3];
+      #endif
     };
   };
 
@@ -1210,6 +1230,21 @@ namespace LiteMath
     };
   };
 
+  static inline uchar4 operator * (const uchar4 & u, float v) { return uchar4(u.x * v, u.y * v, u.z * v, u.w * v); }
+  static inline uchar4 operator / (const uchar4 & u, float v) { return uchar4(u.x / v, u.y / v, u.z / v, u.w / v); }
+  static inline uchar4 operator + (const uchar4 & u, float v) { return uchar4(u.x + v, u.y + v, u.z + v, u.w + v); }
+  static inline uchar4 operator - (const uchar4 & u, float v) { return uchar4(u.x - v, u.y - v, u.z - v, u.w - v); }
+  static inline uchar4 operator * (float v, const uchar4 & u) { return uchar4(v * u.x, v * u.y, v * u.z, v * u.w); }
+  static inline uchar4 operator / (float v, const uchar4 & u) { return uchar4(v / u.x, v / u.y, v / u.z, v / u.w); }
+  static inline uchar4 operator + (float v, const uchar4 & u) { return uchar4(u.x + v, u.y + v, u.z + v, u.w + v); }
+  static inline uchar4 operator - (float v, const uchar4 & u) { return uchar4(u.x - v, u.y - v, u.z - v, u.w - v); }
+
+  static inline uchar4 operator + (const uchar4 & u, const uchar4 & v) { return uchar4(u.x + v.x, u.y + v.y, u.z + v.z, u.w + v.w); }
+  static inline uchar4 operator - (const uchar4 & u, const uchar4 & v) { return uchar4(u.x - v.x, u.y - v.y, u.z - v.z, u.w - v.w); }
+  static inline uchar4 operator * (const uchar4 & u, const uchar4 & v) { return uchar4(u.x * v.x, u.y * v.y, u.z * v.z, u.w * v.w); }
+  static inline uchar4 operator / (const uchar4 & u, const uchar4 & v) { return uchar4(u.x / v.x, u.y / v.y, u.z / v.z, u.w / v.w); }
+  
+  static inline uchar4 lerp(const uchar4 & u, const uchar4 & v, float t) { return u + t * (v - u); }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1334,6 +1369,8 @@ namespace LiteMath
     mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v);
     return res;
   }
+
+  static inline float4 mul4x4x4(const float4x4& m, const float4& v) { return m*v; }
 
   static inline float4 mul(const float4x4& m, const float4& v)
   {
@@ -1603,6 +1640,46 @@ namespace LiteMath
   static inline int    extractIntW(const float4& a)            { return as_int(a.w);  }
   static inline uint   extractUIntW(const float4& a)           { return as_uint(a.w); }
 
+  struct float3x3
+  {
+    float3 row[3];
+  };
+  
+  static inline float3x3 make_float3x3(float3 a, float3 b, float3 c)
+  {
+    float3x3 m;
+    m.row[0] = a;
+    m.row[1] = b;
+    m.row[2] = c;
+    return m;
+  }
+
+  static inline float3x3 make_float3x3_by_columns(float3 a, float3 b, float3 c)
+  {
+    float3x3 m;
+    m.row[0].x = a.x;
+    m.row[1].x = a.y;
+    m.row[2].x = a.z;
+  
+    m.row[0].y = b.x;
+    m.row[1].y = b.y;
+    m.row[2].y = b.z;
+  
+    m.row[0].z = c.x;
+    m.row[1].z = c.y;
+    m.row[2].z = c.z;
+    return m;
+  }
+
+  static inline float3 mul3x3x3(float3x3 m, const float3 v)
+  {
+    float3 res;
+    res.x = m.row[0].x*v.x + m.row[0].y*v.y + m.row[0].z*v.z;
+    res.y = m.row[1].x*v.x + m.row[1].y*v.y + m.row[1].z*v.z;
+    res.z = m.row[2].x*v.x + m.row[2].y*v.y + m.row[2].z*v.z;
+    return res;
+  }
+
   /////////////////////////////////////////
   /////////////// Boxes stuff /////////////
   /////////////////////////////////////////
@@ -1764,4 +1841,7 @@ namespace LiteMath
   }
 
 };
+
+#endif
+#endif
 
