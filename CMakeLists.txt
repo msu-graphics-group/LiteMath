@@ -18,6 +18,10 @@ endif()
 #uncomment this to detect broken memory problems via gcc sanitizers
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds-strict")
 
+add_library(project_warnings INTERFACE)
+include(cmake_modules/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
 add_executable(math_tests tests/tests_main.cpp
                           tests/tests_general.cpp
                           tests/tests_float4.cpp
@@ -31,6 +35,8 @@ add_executable(math_tests tests/tests_main.cpp
                           tests/tests_int2.cpp)
 
 set_target_properties(math_tests PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+target_link_libraries(math_tests PRIVATE project_warnings)
 
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
 option(BUILD_TESTING "Build the testing tree." OFF)
@@ -64,7 +70,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_COMPILER_IS_GNUCXX AND CODE_COVE
   include(CodeCoverage)
   APPEND_COVERAGE_COMPILER_FLAGS()
   target_link_libraries(math_tests gcov)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fkeep-inline-functions -fno-inline -fno-inline-small-functions -fno-default-inline")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O0 -fkeep-inline-functions -fno-inline -fno-inline-small-functions -fno-default-inline")
   #set(COVERAGE_EXCLUDES "dir1/*")
   setup_target_for_coverage_gcovr_html(NAME            coverage
                                        EXECUTABLE      math_tests

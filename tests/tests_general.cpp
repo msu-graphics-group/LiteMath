@@ -259,11 +259,11 @@ bool test007_reflect()
   const float cos41 = dot3f(dir4, n4);
   const float cos42 = dot3f(r4, n4);
 
-  const float cos31 = dot(dir4, n4);
-  const float cos32 = dot(r4, n4);
+  const float cos31 = dot(dir3, n3);
+  const float cos32 = dot(r3, n3);
 
-  const float cos21 = dot(dir4, n4);
-  const float cos22 = dot(r4, n4);
+  const float cos21 = dot(dir2, n2);
+  const float cos22 = dot(r2, n2);
 
   return abs(cos41+cos42) < 1e-6f && abs(cos31+cos32) < 1e-6f && abs(cos21+cos22) < 1e-6f;
 }

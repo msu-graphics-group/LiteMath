@@ -1077,17 +1077,17 @@ namespace LiteMath
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   static inline float4 to_float32(const uint4 a) { return float4 {float(a.x), float(a.y), float(a.z), float(a.w)}; }
-  static inline float4 as_float32(const uint4 a) { float4 res; memcpy(&res, &a, sizeof(uint)*4); return res; }
+  static inline float4 as_float32(const uint4 a) { float4 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*4); return res; }
  
 
   static inline float4 to_float32(const int4 a) { return float4 {float(a.x), float(a.y), float(a.z), float(a.w)}; }
-  static inline float4 as_float32(const int4 a) { float4 res; memcpy(&res, &a, sizeof(uint)*4); return res; }
+  static inline float4 as_float32(const int4 a) { float4 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*4); return res; }
  
 
   static inline int4  to_int32 (const float4 a) { return int4 {int (a.x), int (a.y), int (a.z), int (a.w)}; }
   static inline uint4 to_uint32(const float4 a) { return uint4{uint(a.x), uint(a.y), uint(a.z), uint(a.w)}; }
-  static inline int4  as_int32 (const float4 a) { int4  res; memcpy(&res, &a, sizeof(int)*4);  return res; }
-  static inline uint4 as_uint32(const float4 a) { uint4 res; memcpy(&res, &a, sizeof(uint)*4); return res; } 
+  static inline int4  as_int32 (const float4 a) { int4  res; memcpy((char*)&res, (char*)&a, sizeof(int)*4);  return res; }
+  static inline uint4 as_uint32(const float4 a) { uint4 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*4); return res; }
 
   static inline float4 reflect(const float4 dir, const float4 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
   static inline float4 refract(const float4 incidentVec, const float4 normal, float eta)
@@ -1104,17 +1104,17 @@ namespace LiteMath
  
 
   static inline float3 to_float32(const uint3 a) { return float3 {float(a.x), float(a.y), float(a.z)}; }
-  static inline float3 as_float32(const uint3 a) { float3 res; memcpy(&res, &a, sizeof(uint)*3); return res; }
+  static inline float3 as_float32(const uint3 a) { float3 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*3); return res; }
  
 
   static inline float3 to_float32(const int3 a) { return float3 {float(a.x), float(a.y), float(a.z)}; }
-  static inline float3 as_float32(const int3 a) { float3 res; memcpy(&res, &a, sizeof(uint)*3); return res; }
+  static inline float3 as_float32(const int3 a) { float3 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*3); return res; }
  
 
   static inline int3  to_int32 (const float3 a) { return int3 {int (a.x), int (a.y), int (a.z)}; }
   static inline uint3 to_uint32(const float3 a) { return uint3{uint(a.x), uint(a.y), uint(a.z)}; }
-  static inline int3  as_int32 (const float3 a) { int3  res; memcpy(&res, &a, sizeof(int)*3);  return res; }
-  static inline uint3 as_uint32(const float3 a) { uint3 res; memcpy(&res, &a, sizeof(uint)*3); return res; } 
+  static inline int3  as_int32 (const float3 a) { int3  res; memcpy((char*)&res, (char*)&a, sizeof(int)*3);  return res; }
+  static inline uint3 as_uint32(const float3 a) { uint3 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*3); return res; }
 
   static inline float3 reflect(const float3 dir, const float3 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
   static inline float3 refract(const float3 incidentVec, const float3 normal, float eta)
@@ -1131,17 +1131,17 @@ namespace LiteMath
  
 
   static inline float2 to_float32(const uint2 a) { return float2 {float(a.x), float(a.y)}; }
-  static inline float2 as_float32(const uint2 a) { float2 res; memcpy(&res, &a, sizeof(uint)*2); return res; }
+  static inline float2 as_float32(const uint2 a) { float2 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*2); return res; }
  
 
   static inline float2 to_float32(const int2 a) { return float2 {float(a.x), float(a.y)}; }
-  static inline float2 as_float32(const int2 a) { float2 res; memcpy(&res, &a, sizeof(uint)*2); return res; }
+  static inline float2 as_float32(const int2 a) { float2 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*2); return res; }
  
 
   static inline int2  to_int32 (const float2 a) { return int2 {int (a.x), int (a.y)}; }
   static inline uint2 to_uint32(const float2 a) { return uint2{uint(a.x), uint(a.y)}; }
-  static inline int2  as_int32 (const float2 a) { int2  res; memcpy(&res, &a, sizeof(int)*2);  return res; }
-  static inline uint2 as_uint32(const float2 a) { uint2 res; memcpy(&res, &a, sizeof(uint)*2); return res; } 
+  static inline int2  as_int32 (const float2 a) { int2  res; memcpy((char*)&res, (char*)&a, sizeof(int)*2);  return res; }
+  static inline uint2 as_uint32(const float2 a) { uint2 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*2); return res; }
 
   static inline float2 reflect(const float2 dir, const float2 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
   static inline float2 refract(const float2 incidentVec, const float2 normal, float eta)
