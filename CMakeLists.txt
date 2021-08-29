@@ -70,7 +70,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_COMPILER_IS_GNUCXX AND CODE_COVE
   include(CodeCoverage)
   APPEND_COVERAGE_COMPILER_FLAGS()
   target_link_libraries(math_tests gcov)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O0 -fkeep-inline-functions -fno-inline -fno-inline-small-functions -fno-default-inline")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fkeep-inline-functions -fno-inline -fno-inline-small-functions -fno-default-inline")
   #set(COVERAGE_EXCLUDES "dir1/*")
   setup_target_for_coverage_gcovr_html(NAME            coverage
                                        EXECUTABLE      math_tests
