@@ -183,8 +183,8 @@ namespace LiteMath
   static inline bool any_of(const uint4 a) { return (a.x != 0 || a.y != 0 || a.z != 0 || a.w != 0); } 
  
 
-  static inline void store  (uint* p, const uint4 a_val) { memcpy(p, &a_val, sizeof(uint)*4); }
-  static inline void store_u(uint* p, const uint4 a_val) { memcpy(p, &a_val, sizeof(uint)*4); }  
+  static inline void store  (uint* p, const uint4 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(uint)*4); }
+  static inline void store_u(uint* p, const uint4 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(uint)*4); }  
 
 
   static inline uint4 min  (const uint4 a, const uint4 b) { return uint4{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z), std::min(a.w, b.w)}; }
@@ -293,8 +293,8 @@ namespace LiteMath
   static inline bool any_of(const int4 a) { return (a.x != 0 || a.y != 0 || a.z != 0 || a.w != 0); } 
  
 
-  static inline void store  (int* p, const int4 a_val) { memcpy(p, &a_val, sizeof(int)*4); }
-  static inline void store_u(int* p, const int4 a_val) { memcpy(p, &a_val, sizeof(int)*4); }  
+  static inline void store  (int* p, const int4 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(int)*4); }
+  static inline void store_u(int* p, const int4 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(int)*4); }  
 
 
   static inline int4 min  (const int4 a, const int4 b) { return int4{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z), std::min(a.w, b.w)}; }
@@ -396,8 +396,8 @@ namespace LiteMath
   static inline uint4 operator==(const float4 a, const float4 b) { return uint4{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0, a.z == b.z ? 0xFFFFFFFF : 0, a.w == b.w ? 0xFFFFFFFF : 0}; }
   static inline uint4 operator!=(const float4 a, const float4 b) { return uint4{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0, a.z != b.z ? 0xFFFFFFFF : 0, a.w != b.w ? 0xFFFFFFFF : 0}; }
 
-  static inline void store  (float* p, const float4 a_val) { memcpy(p, &a_val, sizeof(float)*4); }
-  static inline void store_u(float* p, const float4 a_val) { memcpy(p, &a_val, sizeof(float)*4); }  
+  static inline void store  (float* p, const float4 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(float)*4); }
+  static inline void store_u(float* p, const float4 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(float)*4); }  
 
 
   static inline float4 min  (const float4 a, const float4 b) { return float4{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z), std::min(a.w, b.w)}; }
@@ -539,8 +539,8 @@ namespace LiteMath
   static inline bool any_of(const uint3 a) { return (a.x != 0 || a.y != 0 || a.z != 0); } 
  
 
-  static inline void store  (uint* p, const uint3 a_val) { memcpy(p, &a_val, sizeof(uint)*3); }
-  static inline void store_u(uint* p, const uint3 a_val) { memcpy(p, &a_val, sizeof(uint)*3); }  
+  static inline void store  (uint* p, const uint3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(uint)*3); }
+  static inline void store_u(uint* p, const uint3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(uint)*3); }  
 
 
   static inline uint3 min  (const uint3 a, const uint3 b) { return uint3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
@@ -644,8 +644,8 @@ namespace LiteMath
   static inline bool any_of(const int3 a) { return (a.x != 0 || a.y != 0 || a.z != 0); } 
  
 
-  static inline void store  (int* p, const int3 a_val) { memcpy(p, &a_val, sizeof(int)*3); }
-  static inline void store_u(int* p, const int3 a_val) { memcpy(p, &a_val, sizeof(int)*3); }  
+  static inline void store  (int* p, const int3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(int)*3); }
+  static inline void store_u(int* p, const int3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(int)*3); }  
 
 
   static inline int3 min  (const int3 a, const int3 b) { return int3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
@@ -742,8 +742,8 @@ namespace LiteMath
   static inline uint3 operator==(const float3 a, const float3 b) { return uint3{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0, a.z == b.z ? 0xFFFFFFFF : 0}; }
   static inline uint3 operator!=(const float3 a, const float3 b) { return uint3{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0, a.z != b.z ? 0xFFFFFFFF : 0}; }
 
-  static inline void store  (float* p, const float3 a_val) { memcpy(p, &a_val, sizeof(float)*3); }
-  static inline void store_u(float* p, const float3 a_val) { memcpy(p, &a_val, sizeof(float)*3); }  
+  static inline void store  (float* p, const float3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(float)*3); }
+  static inline void store_u(float* p, const float3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(float)*3); }  
 
 
   static inline float3 min  (const float3 a, const float3 b) { return float3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
@@ -859,8 +859,8 @@ namespace LiteMath
   static inline bool any_of(const uint2 a) { return (a.x != 0 || a.y != 0); } 
  
 
-  static inline void store  (uint* p, const uint2 a_val) { memcpy(p, &a_val, sizeof(uint)*2); }
-  static inline void store_u(uint* p, const uint2 a_val) { memcpy(p, &a_val, sizeof(uint)*2); }  
+  static inline void store  (uint* p, const uint2 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(uint)*2); }
+  static inline void store_u(uint* p, const uint2 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(uint)*2); }  
 
 
   static inline uint2 min  (const uint2 a, const uint2 b) { return uint2{std::min(a.x, b.x), std::min(a.y, b.y)}; }
@@ -948,8 +948,8 @@ namespace LiteMath
   static inline bool any_of(const int2 a) { return (a.x != 0 || a.y != 0); } 
  
 
-  static inline void store  (int* p, const int2 a_val) { memcpy(p, &a_val, sizeof(int)*2); }
-  static inline void store_u(int* p, const int2 a_val) { memcpy(p, &a_val, sizeof(int)*2); }  
+  static inline void store  (int* p, const int2 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(int)*2); }
+  static inline void store_u(int* p, const int2 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(int)*2); }  
 
 
   static inline int2 min  (const int2 a, const int2 b) { return int2{std::min(a.x, b.x), std::min(a.y, b.y)}; }
@@ -1030,8 +1030,8 @@ namespace LiteMath
   static inline uint2 operator==(const float2 a, const float2 b) { return uint2{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0}; }
   static inline uint2 operator!=(const float2 a, const float2 b) { return uint2{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0}; }
 
-  static inline void store  (float* p, const float2 a_val) { memcpy(p, &a_val, sizeof(float)*2); }
-  static inline void store_u(float* p, const float2 a_val) { memcpy(p, &a_val, sizeof(float)*2); }  
+  static inline void store  (float* p, const float2 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(float)*2); }
+  static inline void store_u(float* p, const float2 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(float)*2); }  
 
 
   static inline float2 min  (const float2 a, const float2 b) { return float2{std::min(a.x, b.x), std::min(a.y, b.y)}; }
@@ -1077,17 +1077,17 @@ namespace LiteMath
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   static inline float4 to_float32(const uint4 a) { return float4 {float(a.x), float(a.y), float(a.z), float(a.w)}; }
-  static inline float4 as_float32(const uint4 a) { float4 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*4); return res; }
+  static inline float4 as_float32(const uint4 a) { float4 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*4); return res; }
  
 
   static inline float4 to_float32(const int4 a) { return float4 {float(a.x), float(a.y), float(a.z), float(a.w)}; }
-  static inline float4 as_float32(const int4 a) { float4 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*4); return res; }
+  static inline float4 as_float32(const int4 a) { float4 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*4); return res; }
  
 
   static inline int4  to_int32 (const float4 a) { return int4 {int (a.x), int (a.y), int (a.z), int (a.w)}; }
   static inline uint4 to_uint32(const float4 a) { return uint4{uint(a.x), uint(a.y), uint(a.z), uint(a.w)}; }
-  static inline int4  as_int32 (const float4 a) { int4  res; memcpy((char*)&res, (char*)&a, sizeof(int)*4);  return res; }
-  static inline uint4 as_uint32(const float4 a) { uint4 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*4); return res; }
+  static inline int4  as_int32 (const float4 a) { int4  res; memcpy((void*)&res, (void*)&a, sizeof(int)*4);  return res; }
+  static inline uint4 as_uint32(const float4 a) { uint4 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*4); return res; } 
 
   static inline float4 reflect(const float4 dir, const float4 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
   static inline float4 refract(const float4 incidentVec, const float4 normal, float eta)
@@ -1104,17 +1104,17 @@ namespace LiteMath
  
 
   static inline float3 to_float32(const uint3 a) { return float3 {float(a.x), float(a.y), float(a.z)}; }
-  static inline float3 as_float32(const uint3 a) { float3 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*3); return res; }
+  static inline float3 as_float32(const uint3 a) { float3 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*3); return res; }
  
 
   static inline float3 to_float32(const int3 a) { return float3 {float(a.x), float(a.y), float(a.z)}; }
-  static inline float3 as_float32(const int3 a) { float3 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*3); return res; }
+  static inline float3 as_float32(const int3 a) { float3 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*3); return res; }
  
 
   static inline int3  to_int32 (const float3 a) { return int3 {int (a.x), int (a.y), int (a.z)}; }
   static inline uint3 to_uint32(const float3 a) { return uint3{uint(a.x), uint(a.y), uint(a.z)}; }
-  static inline int3  as_int32 (const float3 a) { int3  res; memcpy((char*)&res, (char*)&a, sizeof(int)*3);  return res; }
-  static inline uint3 as_uint32(const float3 a) { uint3 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*3); return res; }
+  static inline int3  as_int32 (const float3 a) { int3  res; memcpy((void*)&res, (void*)&a, sizeof(int)*3);  return res; }
+  static inline uint3 as_uint32(const float3 a) { uint3 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*3); return res; } 
 
   static inline float3 reflect(const float3 dir, const float3 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
   static inline float3 refract(const float3 incidentVec, const float3 normal, float eta)
@@ -1131,17 +1131,17 @@ namespace LiteMath
  
 
   static inline float2 to_float32(const uint2 a) { return float2 {float(a.x), float(a.y)}; }
-  static inline float2 as_float32(const uint2 a) { float2 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*2); return res; }
+  static inline float2 as_float32(const uint2 a) { float2 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*2); return res; }
  
 
   static inline float2 to_float32(const int2 a) { return float2 {float(a.x), float(a.y)}; }
-  static inline float2 as_float32(const int2 a) { float2 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*2); return res; }
+  static inline float2 as_float32(const int2 a) { float2 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*2); return res; }
  
 
   static inline int2  to_int32 (const float2 a) { return int2 {int (a.x), int (a.y)}; }
   static inline uint2 to_uint32(const float2 a) { return uint2{uint(a.x), uint(a.y)}; }
-  static inline int2  as_int32 (const float2 a) { int2  res; memcpy((char*)&res, (char*)&a, sizeof(int)*2);  return res; }
-  static inline uint2 as_uint32(const float2 a) { uint2 res; memcpy((char*)&res, (char*)&a, sizeof(uint)*2); return res; }
+  static inline int2  as_int32 (const float2 a) { int2  res; memcpy((void*)&res, (void*)&a, sizeof(int)*2);  return res; }
+  static inline uint2 as_uint32(const float2 a) { uint2 res; memcpy((void*)&res, (void*)&a, sizeof(uint)*2); return res; } 
 
   static inline float2 reflect(const float2 dir, const float2 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
   static inline float2 refract(const float2 incidentVec, const float2 normal, float eta)
