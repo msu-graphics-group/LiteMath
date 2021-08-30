@@ -5,14 +5,14 @@
 using namespace LiteMath;
 
 template<typename T>
-static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int size)
+static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int size = 4)
 {
   std::cout << name1 << ": ";
-  for(int i=0;i<4;i++)
+  for(int i=0;i<size;i++)
     std::cout << res[i] << " ";
   std::cout << std::endl;
   std::cout << name2 << ": "; 
-   for(int i=0;i<4;i++)
+   for(int i=0;i<size;i++)
     std::cout << ref[i] << " ";
   std::cout << std::endl;
   std::cout << std::endl;

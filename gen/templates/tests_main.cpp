@@ -13,8 +13,14 @@ struct TestRun
 };
 
 int main(int argc, const char** argv)
-{
- 
+{ 
+  if(argc > 1)
+  {
+    for(int i=0;i<argc;i++)
+      std::cout << argv[i] << " ";
+    std::cout << std::endl;
+  }
+
   TestRun tests[] = { {test000_scalar_funcs,  "test000_scalar_funcs"},
                       {test001_dot_cross_f4,  "test001_dot_cross_f4"},
                       {test002_dot_cross_f3,  "test002_dot_cross_f3"},
