@@ -57,21 +57,21 @@ namespace LiteMath
   static inline int as_int(float x) 
   {
     int res; 
-    memcpy(&res, &x, sizeof(float)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
+    memcpy((void*)&res, (void*)&x, sizeof(float)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
     return res; 
   }
 
   static inline uint as_uint(float x) 
   {
     uint res; 
-    memcpy(&res, &x, sizeof(float)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
+    memcpy((void*)&res, (void*)&x, sizeof(float)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
     return res; 
   }
 
   static inline float as_float(int x)
   {
     float res; 
-    memcpy(&res, &x, sizeof(float)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
+    memcpy((void*)&res, (void*)&x, sizeof(float)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
     return res; 
   }
 
