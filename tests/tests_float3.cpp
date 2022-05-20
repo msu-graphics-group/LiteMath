@@ -353,6 +353,8 @@ bool test157_funcv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float3 Cx2( float(3),  float(-4),  float(4));
+  const float3 Cx9( float(2),  float(2),  float(2));
+  const float3 Cx0( float(0),  float(0),  float(0));
 
   
   auto Cx3 = sign(Cx1);
@@ -361,6 +363,7 @@ bool test157_funcv_float3()
   auto Cx5 = clamp(Cx1, float(2), float(3) );
   auto Cx6 = min(Cx1, Cx2);
   auto Cx7 = max(Cx1, Cx2);
+  auto Cx8 = clamp(Cx1, Cx0, Cx9);
 
   float Cm = hmin(Cx1);
   float CM = hmax(Cx1);
@@ -390,6 +393,8 @@ bool test157_funcv_float3()
     if(Cx6[i] != min(Cx1[i], Cx2[i]))
       passed = false;
     if(Cx7[i] != max(Cx1[i], Cx2[i]))
+      passed = false;
+    if(Cx8[i] != clamp(Cx1[i], Cx0[i], Cx9[i]))
       passed = false;
   }
 

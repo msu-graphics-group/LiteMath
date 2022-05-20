@@ -190,11 +190,12 @@ bool test{{Test.Number+2}}_unaryk_{{Test.Type}}()
     expr4[i] = Cx1[i] / Cx2;
     
     {% if Test.IsFloat %}
-    if(fabs(result1[i] - expr1[i]) > 1e-6f || fabs(result2[i] - expr2[i]) > 1e-6f || fabs(result3[i] - expr3[i]) > 1e-6f) 
+    if(std::abs(result1[i] - expr1[i]) > 1e-6f || std::abs(result2[i] - expr2[i]) > 1e-6f || std::abs(result3[i] - expr3[i]) > 1e-6f) 
+      passed = false;
     {% else %}
     if(result1[i] != expr1[i] || result2[i] != expr2[i] || result3[i] != expr3[i]) 
-    {% endif %}
       passed = false;
+    {% endif %}
   }
 
   if(!passed)
@@ -398,6 +399,8 @@ bool test{{Test.Number+7}}_funcv_{{Test.Type}}()
 {
   const {{Test.Type}} Cx1({% for Val in Test.ValuesA %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
   const {{Test.Type}} Cx2({% for Val in Test.ValuesB %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
+  const {{Test.Type}} Cx9({% for Val in Test.ValuesA %} {{Test.TypeS}}(2){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
+  const {{Test.Type}} Cx0({% for Val in Test.ValuesA %} {{Test.TypeS}}(0){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
 
   {% if Test.IsSigned %}  
   auto Cx3 = sign(Cx1);
@@ -406,6 +409,7 @@ bool test{{Test.Number+7}}_funcv_{{Test.Type}}()
   auto Cx5 = clamp(Cx1, {{Test.TypeS}}(2), {{Test.TypeS}}(3) );
   auto Cx6 = min(Cx1, Cx2);
   auto Cx7 = max(Cx1, Cx2);
+  auto Cx8 = clamp(Cx1, Cx0, Cx9);
 
   {{Test.TypeS}} Cm = hmin(Cx1);
   {{Test.TypeS}} CM = hmax(Cx1);
@@ -446,6 +450,8 @@ bool test{{Test.Number+7}}_funcv_{{Test.Type}}()
     if(Cx6[i] != min(Cx1[i], Cx2[i]))
       passed = false;
     if(Cx7[i] != max(Cx1[i], Cx2[i]))
+      passed = false;
+    if(Cx8[i] != clamp(Cx1[i], Cx0[i], Cx9[i]))
       passed = false;
   }
 

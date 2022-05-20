@@ -376,6 +376,8 @@ bool test117_funcv_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int4 Cx2( int(5),  int(-5),  int(6),  int(4));
+  const int4 Cx9( int(2),  int(2),  int(2),  int(2));
+  const int4 Cx0( int(0),  int(0),  int(0),  int(0));
 
   
   auto Cx3 = sign(Cx1);
@@ -384,6 +386,7 @@ bool test117_funcv_int4()
   auto Cx5 = clamp(Cx1, int(2), int(3) );
   auto Cx6 = min(Cx1, Cx2);
   auto Cx7 = max(Cx1, Cx2);
+  auto Cx8 = clamp(Cx1, Cx0, Cx9);
 
   int Cm = hmin(Cx1);
   int CM = hmax(Cx1);
@@ -424,6 +427,8 @@ bool test117_funcv_int4()
     if(Cx6[i] != min(Cx1[i], Cx2[i]))
       passed = false;
     if(Cx7[i] != max(Cx1[i], Cx2[i]))
+      passed = false;
+    if(Cx8[i] != clamp(Cx1[i], Cx0[i], Cx9[i]))
       passed = false;
   }
 
