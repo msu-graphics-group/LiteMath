@@ -26,6 +26,7 @@ bool test108_logicv_uint4();
 bool test109_cstcnv_uint4();
 
 bool test110_other_uint4();
+bool test111_any_all_uint4();
 
 bool test110_basev_int4();
 bool test111_basek_int4();
@@ -40,6 +41,7 @@ bool test118_logicv_int4();
 bool test119_cstcnv_int4();
 
 bool test120_other_int4();
+bool test121_any_all_int4();
 
 bool test120_basev_float4();
 bool test121_basek_float4();
@@ -54,6 +56,7 @@ bool test128_funcfv_float4();
 bool test129_cstcnv_float4();
 
 bool test130_other_float4();
+bool test131_any_all_float4();
 
 bool test130_basev_uint3();
 bool test131_basek_uint3();
@@ -68,6 +71,7 @@ bool test138_logicv_uint3();
 bool test139_cstcnv_uint3();
 
 bool test140_other_uint3();
+bool test141_any_all_uint3();
 
 bool test140_basev_int3();
 bool test141_basek_int3();
@@ -82,6 +86,7 @@ bool test148_logicv_int3();
 bool test149_cstcnv_int3();
 
 bool test150_other_int3();
+bool test151_any_all_int3();
 
 bool test150_basev_float3();
 bool test151_basek_float3();
@@ -96,6 +101,7 @@ bool test158_funcfv_float3();
 bool test159_cstcnv_float3();
 
 bool test160_other_float3();
+bool test161_any_all_float3();
 
 bool test160_basev_uint2();
 bool test161_basek_uint2();
@@ -110,6 +116,7 @@ bool test168_logicv_uint2();
 bool test169_cstcnv_uint2();
 
 bool test170_other_uint2();
+bool test171_any_all_uint2();
 
 bool test170_basev_int2();
 bool test171_basek_int2();
@@ -124,6 +131,7 @@ bool test178_logicv_int2();
 bool test179_cstcnv_int2();
 
 bool test180_other_int2();
+bool test181_any_all_int2();
 
 bool test180_basev_float2();
 bool test181_basek_float2();
@@ -138,5 +146,6 @@ bool test188_funcfv_float2();
 bool test189_cstcnv_float2();
 
 bool test190_other_float2();
+bool test191_any_all_float2();
 
 

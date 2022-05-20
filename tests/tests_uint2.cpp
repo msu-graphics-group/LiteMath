@@ -184,8 +184,8 @@ bool test162_unaryk_uint2()
     
 
     if(result1[i] != expr1[i] || result2[i] != expr2[i] || result3[i] != expr3[i]) 
-
       passed = false;
+
   }
 
   if(!passed)
@@ -476,6 +476,22 @@ bool test170_other_uint2() // dummy test
 
 
   return passed;
+}
+
+bool test171_any_all_uint2() // dummy test
+{
+  const uint CxData[2] = {  uint(1),  uint(2)};
+  const uint2  Cx1(CxData);
+  const uint2  Cx2(uint2(1));
+ 
+  const uint2  Cx3 = Cx1 + Cx2;
+
+  const bool a1 = all_of(Cx1 < Cx3);
+  const bool a2 = all_of(Cx1 < Cx2);
+  const bool a3 = any_of(Cx1 <= Cx2);
+  const bool a4 = any_of(Cx1 > Cx3);
+
+  return a1 && !a2 && a3 && !a4;
 }
 
 

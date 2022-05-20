@@ -48,6 +48,7 @@ int main(int argc, const char** argv)
                       {test109_cstcnv_uint4,        "test109_cstcnv_uint4"},
 
                       {test110_other_uint4,        "test110_other_uint4"},
+                      {test111_any_all_uint4,      "test111_any_all_uint4"},
 
 
 
@@ -64,6 +65,7 @@ int main(int argc, const char** argv)
                       {test119_cstcnv_int4,        "test119_cstcnv_int4"},
 
                       {test120_other_int4,        "test120_other_int4"},
+                      {test121_any_all_int4,      "test121_any_all_int4"},
 
 
 
@@ -80,6 +82,7 @@ int main(int argc, const char** argv)
                       {test129_cstcnv_float4,        "test129_cstcnv_float4"},
 
                       {test130_other_float4,        "test130_other_float4"},
+                      {test131_any_all_float4,      "test131_any_all_float4"},
 
 
 
@@ -96,6 +99,7 @@ int main(int argc, const char** argv)
                       {test139_cstcnv_uint3,        "test139_cstcnv_uint3"},
 
                       {test140_other_uint3,        "test140_other_uint3"},
+                      {test141_any_all_uint3,      "test141_any_all_uint3"},
 
 
 
@@ -112,6 +116,7 @@ int main(int argc, const char** argv)
                       {test149_cstcnv_int3,        "test149_cstcnv_int3"},
 
                       {test150_other_int3,        "test150_other_int3"},
+                      {test151_any_all_int3,      "test151_any_all_int3"},
 
 
 
@@ -128,6 +133,7 @@ int main(int argc, const char** argv)
                       {test159_cstcnv_float3,        "test159_cstcnv_float3"},
 
                       {test160_other_float3,        "test160_other_float3"},
+                      {test161_any_all_float3,      "test161_any_all_float3"},
 
 
 
@@ -144,6 +150,7 @@ int main(int argc, const char** argv)
                       {test169_cstcnv_uint2,        "test169_cstcnv_uint2"},
 
                       {test170_other_uint2,        "test170_other_uint2"},
+                      {test171_any_all_uint2,      "test171_any_all_uint2"},
 
 
 
@@ -160,6 +167,7 @@ int main(int argc, const char** argv)
                       {test179_cstcnv_int2,        "test179_cstcnv_int2"},
 
                       {test180_other_int2,        "test180_other_int2"},
+                      {test181_any_all_int2,      "test181_any_all_int2"},
 
 
 
@@ -176,6 +184,7 @@ int main(int argc, const char** argv)
                       {test189_cstcnv_float2,        "test189_cstcnv_float2"},
 
                       {test190_other_float2,        "test190_other_float2"},
+                      {test191_any_all_float2,      "test191_any_all_float2"},
 
 
                       };

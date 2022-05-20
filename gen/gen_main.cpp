@@ -54,6 +54,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<uint32_t>({1, 2, uint32_t(-3), 4});
     test["ValuesB"] = std::vector<uint32_t>({5, uint32_t(-5), 6, 4});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000, 0x00000000});
+    test["ValuesD"] = std::vector<uint32_t>({1, 2, 3, 4});
     test["IsFloat"]  = false;
     test["IsSigned"] = false;  
   
@@ -78,6 +79,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<int>({1, 2, -3, 4});
     test["ValuesB"] = std::vector<int>({5, -5, 6, 4});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000, 0x00000000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3, 4});
     test["IsFloat"]  = false;
     test["IsSigned"] = true;  
   
@@ -102,6 +104,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<int>({1, 2, -3, 4});
     test["ValuesB"] = std::vector<int>({5, -5, 6, 4});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000, 0x00000000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3, 4});
     test["IsFloat"]  = true;
     test["IsSigned"] = true;  
    
@@ -126,6 +129,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<uint32_t>({1, 2, uint32_t(-3)});
     test["ValuesB"] = std::vector<uint32_t>({5, uint32_t(-5), 6});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3});
     test["IsFloat"]  = false;
     test["IsSigned"] = false;  
   
@@ -150,6 +154,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<int>({1, 2, -3});
     test["ValuesB"] = std::vector<int>({5, -5, 6});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3});
     test["IsFloat"]  = false;
     test["IsSigned"] = true;  
   
@@ -174,6 +179,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<int>({-1, 2, -3});
     test["ValuesB"] = std::vector<int>({3, -4, 4});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3});
     test["IsFloat"]  = true;
     test["IsSigned"] = true;  
   
@@ -198,6 +204,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<uint32_t>({1, 2});
     test["ValuesB"] = std::vector<uint32_t>({5, uint32_t(-5)});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xF0F00000});
+    test["ValuesD"] = std::vector<int>({1, 2});
     test["IsFloat"]  = false;
     test["IsSigned"] = false;  
   
@@ -222,6 +229,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<int>({1, 2});
     test["ValuesB"] = std::vector<int>({5, -5});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xF0F00000});
+    test["ValuesD"] = std::vector<int>({1, 2});
     test["IsFloat"]  = false;
     test["IsSigned"] = true;  
   
@@ -246,6 +254,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<int>({-1, 2});
     test["ValuesB"] = std::vector<int>({3, -4});
     test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF});
+    test["ValuesD"] = std::vector<int>({1, 2});
     test["IsFloat"]  = true;
     test["IsSigned"] = true;  
   
@@ -271,6 +280,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<unsigned short>({1, 2, (unsigned short)(-3), 4});
     test["ValuesB"] = std::vector<unsigned short>({5, (unsigned short)(-5), 6, 4});
     test["ValuesC"] = std::vector<unsigned short>({0xFFFF, 0xFFFF, 0xF0F0, 0x0000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3, 4});
     test["IsFloat"]  = false;
     test["IsSigned"] = false;  
   
@@ -295,6 +305,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<unsigned short>({1, 2});
     test["ValuesB"] = std::vector<unsigned short>({5, (unsigned short)(-5) });
     test["ValuesC"] = std::vector<unsigned short>({0x0000FFFF, 0x0000FFFF});
+    test["ValuesD"] = std::vector<int>({1, 2, 3, 4});
     test["IsFloat"]  = false;
     test["IsSigned"] = false;  
   
@@ -319,6 +330,7 @@ int main(int argc, const char** argv)
     test["ValuesA"] = std::vector<unsigned char>({1, 2, (unsigned char)(-3), 4});
     test["ValuesB"] = std::vector<unsigned char>({5, (unsigned char)(-5), 6, 4});
     test["ValuesC"] = std::vector<unsigned char>({0x000000FF, 0x000000FF, 0x000000F0, 0});
+    test["ValuesD"] = std::vector<int>({1, 2, 3, 4});
     test["IsFloat"]  = false;
     test["IsSigned"] = false;  
   

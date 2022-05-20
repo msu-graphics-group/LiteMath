@@ -184,8 +184,8 @@ bool test102_unaryk_uint4()
     
 
     if(result1[i] != expr1[i] || result2[i] != expr2[i] || result3[i] != expr3[i]) 
-
       passed = false;
+
   }
 
   if(!passed)
@@ -572,6 +572,22 @@ bool test110_other_uint4() // dummy test
 
 
   return passed;
+}
+
+bool test111_any_all_uint4() // dummy test
+{
+  const uint CxData[4] = {  uint(1),  uint(2),  uint(3),  uint(4)};
+  const uint4  Cx1(CxData);
+  const uint4  Cx2(uint4(1));
+ 
+  const uint4  Cx3 = Cx1 + Cx2;
+
+  const bool a1 = all_of(Cx1 < Cx3);
+  const bool a2 = all_of(Cx1 < Cx2);
+  const bool a3 = any_of(Cx1 <= Cx2);
+  const bool a4 = any_of(Cx1 > Cx3);
+
+  return a1 && !a2 && a3 && !a4;
 }
 
 

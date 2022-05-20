@@ -183,9 +183,9 @@ bool test182_unaryk_float2()
     expr4[i] = Cx1[i] / Cx2;
     
 
-    if(fabs(result1[i] - expr1[i]) > 1e-6f || fabs(result2[i] - expr2[i]) > 1e-6f || fabs(result3[i] - expr3[i]) > 1e-6f) 
-
+    if(std::abs(result1[i] - expr1[i]) > 1e-6f || std::abs(result2[i] - expr2[i]) > 1e-6f || std::abs(result3[i] - expr3[i]) > 1e-6f) 
       passed = false;
+
   }
 
   if(!passed)
@@ -527,7 +527,7 @@ bool test190_other_float2() // dummy test
   for (int i=0; i<2; i++)
   {
 
-    if (fabs(result1[i] + float(1) - result3[i]) > 1e-10f || fabs(result2[i] - float(1) > 1e-10f) )
+    if (std::abs(result1[i] + float(1) - result3[i]) > 1e-10f || std::abs(result2[i] - float(1) > 1e-10f) )
 
     {
       passed = false;
@@ -550,6 +550,22 @@ bool test190_other_float2() // dummy test
 
 
   return passed;
+}
+
+bool test191_any_all_float2() // dummy test
+{
+  const float CxData[2] = {  float(1),  float(2)};
+  const float2  Cx1(CxData);
+  const float2  Cx2(float2(1));
+ 
+  const float2  Cx3 = Cx1 + Cx2;
+
+  const bool a1 = all_of(Cx1 < Cx3);
+  const bool a2 = all_of(Cx1 < Cx2);
+  const bool a3 = any_of(Cx1 <= Cx2);
+  const bool a4 = any_of(Cx1 > Cx3);
+
+  return a1 && !a2 && a3 && !a4;
 }
 
 

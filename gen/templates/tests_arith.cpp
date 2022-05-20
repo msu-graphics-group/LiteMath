@@ -704,7 +704,7 @@ bool test{{Test.Number+10}}_other_{{Test.Type}}() // dummy test
   for (int i=0; i<{{Test.VecLen}}; i++)
   {
     {% if Test.IsFloat %}
-    if (fabs(result1[i] + {{Test.TypeS}}(1) - result3[i]) > 1e-10f || fabs(result2[i] - {{Test.TypeS}}(1) > 1e-10f) )
+    if (std::abs(result1[i] + {{Test.TypeS}}(1) - result3[i]) > 1e-10f || std::abs(result2[i] - {{Test.TypeS}}(1) > 1e-10f) )
     {% else %}
     if (result1[i] + {{Test.TypeS}}(1) != result3[i] || result2[i] != {{Test.TypeS}}(1))
     {% endif %}
@@ -761,6 +761,22 @@ bool test{{Test.Number+10}}_other_{{Test.Type}}() // dummy test
   {% endif %}
 
   return passed;
+}
+
+bool test{{Test.Number+11}}_any_all_{{Test.Type}}() // dummy test
+{
+  const {{Test.TypeS}} CxData[{{Test.VecLen}}] = { {% for Val in Test.ValuesD %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %}};
+  const {{Test.Type}}  Cx1(CxData);
+  const {{Test.Type}}  Cx2({{Test.Type}}(1));
+ 
+  const {{Test.Type}}  Cx3 = Cx1 + Cx2;
+
+  const bool a1 = all_of(Cx1 < Cx3);
+  const bool a2 = all_of(Cx1 < Cx2);
+  const bool a3 = any_of(Cx1 <= Cx2);
+  const bool a4 = any_of(Cx1 > Cx3);
+
+  return a1 && !a2 && a3 && !a4;
 }
 
 ## endfor

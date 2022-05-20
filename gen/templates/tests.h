@@ -31,6 +31,7 @@ bool test{{Test.Number+8}}_logicv_{{Test.Type}}();
 bool test{{Test.Number+9}}_cstcnv_{{Test.Type}}();
 {% endif %}
 bool test{{Test.Number+10}}_other_{{Test.Type}}();
+bool test{{Test.Number+11}}_any_all_{{Test.Type}}();
 
 ## endfor
 ## endfor
