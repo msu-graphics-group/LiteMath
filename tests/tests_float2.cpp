@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test180_basev_float2()
+bool test260_basev_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float2 Cx2( float(3),  float(-4));
@@ -59,7 +59,7 @@ bool test180_basev_float2()
   return passed;
 }
 
-bool test181_basek_float2()
+bool test261_basek_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float Cx2 = float(3);
@@ -97,7 +97,7 @@ bool test181_basek_float2()
   return passed;
 }
 
-bool test182_unaryv_float2()
+bool test262_unaryv_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float2 Cx2( float(3),  float(-4));
@@ -148,7 +148,7 @@ bool test182_unaryv_float2()
   return passed;
 }
 
-bool test182_unaryk_float2()
+bool test262_unaryk_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float Cx2 = float(3);
@@ -199,7 +199,7 @@ bool test182_unaryk_float2()
   return passed;
 }
 
-bool test183_cmpv_float2()
+bool test263_cmpv_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float2 Cx2( float(3),  float(-4));
@@ -266,7 +266,7 @@ bool test183_cmpv_float2()
   return passed;
 }
 
-bool test184_shuffle_float2()
+bool test264_shuffle_float2()
 { 
   const float2 Cx1( float(-1),  float(2));
 
@@ -275,7 +275,7 @@ bool test184_shuffle_float2()
 
 }
 
-bool test185_exsplat_float2()
+bool test265_exsplat_float2()
 {
   const float2 Cx1( float(-1),  float(2));
 
@@ -308,7 +308,7 @@ bool test185_exsplat_float2()
   return passed;
 }
 
-bool test187_funcv_float2()
+bool test267_funcv_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float2 Cx2( float(3),  float(-4));
@@ -369,7 +369,7 @@ bool test187_funcv_float2()
 
 
 
-bool test188_funcfv_float2()
+bool test268_funcfv_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   const float2 Cx2( float(3),  float(-4));
@@ -461,7 +461,7 @@ bool test188_funcfv_float2()
   return passed;
 }
 
-bool test189_cstcnv_float2()
+bool test269_cstcnv_float2()
 {
   const float2 Cx1( float(-1),  float(2));
   
@@ -509,7 +509,7 @@ bool test189_cstcnv_float2()
 
 
 
-bool test190_other_float2() // dummy test
+bool test270_other_float2() // dummy test
 {
   const float CxData[2] = {  float(-1),  float(2)};
   const float2  Cx1(CxData);
@@ -552,7 +552,7 @@ bool test190_other_float2() // dummy test
   return passed;
 }
 
-bool test191_any_all_float2() // dummy test
+bool test271_any_all_float2() // dummy test
 {
   const float CxData[2] = {  float(1),  float(2)};
   const float2  Cx1(CxData);

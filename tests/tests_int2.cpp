@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test170_basev_int2()
+bool test240_basev_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int2 Cx2( int(5),  int(-5));
@@ -59,7 +59,7 @@ bool test170_basev_int2()
   return passed;
 }
 
-bool test171_basek_int2()
+bool test241_basek_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int Cx2 = int(5);
@@ -97,7 +97,7 @@ bool test171_basek_int2()
   return passed;
 }
 
-bool test172_unaryv_int2()
+bool test242_unaryv_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int2 Cx2( int(5),  int(-5));
@@ -148,7 +148,7 @@ bool test172_unaryv_int2()
   return passed;
 }
 
-bool test172_unaryk_int2()
+bool test242_unaryk_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int Cx2 = int(5);
@@ -199,7 +199,7 @@ bool test172_unaryk_int2()
   return passed;
 }
 
-bool test173_cmpv_int2()
+bool test243_cmpv_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int2 Cx2( int(5),  int(-5));
@@ -266,7 +266,7 @@ bool test173_cmpv_int2()
   return passed;
 }
 
-bool test174_shuffle_int2()
+bool test244_shuffle_int2()
 { 
   const int2 Cx1( int(1),  int(2));
 
@@ -275,7 +275,7 @@ bool test174_shuffle_int2()
 
 }
 
-bool test175_exsplat_int2()
+bool test245_exsplat_int2()
 {
   const int2 Cx1( int(1),  int(2));
 
@@ -308,7 +308,7 @@ bool test175_exsplat_int2()
   return passed;
 }
 
-bool test177_funcv_int2()
+bool test247_funcv_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int2 Cx2( int(5),  int(-5));
@@ -369,7 +369,7 @@ bool test177_funcv_int2()
 
 
 
-bool test178_logicv_int2()
+bool test248_logicv_int2()
 {
   const int2 Cx1( int(1),  int(2));
   const int2 Cx2( int(5),  int(-5));
@@ -411,7 +411,7 @@ bool test178_logicv_int2()
   return passed;
 }
 
-bool test179_cstcnv_int2()
+bool test249_cstcnv_int2()
 {
   const int2 Cx1( int(1),  int(2));
   
@@ -443,7 +443,7 @@ bool test179_cstcnv_int2()
 
 
 
-bool test180_other_int2() // dummy test
+bool test250_other_int2() // dummy test
 {
   const int CxData[2] = {  int(1),  int(2)};
   const int2  Cx1(CxData);
@@ -486,7 +486,7 @@ bool test180_other_int2() // dummy test
   return passed;
 }
 
-bool test181_any_all_int2() // dummy test
+bool test251_any_all_int2() // dummy test
 {
   const int CxData[2] = {  int(1),  int(2)};
   const int2  Cx1(CxData);

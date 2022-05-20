@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test150_basev_float3()
+bool test200_basev_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float3 Cx2( float(3),  float(-4),  float(4));
@@ -59,7 +59,7 @@ bool test150_basev_float3()
   return passed;
 }
 
-bool test151_basek_float3()
+bool test201_basek_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float Cx2 = float(3);
@@ -97,7 +97,7 @@ bool test151_basek_float3()
   return passed;
 }
 
-bool test152_unaryv_float3()
+bool test202_unaryv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float3 Cx2( float(3),  float(-4),  float(4));
@@ -148,7 +148,7 @@ bool test152_unaryv_float3()
   return passed;
 }
 
-bool test152_unaryk_float3()
+bool test202_unaryk_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float Cx2 = float(3);
@@ -199,7 +199,7 @@ bool test152_unaryk_float3()
   return passed;
 }
 
-bool test153_cmpv_float3()
+bool test203_cmpv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float3 Cx2( float(3),  float(-4),  float(4));
@@ -266,7 +266,7 @@ bool test153_cmpv_float3()
   return passed;
 }
 
-bool test154_shuffle_float3()
+bool test204_shuffle_float3()
 { 
   const float3 Cx1( float(-1),  float(2),  float(-3));
 
@@ -308,7 +308,7 @@ bool test154_shuffle_float3()
 
 }
 
-bool test155_exsplat_float3()
+bool test205_exsplat_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
 
@@ -349,7 +349,7 @@ bool test155_exsplat_float3()
   return passed;
 }
 
-bool test157_funcv_float3()
+bool test207_funcv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float3 Cx2( float(3),  float(-4),  float(4));
@@ -410,7 +410,7 @@ bool test157_funcv_float3()
 
 
 
-bool test158_funcfv_float3()
+bool test208_funcfv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   const float3 Cx2( float(3),  float(-4),  float(4));
@@ -502,7 +502,7 @@ bool test158_funcfv_float3()
   return passed;
 }
 
-bool test159_cstcnv_float3()
+bool test209_cstcnv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));
   
@@ -550,7 +550,7 @@ bool test159_cstcnv_float3()
 
 
 
-bool test160_other_float3() // dummy test
+bool test210_other_float3() // dummy test
 {
   const float CxData[3] = {  float(-1),  float(2),  float(-3)};
   const float3  Cx1(CxData);
@@ -601,7 +601,7 @@ bool test160_other_float3() // dummy test
   return passed;
 }
 
-bool test161_any_all_float3() // dummy test
+bool test211_any_all_float3() // dummy test
 {
   const float CxData[3] = {  float(1),  float(2),  float(3)};
   const float3  Cx1(CxData);

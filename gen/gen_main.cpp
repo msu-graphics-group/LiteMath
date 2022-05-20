@@ -60,7 +60,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_uint4.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -85,7 +85,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_int4.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -110,7 +110,7 @@ int main(int argc, const char** argv)
    
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_float4.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -135,7 +135,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_uint3.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -160,7 +160,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_int3.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   } 
@@ -185,7 +185,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_float3.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -210,7 +210,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_uint2.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -235,7 +235,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_int2.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   } 
@@ -260,7 +260,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_float2.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -286,7 +286,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_ushort4.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -311,7 +311,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_ushort2.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }
@@ -336,7 +336,7 @@ int main(int argc, const char** argv)
   
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_uchar4.cpp", dataLocal);
-    currNumber += 10;
+    currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
   }*/

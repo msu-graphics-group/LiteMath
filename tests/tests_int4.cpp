@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test110_basev_int4()
+bool test120_basev_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int4 Cx2( int(5),  int(-5),  int(6),  int(4));
@@ -59,7 +59,7 @@ bool test110_basev_int4()
   return passed;
 }
 
-bool test111_basek_int4()
+bool test121_basek_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int Cx2 = int(5);
@@ -97,7 +97,7 @@ bool test111_basek_int4()
   return passed;
 }
 
-bool test112_unaryv_int4()
+bool test122_unaryv_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int4 Cx2( int(5),  int(-5),  int(6),  int(4));
@@ -148,7 +148,7 @@ bool test112_unaryv_int4()
   return passed;
 }
 
-bool test112_unaryk_int4()
+bool test122_unaryk_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int Cx2 = int(5);
@@ -199,7 +199,7 @@ bool test112_unaryk_int4()
   return passed;
 }
 
-bool test113_cmpv_int4()
+bool test123_cmpv_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int4 Cx2( int(5),  int(-5),  int(6),  int(4));
@@ -266,7 +266,7 @@ bool test113_cmpv_int4()
   return passed;
 }
 
-bool test114_shuffle_int4()
+bool test124_shuffle_int4()
 { 
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
 
@@ -323,7 +323,7 @@ bool test114_shuffle_int4()
 
 }
 
-bool test115_exsplat_int4()
+bool test125_exsplat_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
 
@@ -372,7 +372,7 @@ bool test115_exsplat_int4()
   return passed;
 }
 
-bool test117_funcv_int4()
+bool test127_funcv_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int4 Cx2( int(5),  int(-5),  int(6),  int(4));
@@ -449,7 +449,7 @@ bool test117_funcv_int4()
 
 
 
-bool test118_logicv_int4()
+bool test128_logicv_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   const int4 Cx2( int(5),  int(-5),  int(6),  int(4));
@@ -491,7 +491,7 @@ bool test118_logicv_int4()
   return passed;
 }
 
-bool test119_cstcnv_int4()
+bool test129_cstcnv_int4()
 {
   const int4 Cx1( int(1),  int(2),  int(-3),  int(4));
   
@@ -523,7 +523,7 @@ bool test119_cstcnv_int4()
 
 
 
-bool test120_other_int4() // dummy test
+bool test130_other_int4() // dummy test
 {
   const int CxData[4] = {  int(1),  int(2),  int(-3),  int(4)};
   const int4  Cx1(CxData);
@@ -582,7 +582,7 @@ bool test120_other_int4() // dummy test
   return passed;
 }
 
-bool test121_any_all_int4() // dummy test
+bool test131_any_all_int4() // dummy test
 {
   const int CxData[4] = {  int(1),  int(2),  int(3),  int(4)};
   const int4  Cx1(CxData);

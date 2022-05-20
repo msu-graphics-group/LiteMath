@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test130_basev_uint3()
+bool test160_basev_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint3 Cx2( uint(5),  uint(4294967291),  uint(6));
@@ -59,7 +59,7 @@ bool test130_basev_uint3()
   return passed;
 }
 
-bool test131_basek_uint3()
+bool test161_basek_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint Cx2 = uint(5);
@@ -97,7 +97,7 @@ bool test131_basek_uint3()
   return passed;
 }
 
-bool test132_unaryv_uint3()
+bool test162_unaryv_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint3 Cx2( uint(5),  uint(4294967291),  uint(6));
@@ -148,7 +148,7 @@ bool test132_unaryv_uint3()
   return passed;
 }
 
-bool test132_unaryk_uint3()
+bool test162_unaryk_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint Cx2 = uint(5);
@@ -199,7 +199,7 @@ bool test132_unaryk_uint3()
   return passed;
 }
 
-bool test133_cmpv_uint3()
+bool test163_cmpv_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint3 Cx2( uint(5),  uint(4294967291),  uint(6));
@@ -266,7 +266,7 @@ bool test133_cmpv_uint3()
   return passed;
 }
 
-bool test134_shuffle_uint3()
+bool test164_shuffle_uint3()
 { 
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
 
@@ -308,7 +308,7 @@ bool test134_shuffle_uint3()
 
 }
 
-bool test135_exsplat_uint3()
+bool test165_exsplat_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
 
@@ -349,7 +349,7 @@ bool test135_exsplat_uint3()
   return passed;
 }
 
-bool test137_funcv_uint3()
+bool test167_funcv_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint3 Cx2( uint(5),  uint(4294967291),  uint(6));
@@ -402,7 +402,7 @@ bool test137_funcv_uint3()
 
 
 
-bool test138_logicv_uint3()
+bool test168_logicv_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   const uint3 Cx2( uint(5),  uint(4294967291),  uint(6));
@@ -444,7 +444,7 @@ bool test138_logicv_uint3()
   return passed;
 }
 
-bool test139_cstcnv_uint3()
+bool test169_cstcnv_uint3()
 {
   const uint3 Cx1( uint(1),  uint(2),  uint(4294967293));
   
@@ -476,7 +476,7 @@ bool test139_cstcnv_uint3()
 
 
 
-bool test140_other_uint3() // dummy test
+bool test170_other_uint3() // dummy test
 {
   const uint CxData[3] = {  uint(1),  uint(2),  uint(4294967293)};
   const uint3  Cx1(CxData);
@@ -527,7 +527,7 @@ bool test140_other_uint3() // dummy test
   return passed;
 }
 
-bool test141_any_all_uint3() // dummy test
+bool test171_any_all_uint3() // dummy test
 {
   const uint CxData[3] = {  uint(1),  uint(2),  uint(3)};
   const uint3  Cx1(CxData);

@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test140_basev_int3()
+bool test180_basev_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int3 Cx2( int(5),  int(-5),  int(6));
@@ -59,7 +59,7 @@ bool test140_basev_int3()
   return passed;
 }
 
-bool test141_basek_int3()
+bool test181_basek_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int Cx2 = int(5);
@@ -97,7 +97,7 @@ bool test141_basek_int3()
   return passed;
 }
 
-bool test142_unaryv_int3()
+bool test182_unaryv_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int3 Cx2( int(5),  int(-5),  int(6));
@@ -148,7 +148,7 @@ bool test142_unaryv_int3()
   return passed;
 }
 
-bool test142_unaryk_int3()
+bool test182_unaryk_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int Cx2 = int(5);
@@ -199,7 +199,7 @@ bool test142_unaryk_int3()
   return passed;
 }
 
-bool test143_cmpv_int3()
+bool test183_cmpv_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int3 Cx2( int(5),  int(-5),  int(6));
@@ -266,7 +266,7 @@ bool test143_cmpv_int3()
   return passed;
 }
 
-bool test144_shuffle_int3()
+bool test184_shuffle_int3()
 { 
   const int3 Cx1( int(1),  int(2),  int(-3));
 
@@ -308,7 +308,7 @@ bool test144_shuffle_int3()
 
 }
 
-bool test145_exsplat_int3()
+bool test185_exsplat_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
 
@@ -349,7 +349,7 @@ bool test145_exsplat_int3()
   return passed;
 }
 
-bool test147_funcv_int3()
+bool test187_funcv_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int3 Cx2( int(5),  int(-5),  int(6));
@@ -410,7 +410,7 @@ bool test147_funcv_int3()
 
 
 
-bool test148_logicv_int3()
+bool test188_logicv_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   const int3 Cx2( int(5),  int(-5),  int(6));
@@ -452,7 +452,7 @@ bool test148_logicv_int3()
   return passed;
 }
 
-bool test149_cstcnv_int3()
+bool test189_cstcnv_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));
   
@@ -484,7 +484,7 @@ bool test149_cstcnv_int3()
 
 
 
-bool test150_other_int3() // dummy test
+bool test190_other_int3() // dummy test
 {
   const int CxData[3] = {  int(1),  int(2),  int(-3)};
   const int3  Cx1(CxData);
@@ -535,7 +535,7 @@ bool test150_other_int3() // dummy test
   return passed;
 }
 
-bool test151_any_all_int3() // dummy test
+bool test191_any_all_int3() // dummy test
 {
   const int CxData[3] = {  int(1),  int(2),  int(3)};
   const int3  Cx1(CxData);

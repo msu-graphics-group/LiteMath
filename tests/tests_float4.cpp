@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test120_basev_float4()
+bool test140_basev_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float4 Cx2( float(5),  float(-5),  float(6),  float(4));
@@ -59,7 +59,7 @@ bool test120_basev_float4()
   return passed;
 }
 
-bool test121_basek_float4()
+bool test141_basek_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float Cx2 = float(5);
@@ -97,7 +97,7 @@ bool test121_basek_float4()
   return passed;
 }
 
-bool test122_unaryv_float4()
+bool test142_unaryv_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float4 Cx2( float(5),  float(-5),  float(6),  float(4));
@@ -148,7 +148,7 @@ bool test122_unaryv_float4()
   return passed;
 }
 
-bool test122_unaryk_float4()
+bool test142_unaryk_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float Cx2 = float(5);
@@ -199,7 +199,7 @@ bool test122_unaryk_float4()
   return passed;
 }
 
-bool test123_cmpv_float4()
+bool test143_cmpv_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float4 Cx2( float(5),  float(-5),  float(6),  float(4));
@@ -266,7 +266,7 @@ bool test123_cmpv_float4()
   return passed;
 }
 
-bool test124_shuffle_float4()
+bool test144_shuffle_float4()
 { 
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
 
@@ -323,7 +323,7 @@ bool test124_shuffle_float4()
 
 }
 
-bool test125_exsplat_float4()
+bool test145_exsplat_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
 
@@ -372,7 +372,7 @@ bool test125_exsplat_float4()
   return passed;
 }
 
-bool test127_funcv_float4()
+bool test147_funcv_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float4 Cx2( float(5),  float(-5),  float(6),  float(4));
@@ -449,7 +449,7 @@ bool test127_funcv_float4()
 
 
 
-bool test128_funcfv_float4()
+bool test148_funcfv_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   const float4 Cx2( float(5),  float(-5),  float(6),  float(4));
@@ -541,7 +541,7 @@ bool test128_funcfv_float4()
   return passed;
 }
 
-bool test129_cstcnv_float4()
+bool test149_cstcnv_float4()
 {
   const float4 Cx1( float(1),  float(2),  float(-3),  float(4));
   
@@ -589,7 +589,7 @@ bool test129_cstcnv_float4()
 
 
 
-bool test130_other_float4() // dummy test
+bool test150_other_float4() // dummy test
 {
   const float CxData[4] = {  float(1),  float(2),  float(-3),  float(4)};
   const float4  Cx1(CxData);
@@ -648,7 +648,7 @@ bool test130_other_float4() // dummy test
   return passed;
 }
 
-bool test131_any_all_float4() // dummy test
+bool test151_any_all_float4() // dummy test
 {
   const float CxData[4] = {  float(1),  float(2),  float(3),  float(4)};
   const float4  Cx1(CxData);
