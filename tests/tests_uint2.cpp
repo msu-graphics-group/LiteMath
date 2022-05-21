@@ -485,11 +485,18 @@ bool test231_any_all_uint2() // dummy test
   const uint2  Cx2(uint2(1));
  
   const uint2  Cx3 = Cx1 + Cx2;
+  
 
-  const bool a1 = all_of(Cx1 < Cx3);
-  const bool a2 = all_of(Cx1 < Cx2);
-  const bool a3 = any_of(Cx1 <= Cx2);
-  const bool a4 = any_of(Cx1 > Cx3);
+  uint2 cmp1 = uint2(Cx1 < Cx3);
+  uint2 cmp2 = uint2(Cx1 < Cx2);
+  uint2 cmp3 = uint2(Cx1 <= Cx2);
+  uint2 cmp4 = uint2(Cx1 > Cx3);
+
+
+  const bool a1 = all_of(cmp1);
+  const bool a2 = all_of(cmp2);
+  const bool a3 = any_of(cmp3);
+  const bool a4 = any_of(cmp4);
 
   return a1 && !a2 && a3 && !a4;
 }

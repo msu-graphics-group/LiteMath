@@ -608,11 +608,18 @@ bool test211_any_all_float3() // dummy test
   const float3  Cx2(float3(1));
  
   const float3  Cx3 = Cx1 + Cx2;
+  
 
-  const bool a1 = all_of(Cx1 < Cx3);
-  const bool a2 = all_of(Cx1 < Cx2);
-  const bool a3 = any_of(Cx1 <= Cx2);
-  const bool a4 = any_of(Cx1 > Cx3);
+  auto cmp1 = (Cx1 < Cx3);
+  auto cmp2 = (Cx1 < Cx2);
+  auto cmp3 = (Cx1 <= Cx2);
+  auto cmp4 = (Cx1 > Cx3);
+
+
+  const bool a1 = all_of(cmp1);
+  const bool a2 = all_of(cmp2);
+  const bool a3 = any_of(cmp3);
+  const bool a4 = any_of(cmp4);
 
   return a1 && !a2 && a3 && !a4;
 }

@@ -770,11 +770,23 @@ bool test{{Test.Number+11}}_any_all_{{Test.Type}}() // dummy test
   const {{Test.Type}}  Cx2({{Test.Type}}(1));
  
   const {{Test.Type}}  Cx3 = Cx1 + Cx2;
+  
+  {% if Test.IsFloat %}
+  auto cmp1 = (Cx1 < Cx3);
+  auto cmp2 = (Cx1 < Cx2);
+  auto cmp3 = (Cx1 <= Cx2);
+  auto cmp4 = (Cx1 > Cx3);
+  {% else %}
+  {{Test.Type}} cmp1 = {{Test.Type}}(Cx1 < Cx3);
+  {{Test.Type}} cmp2 = {{Test.Type}}(Cx1 < Cx2);
+  {{Test.Type}} cmp3 = {{Test.Type}}(Cx1 <= Cx2);
+  {{Test.Type}} cmp4 = {{Test.Type}}(Cx1 > Cx3);
+  {% endif %}
 
-  const bool a1 = all_of(Cx1 < Cx3);
-  const bool a2 = all_of(Cx1 < Cx2);
-  const bool a3 = any_of(Cx1 <= Cx2);
-  const bool a4 = any_of(Cx1 > Cx3);
+  const bool a1 = all_of(cmp1);
+  const bool a2 = all_of(cmp2);
+  const bool a3 = any_of(cmp3);
+  const bool a4 = any_of(cmp4);
 
   return a1 && !a2 && a3 && !a4;
 }

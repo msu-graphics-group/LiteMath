@@ -122,7 +122,12 @@ namespace LiteMath
 
 ## for Tests in AllTests
 ## for Test  in Tests.Tests
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  struct {{Test.Type}};
+## endfor
+## endfor
+
+## for Tests in AllTests
+## for Test  in Tests.Tests
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -132,7 +137,9 @@ namespace LiteMath
     inline {{Test.Type}}({% for Coord in Test.XYZW %}{{Test.TypeS}} a_{{Coord}}{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}) :{% for Coord in Test.XYZW %} {{Coord}}(a_{{Coord}}){% if loop.index1 != Test.VecLen %},{% endif %}{% endfor %} {}
     inline explicit {{Test.Type}}({{Test.TypeS}} a_val) :{% for Coord in Test.XYZW %} {{Coord}}(a_val){% if loop.index1 != Test.VecLen %},{% endif %}{% endfor %} {}
     inline explicit {{Test.Type}}(const {{Test.TypeS}} a[{{Test.VecLen}}]) :{% for Coord in Test.XYZW %} {{Coord}}(a[{{loop.index}}]){% if loop.index1 != Test.VecLen %},{% endif %}{% endfor %} {}
-
+    {% for TypeFrom in Test.TypesCV %}
+    inline explicit {{Test.Type}}({{TypeFrom}}{{Test.VecLen}} a); {% endfor %}
+    
     inline {{Test.TypeS}}& operator[](int i)       { return M[i]; }
     inline {{Test.TypeS}}  operator[](int i) const { return M[i]; }
 
@@ -287,6 +294,9 @@ namespace LiteMath
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ## for Tests in AllTests
 ## for Test  in Tests.Tests
+  {% for TypeFrom in Test.TypesCV %}
+  inline {{Test.Type}}::{{Test.Type}}({{TypeFrom}}{{Test.VecLen}} a) :{% for Coord in Test.XYZW %} {{Coord}}({{Test.TypeS}}(a[{{loop.index}}])){% if loop.index1 != Test.VecLen %},{% endif %}{% endfor %} {} {% endfor %}
+  
   {% if Test.IsFloat %}
   static inline int{{Test.VecLen}}  to_int32 ({{Test.TypeC}} a) { return int{{Test.VecLen}} {{OPN}}{% for Coord in Test.XYZW %}int (a.{{Coord}}){% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }
   static inline uint{{Test.VecLen}} to_uint32({{Test.TypeC}} a) { return uint{{Test.VecLen}}{{OPN}}{% for Coord in Test.XYZW %}uint(a.{{Coord}}){% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }

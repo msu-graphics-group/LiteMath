@@ -20,11 +20,16 @@ void ApplyJsonToTemplate(const std::string& a_declTemplateFilePath, const std::s
   fout.close();
 }
 
-std::string ByConstRefOrValue(const std::string& a_name)
+std::string ByConstRefOrValue(const std::string& a_name) { return std::string("const ") + a_name; }
+
+std::vector<std::string> TypesToConvert(const std::string& a_typeNameS)
 {
-  //return a_name;
-  return std::string("const ") + a_name;
-  //return std::string("const ") + a_name + "&";
+  if(a_typeNameS == "float")
+    return {"int","uint"};
+  else if(a_typeNameS == "int")
+    return {"float","uint"};
+  else 
+    return {"float","int"};
 }
 
 int main(int argc, const char** argv)
@@ -48,6 +53,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "uint4";
     test["TypeS"]   = "uint";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 4;
     test["XYZW"]    = XYZW4;
@@ -73,6 +79,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "int4";
     test["TypeS"]   = "int";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]  = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 4;
     test["XYZW"]    = XYZW4;
@@ -95,10 +102,11 @@ int main(int argc, const char** argv)
     dataLocal["Tests"] = std::vector<std::string>();
 
     nlohmann::json test;
-    test["Number"] = currNumber;
-    test["Type"]   = "float4";
-    test["TypeS"]  = "float";
-    test["TypeC"]  = ByConstRefOrValue(test["Type"]);
+    test["Number"]  = currNumber;
+    test["Type"]    = "float4";
+    test["TypeS"]   = "float";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
+    test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 4;
     test["XYZW"]    = XYZW4;
     test["ValuesA"] = std::vector<int>({1, 2, -3, 4});
@@ -123,6 +131,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "uint3";
     test["TypeS"]   = "uint";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 3;
     test["XYZW"]    = XYZW3;
@@ -148,6 +157,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "int3";
     test["TypeS"]   = "int";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 3;
     test["XYZW"]    = XYZW3;
@@ -173,6 +183,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "float3";
     test["TypeS"]   = "float";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 3;
     test["XYZW"]    = XYZW3;
@@ -198,6 +209,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "uint2";
     test["TypeS"]   = "uint";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 2;
     test["XYZW"]    = XYZW2;
@@ -223,6 +235,7 @@ int main(int argc, const char** argv)
     test["Number"]  = currNumber;
     test["Type"]    = "int2";
     test["TypeS"]   = "int";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
     test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 2;
     test["XYZW"]    = XYZW2;
@@ -245,10 +258,11 @@ int main(int argc, const char** argv)
     dataLocal["Tests"] = std::vector<std::string>();
 
     nlohmann::json test;
-    test["Number"] = currNumber;
-    test["Type"]   = "float2";
-    test["TypeS"]  = "float";
-    test["TypeC"]  = ByConstRefOrValue(test["Type"]);
+    test["Number"]  = currNumber;
+    test["Type"]    = "float2";
+    test["TypeS"]   = "float";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
+    test["TypeC"]   = ByConstRefOrValue(test["Type"]);
     test["VecLen"]  = 2;
     test["XYZW"]    = XYZW2;
     test["ValuesA"] = std::vector<int>({-1, 2});

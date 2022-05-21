@@ -589,11 +589,18 @@ bool test131_any_all_int4() // dummy test
   const int4  Cx2(int4(1));
  
   const int4  Cx3 = Cx1 + Cx2;
+  
 
-  const bool a1 = all_of(Cx1 < Cx3);
-  const bool a2 = all_of(Cx1 < Cx2);
-  const bool a3 = any_of(Cx1 <= Cx2);
-  const bool a4 = any_of(Cx1 > Cx3);
+  int4 cmp1 = int4(Cx1 < Cx3);
+  int4 cmp2 = int4(Cx1 < Cx2);
+  int4 cmp3 = int4(Cx1 <= Cx2);
+  int4 cmp4 = int4(Cx1 > Cx3);
+
+
+  const bool a1 = all_of(cmp1);
+  const bool a2 = all_of(cmp2);
+  const bool a3 = any_of(cmp3);
+  const bool a4 = any_of(cmp4);
 
   return a1 && !a2 && a3 && !a4;
 }
