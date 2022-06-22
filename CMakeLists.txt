@@ -23,6 +23,7 @@ include(cmake_modules/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
 add_executable(math_tests tests/tests_main.cpp
+                          tests/tests_images.cpp
                           tests/tests_general.cpp
                           tests/tests_float4.cpp
                           tests/tests_float3.cpp
@@ -32,7 +33,9 @@ add_executable(math_tests tests/tests_main.cpp
                           tests/tests_uint2.cpp
                           tests/tests_int4.cpp
                           tests/tests_int3.cpp
-                          tests/tests_int2.cpp)
+                          tests/tests_int2.cpp
+                          Image2d.cpp
+                          Bitmap.cpp)
 
 set_target_properties(math_tests PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
@@ -54,7 +57,9 @@ option(BUILD_TESTING "Build the testing tree." OFF)
 #  else()
 #    target_link_libraries(math_tests INTERFACE --coverage)
 #  endif()
-#endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+#endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") # -Wno-unused-variable
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND BUILD_TESTING)
   message("CTEST is ENABLED")

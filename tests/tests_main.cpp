@@ -5,6 +5,7 @@
 #include "tests/tests.h"
 
 using TestFuncType = bool (*)();
+void tests_all_images();
 
 struct TestRun
 {
@@ -202,6 +203,8 @@ int main(int argc, const char** argv)
     std::cout << std::endl;
     std::cout.flush();
   }
+
+  tests_all_images();
   
   return 0;
 }

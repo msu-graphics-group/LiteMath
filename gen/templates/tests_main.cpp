@@ -5,6 +5,7 @@
 #include "tests/tests.h"
 
 using TestFuncType = bool (*)();
+void tests_all_images();
 
 struct TestRun
 {
