@@ -43,6 +43,13 @@ target_link_libraries(math_tests PRIVATE project_warnings)
 
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
 option(BUILD_TESTING "Build the testing tree." OFF)
+option(USE_STB_IMAGE "Use StbImage for 'png'" OFF)
+
+if(USE_STB_IMAGE)
+  add_definitions(-DUSE_STB_IMAGE)
+  include_directories("${CMAKE_SOURCE_DIR}/external")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-duplicated-branches -Wduplicated-cond ")
+endif()
 
 #if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 #  message("CODE_COVERAGE is ENABLED")
@@ -59,7 +66,7 @@ option(BUILD_TESTING "Build the testing tree." OFF)
 #  endif()
 #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") # -Wno-unused-variable
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter ")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND BUILD_TESTING)
   message("CTEST is ENABLED")
