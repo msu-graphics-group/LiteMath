@@ -1,5 +1,8 @@
 #include "Image2d.h"
 
+#include <iostream>
+#include <iomanip>      // std::setfill, std::setw
+
 using LiteMath::float3;
 using LiteMath::float4;
 using LiteMath::uchar4;
@@ -132,7 +135,7 @@ bool test03_float1_save()
   return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f);
 }
 
-void test04_uint1_save()
+bool test04_uint1_save()
 {
   Image2D<uint32_t> imgEst(300,200);
 
@@ -158,10 +161,24 @@ void test04_uint1_save()
   auto img3 = LiteImage::LoadImage<float4>("flags/est.bmp");
   LiteImage::SaveImage("flags/est.png", img2);
   LiteImage::SaveImage("flags/est2.png", img3);
-
+  
+  auto img12 = LiteImage::LoadImage<uint32_t>("flags/est.ppm");
+  auto img13 = LiteImage::LoadImage<uint32_t>("flags/est.bmp");
+  auto img14 = LiteImage::LoadImage<uint32_t>("flags/est.png");
+  auto img15 = LiteImage::LoadImage<uint32_t>("flags/est.jpg");
+  auto img16 = LiteImage::LoadImage<uint32_t>("flags/est2.png");
+  //LiteImage::SaveImage("flags/est_12.bmp", img12);
+  
+  const float err2 = LiteImage::MSE(imgEst, img12);
+  const float err3 = LiteImage::MSE(imgEst, img13);
+  const float err4 = LiteImage::MSE(imgEst, img14);
+  const float err5 = LiteImage::MSE(imgEst, img15);
+  const float err6 = LiteImage::MSE(imgEst, img16);
+  
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f);
 }
 
-void test05_uchar4_save()
+bool test05_uchar4_save()
 {
   Image2D<uchar4> imgUkr(300,200);
 
@@ -185,8 +202,29 @@ void test05_uchar4_save()
   auto img3 = LiteImage::LoadImage<float3>("flags/ukr.bmp");
   LiteImage::SaveImage("flags/ukr.png", img2);
   LiteImage::SaveImage("flags/ukr2.png", img3);
-
+  
+  auto img12 = LiteImage::LoadImage<uchar4>("flags/ukr.ppm");
+  auto img13 = LiteImage::LoadImage<uchar4>("flags/ukr.bmp");
+  auto img14 = LiteImage::LoadImage<uchar4>("flags/ukr.png");
+  auto img15 = LiteImage::LoadImage<uchar4>("flags/ukr.jpg");
+  auto img16 = LiteImage::LoadImage<uchar4>("flags/ukr2.png");
+  LiteImage::SaveImage("flags/ukr_15.bmp", img15);
+  
+  const float err2 = LiteImage::MSE(imgUkr, img12);
+  const float err3 = LiteImage::MSE(imgUkr, img13);
+  const float err4 = LiteImage::MSE(imgUkr, img14);
+  const float err5 = LiteImage::MSE(imgUkr, img15);
+  const float err6 = LiteImage::MSE(imgUkr, img16);
+  
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-2f) && (err6 < 1e-5f);
 }
+
+using TestFuncType2 = bool (*)();
+struct TestRun2
+{
+  TestFuncType2 pTest;
+  const char*   pTestName;
+};
 
 void tests_all_images()
 {
@@ -202,11 +240,30 @@ void tests_all_images()
   mkdir("flags", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   #endif
 
-  test01_float3_save();
-  test02_float4_save();
-  test03_float1_save();
-  test04_uint1_save();
-  test05_uchar4_save();
-  //img1.load("data/texture1.bmp");
+  std::cout << std::endl;
+  std::cout << "run images tests: " << std::endl;
+
+  TestRun2 tests[] = { {test01_float3_save, "test01_float3_save"},
+                      {test02_float4_save,  "test02_float4_save"},
+                      {test03_float1_save,  "test03_float1_save"},
+                      {test04_uint1_save,   "test04_uint1_save"},
+                      {test05_uchar4_save,  "test05_uchar4_save"},
+                     };
+
+  
+
+  const auto arraySize = sizeof(tests)/sizeof(TestRun2);
+  
+  for(int i=0;i<int(arraySize);i++)
+  {
+    const bool res = tests[i].pTest();
+    std::cout << "test " << std::setfill('0') << std::setw(3) << i << " " << tests[i].pTestName << "\t";
+    if(res)
+      std::cout << "PASSED!";
+    else 
+      std::cout << "FAILED!" << "\t(!!!)";
+    std::cout << std::endl;
+    std::cout.flush();
+  }
 
 }

@@ -1001,6 +1001,8 @@ LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, 
     fin.read((char*)img.data(), size_t(wh[0]*wh[1]*4)*sizeof(float));
     fin.close();
   }
+  else
+    std::cout << "[LiteImage::LoadImage<float4>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
   
   return img;
 }
@@ -1140,9 +1142,13 @@ LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, 
     fin.read((char*)img.data(), size_t(wh[0]*wh[1]*3)*sizeof(float));
     fin.close();
   }
+  else
+    std::cout << "[LiteImage::LoadImage<float3>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
   
   return img;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
 LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, float a_gamma)
@@ -1176,6 +1182,246 @@ LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, fl
     result.data()[i] = 0.333334f*(color[0] + color[1] + color[2]);
   }
   return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<> 
+LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileName, float a_gamma)
+{
+  const std::string fileStr(a_fileName);
+  const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
+  
+  LiteImage::Image2D<uint32_t> img;
+
+  if(fileExt == ".ppm" || fileExt == ".PPM")
+  {
+    std::ifstream fin(a_fileName);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    std::string header;
+    std::getline(fin, header);
+    if(header != "P3")
+    {
+      std::cout << "[LoadImage<uint>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    int wh[3] = {0,0,0};
+    fin >> wh[0] >> wh[1] >> wh[2];
+    if(wh[0] <= 0 || wh[1] <=0)
+    {
+      std::cout << "[LoadImage<uint>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    if(wh[2] != 255)
+      std::cout << "[LoadImage<uint>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+    
+    img.resize(wh[0], wh[1]);
+    const size_t totalSize = size_t(wh[0]*wh[1]);
+    size_t i=0;
+    while(fin.is_open() && i < totalSize)
+    {
+      unsigned color[3] = {0,0,0};
+      fin >> color[0] >> color[1] >> color[2];
+      img.data()[i] = color[0] | (color[1] << 8) | (color[2] << 16);
+      i++;
+    }
+    fin.close();
+  } 
+  else if(fileExt == ".image1ui" || fileExt == ".image4ub")
+  {
+    unsigned wh[2] = { 0,0};
+    std::ifstream fin(a_fileName, std::ios::binary);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    fin.read((char*)wh, sizeof(unsigned)* 2);
+    img.resize(wh[0], wh[1]);
+    fin.read((char*)img.data(), size_t(wh[0]*wh[1])*sizeof(uint32_t));
+    fin.close();
+  }
+  else if(fileExt == ".bmp" || fileExt == ".BMP")
+  {
+    int w=0, h=0;
+    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
+    if(w == 0 || h == 0)
+    {
+      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(w,h);
+    for(int y=0;y<h;y++)
+    {
+      const int offset1 = (h-y-1)*w;
+      const int offset2 = y*w;
+      for(int x=0;x<w;x++) 
+        img.data()[offset1+x] = data[offset2+x];
+    }
+  }
+  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
+  {
+    #ifdef USE_STB_IMAGE
+    int width, height, channels;
+    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
+    
+    if(imgData == NULL) 
+    {
+      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    else if(channels < 3)
+    {
+      std::cout << "[LoadImage<uint>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(width,height);
+    const size_t imSize = size_t(width*height);
+    for(size_t i=0;i<imSize;i++)
+    {
+      unsigned r = imgData[i*channels+0];
+      unsigned g = imgData[i*channels+1];
+      unsigned b = imgData[i*channels+2];
+      img.data()[i] = r | (g << 8) | (b << 16);
+    }
+
+    stbi_image_free(imgData);
+    return img;
+    #else
+    std::cout << "[LoadImage<uint>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
+    return img;
+    #endif
+  }  
+  else
+    std::cout << "[LiteImage::LoadImage<uint>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
+  
+  return img;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<> 
+LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, float a_gamma)
+{
+  const std::string fileStr(a_fileName);
+  const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
+  
+  LiteImage::Image2D<uchar4> img;
+
+  if(fileExt == ".ppm" || fileExt == ".PPM")
+  {
+    std::ifstream fin(a_fileName);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    std::string header;
+    std::getline(fin, header);
+    if(header != "P3")
+    {
+      std::cout << "[LoadImage<uchar4>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    int wh[3] = {0,0,0};
+    fin >> wh[0] >> wh[1] >> wh[2];
+    if(wh[0] <= 0 || wh[1] <=0)
+    {
+      std::cout << "[LoadImage<uchar4>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    if(wh[2] != 255)
+      std::cout << "[LoadImage<uchar4>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+    
+    img.resize(wh[0], wh[1]);
+    const size_t totalSize = size_t(wh[0]*wh[1]);
+    size_t i=0;
+    while(fin.is_open() && i < totalSize)
+    {
+      unsigned color[3] = {0,0,0};
+      fin >> color[0] >> color[1] >> color[2];
+      img.data()[i] = uchar4( (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], 0);
+      i++;
+    }
+    fin.close();
+  } 
+  else if(fileExt == ".image1ui" || fileExt == ".image4ub")
+  {
+    unsigned wh[2] = { 0,0};
+    std::ifstream fin(a_fileName, std::ios::binary);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    fin.read((char*)wh, sizeof(unsigned)* 2);
+    img.resize(wh[0], wh[1]);
+    fin.read((char*)img.data(), size_t(wh[0]*wh[1])*sizeof(uint32_t));
+    fin.close();
+  }
+  else if(fileExt == ".bmp" || fileExt == ".BMP")
+  {
+    int w=0, h=0;
+    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
+    if(w == 0 || h == 0)
+    {
+      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(w,h);
+    for(int y=0;y<h;y++)
+    {
+      const int offset1 = (h-y-1)*w;
+      const int offset2 = y*w;
+      memcpy((void*)(img.data() + offset1), (void*)(data.data() + offset2), w*sizeof(unsigned));
+    }
+  }
+  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
+  {
+    #ifdef USE_STB_IMAGE
+    int width, height, channels;
+    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
+    
+    if(imgData == NULL) 
+    {
+      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    else if(channels < 3)
+    {
+      std::cout << "[LoadImage<uchar4>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(width,height);
+    const size_t imSize = size_t(width*height);
+    for(size_t i=0;i<imSize;i++)
+      img.data()[i] = uchar4(imgData[i*channels+0], imgData[i*channels+1], imgData[i*channels+2], 0);
+
+    stbi_image_free(imgData);
+    return img;
+    #else
+    std::cout << "[LoadImage<uchar4>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
+    return img;
+    #endif
+  }  
+  else
+    std::cout << "[LiteImage::LoadImage<uchar4>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
+  
+  return img;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -159,9 +159,7 @@ namespace LiteImage
     //#pragma omp parallel for reduction(+:summ)
     for (size_t i = 0; i < image1.size(); i++)
     {
-      auto c1 = image1[i];
-      auto c2 = image2[i];
-      auto di = (c1 - c2);
+      auto di = (image2[i] - image1[i]);
       summ += double(extDotProd(di,di));
     }
     return float(summ/double(image1.size()));
