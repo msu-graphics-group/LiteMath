@@ -14,7 +14,7 @@ using LiteImage::Image2D;
   #include <sys/types.h>
 #endif
 
-void test01_float3_save()
+bool test01_float3_save()
 {
   Image2D<float3> imgRus(300,200, float3{1,1,1});
 
@@ -34,13 +34,28 @@ void test01_float3_save()
   
   LiteImage::SaveImage("flags/rus.ppm", imgRus);
   LiteImage::SaveImage("flags/rus.bmp", imgRus);
+  LiteImage::SaveImage("flags/rus.jpg", imgRus);
 
   LiteImage::SaveImage("flags/rus.image3f", imgRus);
   auto img2 = LiteImage::LoadImage<float3>("flags/rus.image3f");
   LiteImage::SaveImage("flags/rus.png", img2);
+
+  auto img3 = LiteImage::LoadImage<float3>("flags/rus.ppm");
+  auto img4 = LiteImage::LoadImage<float3>("flags/rus.bmp");
+  auto img5 = LiteImage::LoadImage<float3>("flags/rus.jpg");
+  auto img6 = LiteImage::LoadImage<float3>("flags/rus.png");
+  //LiteImage::SaveImage("flags/rus6.png", img6);
+
+  const float err2 = LiteImage::MSE(imgRus, img2);
+  const float err3 = LiteImage::MSE(imgRus, img3);
+  const float err4 = LiteImage::MSE(imgRus, img4);
+  const float err5 = LiteImage::MSE(imgRus, img5);
+  const float err6 = LiteImage::MSE(imgRus, img6);
+
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f);
 }
 
-void test02_float4_save()
+bool test02_float4_save()
 {
   Image2D<float4> imgGer(300,200);
 
@@ -60,13 +75,27 @@ void test02_float4_save()
   
   LiteImage::SaveImage("flags/ger.ppm", imgGer);
   LiteImage::SaveImage("flags/ger.bmp", imgGer);
+  LiteImage::SaveImage("flags/ger.jpg", imgGer);
 
   LiteImage::SaveImage("flags/ger.image4f", imgGer);
   auto img2 = LiteImage::LoadImage<float4>("flags/ger.image4f");
   LiteImage::SaveImage("flags/ger.png", img2);
+
+  auto img3 = LiteImage::LoadImage<float4>("flags/ger.ppm");
+  auto img4 = LiteImage::LoadImage<float4>("flags/ger.bmp");
+  auto img5 = LiteImage::LoadImage<float4>("flags/ger.jpg");
+  auto img6 = LiteImage::LoadImage<float4>("flags/ger.png");
+
+  const float err2 = LiteImage::MSE(imgGer, img2);
+  const float err3 = LiteImage::MSE(imgGer, img3);
+  const float err4 = LiteImage::MSE(imgGer, img4);
+  const float err5 = LiteImage::MSE(imgGer, img5);
+  const float err6 = LiteImage::MSE(imgGer, img6);
+
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f);
 }
 
-void test03_float1_save()
+bool test03_float1_save()
 {
   Image2D<float> imgGradient(300,200);
 
@@ -79,12 +108,28 @@ void test03_float1_save()
   
   LiteImage::SaveImage("flags/grad_22.ppm", imgGradient);
   LiteImage::SaveImage("flags/grad_22.bmp", imgGradient);
+  LiteImage::SaveImage("flags/grad_22.jpg", imgGradient);
 
   LiteImage::SaveImage("flags/grad_10.ppm", imgGradient, 1.0f);
   LiteImage::SaveImage("flags/grad_10.bmp", imgGradient, 1.0f);
+  LiteImage::SaveImage("flags/grad_10.jpg", imgGradient, 1.0f);
 
-  //#TODO: save float image, then load it to test both functions
+  LiteImage::SaveImage("flags/grad_10.image1f", imgGradient);
+  auto img2 = LiteImage::LoadImage<float>("flags/grad_10.image1f");
+  LiteImage::SaveImage("flags/grad_10.png", img2, 1.0f);
 
+  auto img3 = LiteImage::LoadImage<float>("flags/grad_10.ppm", 1.0f);
+  auto img4 = LiteImage::LoadImage<float>("flags/grad_10.bmp", 1.0f);
+  auto img5 = LiteImage::LoadImage<float>("flags/grad_10.jpg", 1.0f);
+  auto img6 = LiteImage::LoadImage<float>("flags/grad_10.png", 1.0f);
+  
+  const float err2 = LiteImage::MSE(imgGradient, img2);
+  const float err3 = LiteImage::MSE(imgGradient, img3);
+  const float err4 = LiteImage::MSE(imgGradient, img4);
+  const float err5 = LiteImage::MSE(imgGradient, img5);
+  const float err6 = LiteImage::MSE(imgGradient, img6);
+  
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f);
 }
 
 void test04_uint1_save()
@@ -107,8 +152,12 @@ void test04_uint1_save()
   
   LiteImage::SaveImage("flags/est.ppm", imgEst);
   LiteImage::SaveImage("flags/est.bmp", imgEst);
-
-  //#TODO: save float4 image, then load it to test both functions
+  LiteImage::SaveImage("flags/est.jpg", imgEst);
+  
+  auto img2 = LiteImage::LoadImage<float4>("flags/est.ppm");
+  auto img3 = LiteImage::LoadImage<float4>("flags/est.bmp");
+  LiteImage::SaveImage("flags/est.png", img2);
+  LiteImage::SaveImage("flags/est2.png", img3);
 
 }
 
@@ -130,8 +179,12 @@ void test05_uchar4_save()
   
   LiteImage::SaveImage("flags/ukr.ppm", imgUkr);
   LiteImage::SaveImage("flags/ukr.bmp", imgUkr);
-
-  //#TODO: save float4 image, then load it to test both functions
+  LiteImage::SaveImage("flags/ukr.jpg", imgUkr);
+  
+  auto img2 = LiteImage::LoadImage<float3>("flags/ukr.ppm");
+  auto img3 = LiteImage::LoadImage<float3>("flags/ukr.bmp");
+  LiteImage::SaveImage("flags/ukr.png", img2);
+  LiteImage::SaveImage("flags/ukr2.png", img3);
 
 }
 

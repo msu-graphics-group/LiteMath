@@ -93,6 +93,7 @@ namespace LiteMath
 
   static inline float  lerp(float u, float v, float t) { return u + t * (v - u);  } 
   static inline float  mix (float u, float v, float t) { return u + t * (v - u);  } 
+  static inline float  dot (float a, float b)          { return a*b;  } 
 
   static inline float smoothstep(float edge0, float edge1, float x)
   {
@@ -406,7 +407,8 @@ namespace LiteMath
   static inline uchar4 operator / (const uchar4 & u, const uchar4 & v) { return uchar4(u.x / v.x, u.y / v.y, u.z / v.z, u.w / v.w); }
   
   static inline uchar4 lerp(const uchar4 & u, const uchar4 & v, float t) { return u + t * (v - u); }
-
+  static inline int    dot(uchar4 a, uchar4 b) { return int(a.x)*int(b.x) + int(a.y)*int(b.y) + int(a.z)*int(b.z); }
+ 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

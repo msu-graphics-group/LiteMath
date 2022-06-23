@@ -5,7 +5,6 @@
 #include <string>
 #include <memory>
 #include <cassert>
-//#include <type_traits>
 
 #include "LiteMath.h"
 
@@ -87,7 +86,9 @@ namespace LiteImage
     unsigned int height() const { return m_height; }  
     unsigned int bpp()    const { return sizeof(Type); }
    
+          Type*              data()         { return m_data.data(); }
     const Type*              data()   const { return m_data.data(); }
+
     const std::vector<Type>& vector() const { return m_data; }
     unsigned int             format() const { return GetVulkanFormat<Type>(m_srgb); } 
   
@@ -146,9 +147,28 @@ namespace LiteImage
   };
 
   template<typename Type> bool          SaveImage(const char* a_fileName, const Image2D<Type>& a_image, float a_gamma = 2.2f);
-  template<typename Type> Image2D<Type> LoadImage(const char* a_fileName);
+  template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
+  
+  template<typename Type> inline float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
+  template<typename T>    inline float MSE(const std::vector<T> image1, const std::vector<T> image2)
+  {
+    if (image1.size() != image2.size())
+      return std::max<float>(100000.0f, float(image1.size()+image2.size()));
+
+    double summ = 0;
+    //#pragma omp parallel for reduction(+:summ)
+    for (size_t i = 0; i < image1.size(); i++)
+    {
+      auto c1 = image1[i];
+      auto c2 = image2[i];
+      auto di = (c1 - c2);
+      summ += double(extDotProd(di,di));
+    }
+    return float(summ/double(image1.size()));
+  }
+
+  template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(a.vector(), b.vector())/3.0f; }
 
 }; // end namespace
-
 
 #endif

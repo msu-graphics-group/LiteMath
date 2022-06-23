@@ -523,7 +523,9 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
     return true;
   }
   
-  if(fileExt == ".bmp" || fileExt == ".BMP" || fileExt == ".png" || fileExt == ".PNG")
+  if(fileExt == ".bmp" || fileExt == ".BMP" || 
+     fileExt == ".png" || fileExt == ".PNG" || 
+     fileExt == ".jpg" || fileExt == ".JPG")
   {
     const bool doFlip = (fileExt == ".bmp" || fileExt == ".BMP");
     std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
@@ -543,10 +545,17 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
     #ifdef USE_STB_IMAGE
     else if(fileExt == ".png" || fileExt == ".PNG") 
       return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), a_image.width() * 4);
+    else if(fileExt == ".jpg" || fileExt == ".JPG") 
+      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), 100);
     #else
     else if(fileExt == ".png" || fileExt == ".PNG") 
     {
       std::cout << "[SaveImage<float4>]: '.png' via stbimage is OFF!" << std::endl;
+      return false;
+    }
+    else if(fileExt == ".jpg" || fileExt == ".JPG") 
+    {
+      std::cout << "[SaveImage<float4>]: '.jpg' via stbimage is DISABLED!" << std::endl;
       return false;
     }
     #endif
@@ -588,7 +597,9 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
     return true;
   }
   
-  if(fileExt == ".bmp" || fileExt == ".BMP" || fileExt == ".png" || fileExt == ".PNG")
+  if(fileExt == ".bmp" || fileExt == ".BMP" || 
+     fileExt == ".png" || fileExt == ".PNG" || 
+     fileExt == ".jpg" || fileExt == ".JPG")
   {
     const bool doFlip = (fileExt == ".bmp" || fileExt == ".BMP");
     std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
@@ -608,10 +619,17 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
     #ifdef USE_STB_IMAGE
     else if(fileExt == ".png" || fileExt == ".PNG") 
       return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), a_image.width() * 4);
+    else if(fileExt == ".jpg" || fileExt == ".JPG") 
+      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), 100);
     #else
     else if(fileExt == ".png" || fileExt == ".PNG") 
     {
-      std::cout << "[SaveImage<float3>]: '.png' via stbimage is OFF!" << std::endl;
+      std::cout << "[SaveImage<float3>]: '.png' via stbimage is DISABLED!" << std::endl;
+      return false;
+    }
+    else if(fileExt == ".jpg" || fileExt == ".JPG") 
+    {
+      std::cout << "[SaveImage<float3>]: '.jpg' via stbimage is DISABLED!" << std::endl;
       return false;
     }
     #endif
@@ -655,7 +673,9 @@ bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2
     return true;
   }
   
-  if(fileExt == ".bmp" || fileExt == ".BMP" || fileExt == ".png" || fileExt == ".PNG")
+  if(fileExt == ".bmp" || fileExt == ".BMP" || 
+     fileExt == ".png" || fileExt == ".PNG" || 
+     fileExt == ".jpg" || fileExt == ".JPG")
   {
     const bool doFlip = (fileExt == ".bmp" || fileExt == ".BMP");
     std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
@@ -676,10 +696,17 @@ bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2
     #ifdef USE_STB_IMAGE
     else if(fileExt == ".png" || fileExt == ".PNG") 
       return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), a_image.width() * 4);
+    else if(fileExt == ".jpg" || fileExt == ".JPG") 
+      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), 100);
     #else
     else if(fileExt == ".png" || fileExt == ".PNG")
     {
-      std::cout << "[SaveImage<float>]: '.png' via stbimage is OFF!" << std::endl;
+      std::cout << "[SaveImage<float>]: '.png' via stbimage is DISABLED!" << std::endl;
+      return false;
+    }
+    else if(fileExt == ".jpg" || fileExt == ".JPG")
+    {
+      std::cout << "[SaveImage<float>]: '.jpg' via stbimage is DISABLED!" << std::endl;
       return false;
     }
     #endif
@@ -749,6 +776,15 @@ bool LiteImage::SaveImage<uint32_t>(const char* a_fileName, const LiteImage::Ima
       return false;
     #endif
   }
+  else if(fileExt == ".jpg" || fileExt == ".JPG")
+  {
+    #ifdef USE_STB_IMAGE 
+      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), 100);
+    #else
+      std::cout << "[SaveImage<uchar4>]: '.jpg' via stbimage is DISABLED!" << std::endl;
+      return false;
+    #endif
+  }
 
   std::cout << "[SaveImage<uint32_t>]: unsupported extension '" << fileExt.c_str() << "'" << std::endl;
   return false;
@@ -809,7 +845,16 @@ bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image
     #ifdef USE_STB_IMAGE 
       return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), a_image.width() * 4);
     #else
-      std::cout << "[SaveImage<uchar4>]: '.png' via stbimage is OFF!" << std::endl;
+      std::cout << "[SaveImage<uchar4>]: '.png' via stbimage is DISABLED!" << std::endl;
+      return false;
+    #endif
+  }
+  else if(fileExt == ".jpg" || fileExt == ".JPG")
+  {
+    #ifdef USE_STB_IMAGE 
+      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), 100);
+    #else
+      std::cout << "[SaveImage<uchar4>]: '.jpg' via stbimage is DISABLED!" << std::endl;
       return false;
     #endif
   }
@@ -824,42 +869,125 @@ bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName)
+LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
   LiteImage::Image2D<float4> img;
 
-  //if(fileExt == ".ppm" || fileExt == ".PPM")
-  //{
-  //  std::ifstream fin(a_fileName);
-  //  if(!fin.is_open())
-  //  {
-  //    std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
-  //    return img;
-  //  }
-  //
-  //  std::string header;
-  //  std::getline(fin, myline);
-  //  if(myline != "P3")
-  //  {
-  //    std::cout << "[LoadImage<float3>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
-  //    return img;
-  //  }
-  //
-  //  int whx[3] = {0,0,0};
-  //  fin >> whx[0] >> whx[1] >> whx[2];
-  //  if(whx[0] <= 0 || why[0] <=0)
-  //  {
-  //    std::cout << "[LoadImage<float3>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
-  //    return img;
-  //  }
-  //
-  //  
-  //} 
+  if(fileExt == ".ppm" || fileExt == ".PPM")
+  {
+    std::ifstream fin(a_fileName);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<float4>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    std::string header;
+    std::getline(fin, header);
+    if(header != "P3")
+    {
+      std::cout << "[LoadImage<float4>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    int wh[3] = {0,0,0};
+    fin >> wh[0] >> wh[1] >> wh[2];
+    if(wh[0] <= 0 || wh[1] <=0)
+    {
+      std::cout << "[LoadImage<float4>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
 
-  if(fileExt == ".image4f")
+    if(wh[2] != 255)
+      std::cout << "[LoadImage<float4>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+    
+    img.resize(wh[0], wh[1]);
+    const size_t totalSize = size_t(wh[0]*wh[1]);
+    const float  invDiv    = 1.0f/float(wh[2]); 
+    size_t i=0;
+    while(fin.is_open() && i < totalSize)
+    {
+      int color[3] = {0,0,0};
+      fin >> color[0] >> color[1] >> color[2];
+      float4 colf(std::pow(float(color[0])*invDiv, a_gamma), 
+                  std::pow(float(color[1])*invDiv, a_gamma), 
+                  std::pow(float(color[2])*invDiv, a_gamma), 0.0f);
+      img.data()[i] = colf;
+      i++;
+    }
+    fin.close();
+  }
+  else if(fileExt == ".bmp" || fileExt == ".BMP")
+  {
+    int w=0, h=0;
+    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
+    if(w == 0 || h == 0)
+    {
+      std::cout << "[LoadImage<float4>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(w,h);
+    const float  invDiv = 1.0f/255.0f; 
+    for(int y=0;y<h;y++)
+    {
+      const int offset1 = (h-y-1)*w;
+      const int offset2 = y*w;
+      for(int x=0;x<w;x++) 
+      {
+        unsigned c = data[offset2+x];
+        unsigned r = (c & 0x000000FF);
+        unsigned g = (c & 0x0000FF00) >> 8;
+        unsigned b = (c & 0x00FF0000) >> 16;
+        float4 colf(std::pow(float(r)*invDiv, a_gamma), 
+                    std::pow(float(g)*invDiv, a_gamma), 
+                    std::pow(float(b)*invDiv, a_gamma), 0.0f);
+        img.data()[offset1+x] = colf;
+      }
+    }
+  }
+  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
+  {
+    #ifdef USE_STB_IMAGE
+    int width, height, channels;
+    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
+    
+    if(imgData == NULL) 
+    {
+      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    else if(channels < 3)
+    {
+       std::cout << "[LoadImage<float3>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(width,height);
+    const size_t imSize = size_t(width*height);
+    const float  invDiv = 1.0f/255.0f;
+    for(size_t i=0;i<imSize;i++)
+    {
+      unsigned r = imgData[i*channels+0];
+      unsigned g = imgData[i*channels+1];
+      unsigned b = imgData[i*channels+2];
+      float4 colf(std::pow(float(r)*invDiv, a_gamma), 
+                  std::pow(float(g)*invDiv, a_gamma), 
+                  std::pow(float(b)*invDiv, a_gamma), 0.0f);
+      img.data()[i] = colf;
+    }
+
+    stbi_image_free(imgData);
+    return img;
+    #else
+    std::cout << "[LoadImage<float3>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
+    return img;
+    #endif
+  }  
+  else if(fileExt == ".image4f")
   {
     unsigned wh[2] = { 0,0};
     std::ifstream fin(a_fileName, std::ios::binary);
@@ -877,44 +1005,128 @@ LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName)
   return img;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName)
+LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
   LiteImage::Image2D<float3> img;
 
-  //if(fileExt == ".ppm" || fileExt == ".PPM")
-  //{
-  //  std::ifstream fin(a_fileName);
-  //  if(!fin.is_open())
-  //  {
-  //    std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
-  //    return img;
-  //  }
-  //
-  //  std::string header;
-  //  std::getline(fin, myline);
-  //  if(myline != "P3")
-  //  {
-  //    std::cout << "[LoadImage<float3>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
-  //    return img;
-  //  }
-  //
-  //  int whx[3] = {0,0,0};
-  //  fin >> whx[0] >> whx[1] >> whx[2];
-  //  if(whx[0] <= 0 || why[0] <=0)
-  //  {
-  //    std::cout << "[LoadImage<float3>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
-  //    return img;
-  //  }
-  //
-  //  
-  //} 
+  if(fileExt == ".ppm" || fileExt == ".PPM")
+  {
+    std::ifstream fin(a_fileName);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    std::string header;
+    std::getline(fin, header);
+    if(header != "P3")
+    {
+      std::cout << "[LoadImage<float3>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+  
+    int wh[3] = {0,0,0};
+    fin >> wh[0] >> wh[1] >> wh[2];
+    if(wh[0] <= 0 || wh[1] <=0)
+    {
+      std::cout << "[LoadImage<float3>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
 
-  if(fileExt == ".image3f")
+    if(wh[2] != 255)
+      std::cout << "[LoadImage<float3>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+    
+    img.resize(wh[0], wh[1]);
+    const size_t totalSize = size_t(wh[0]*wh[1]);
+    const float  invDiv    = 1.0f/float(wh[2]); 
+    size_t i=0;
+    while(fin.is_open() && i < totalSize)
+    {
+      int color[3] = {0,0,0};
+      fin >> color[0] >> color[1] >> color[2];
+      float3 colf(std::pow(float(color[0])*invDiv, a_gamma), 
+                  std::pow(float(color[1])*invDiv, a_gamma), 
+                  std::pow(float(color[2])*invDiv, a_gamma));
+      img.data()[i] = colf;
+      i++;
+    }
+    fin.close();
+  }
+  else if(fileExt == ".bmp" || fileExt == ".BMP")
+  {
+    int w=0, h=0;
+    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
+    if(w == 0 || h == 0)
+    {
+      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(w,h);
+    const float  invDiv = 1.0f/255.0f; 
+    for(int y=0;y<h;y++)
+    {
+      const int offset1 = (h-y-1)*w;
+      const int offset2 = y*w;
+      for(int x=0;x<w;x++) 
+      {
+        unsigned c = data[offset2+x];
+        unsigned r = (c & 0x000000FF);
+        unsigned g = (c & 0x0000FF00) >> 8;
+        unsigned b = (c & 0x00FF0000) >> 16;
+        float3 colf(std::pow(float(r)*invDiv, a_gamma), 
+                    std::pow(float(g)*invDiv, a_gamma), 
+                    std::pow(float(b)*invDiv, a_gamma));
+        img.data()[offset1+x] = colf;
+      }
+    }
+  } 
+  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
+  {
+    #ifdef USE_STB_IMAGE
+    int width, height, channels;
+    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
+    
+    if(imgData == NULL) 
+    {
+      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    else if(channels < 3)
+    {
+       std::cout << "[LoadImage<float3>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+
+    img.resize(width,height);
+    const size_t imSize = size_t(width*height);
+    const float  invDiv = 1.0f/255.0f;
+    for(size_t i=0;i<imSize;i++)
+    {
+      unsigned r = imgData[i*channels+0];
+      unsigned g = imgData[i*channels+1];
+      unsigned b = imgData[i*channels+2];
+      float3 colf(std::pow(float(r)*invDiv, a_gamma), 
+                  std::pow(float(g)*invDiv, a_gamma), 
+                  std::pow(float(b)*invDiv, a_gamma));
+      img.data()[i] = colf;
+    }
+
+    stbi_image_free(imgData);
+    return img;
+    #else
+    std::cout << "[LoadImage<float3>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
+    return img;
+    #endif
+  } 
+  else if(fileExt == ".image3f")
   {
     unsigned wh[2] = { 0,0};
     std::ifstream fin(a_fileName, std::fstream::out | std::ios::binary);
@@ -932,3 +1144,54 @@ LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName)
   return img;
 }
 
+template<> 
+LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, float a_gamma)
+{
+  const std::string fileStr(a_fileName);
+  const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
+
+  if(fileExt == ".image1f")
+  {
+    LiteImage::Image2D<float> img;
+    unsigned wh[2] = { 0,0};
+    std::ifstream fin(a_fileName, std::fstream::out | std::ios::binary);
+    if(!fin.is_open())
+    {
+      std::cout << "[LoadImage<float>]: can't open file '" << a_fileName << "' " << std::endl;
+      return img;
+    }
+    fin.read((char*)wh, sizeof(unsigned)* 2);
+    img.resize(wh[0], wh[1]);
+    fin.read((char*)img.data(), size_t(wh[0]*wh[1])*sizeof(float));
+    fin.close();
+    return img;
+  }
+
+  LiteImage::Image2D<float3> rgbImage = LiteImage::LoadImage<float3>(a_fileName, a_gamma);
+  Image2D<float> result(rgbImage.width(), rgbImage.height());
+
+  size_t imSize = size_t(rgbImage.width()*rgbImage.height());
+  for(size_t i=0;i<imSize;i++) {
+    float3 color = rgbImage.data()[i];
+    result.data()[i] = 0.333334f*(color[0] + color[1] + color[2]);
+  }
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<> float LiteImage::extDotProd<uint32_t>(uint32_t a, uint32_t b) 
+{ 
+  unsigned r1 = (a & 0x000000FF);
+  unsigned g1 = (a & 0x0000FF00) >> 8;
+  unsigned b1 = (a & 0x00FF0000) >> 16;
+  unsigned r2 = (b & 0x000000FF);
+  unsigned g2 = (b & 0x0000FF00) >> 8;
+  unsigned b2 = (b & 0x00FF0000) >> 16;
+  return float(r1*r2 + g1*g2 + b1*b2); 
+}
+
+template<> float LiteImage::MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
