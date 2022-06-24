@@ -166,6 +166,29 @@ namespace LiteImage
   }
 
   template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(a.vector(), b.vector())/3.0f; }
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  /**
+  \brief save 24 bit RGB bitmap images.
+  \param fname  - file name
+  \param w      - input image width
+  \param h      - input image height
+  \param pixels - R8G8B8A8 data, 4 bytes per pixel, one byte for channel.
+  */
+  bool SaveBMP(const char* fname, const unsigned int* pixels, int w, int h);
+
+  /**
+  \brief load 24 bit RGB bitmap images.
+  \param fname - file name
+  \param pW    - out image width
+  \param pH    - out image height
+  \return R8G8B8A8 data, 4 bytes per pixel, one byte for channel.
+          Note that this function in this sample works correctly _ONLY_ for 24 bit RGB ".bmp" images.
+          If you want to support gray-scale images or images with palette, please upgrade its implementation.
+  */
+  std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH);
 
 }; // end namespace
 

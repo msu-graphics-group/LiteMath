@@ -35,7 +35,7 @@ add_executable(math_tests tests/tests_main.cpp
                           tests/tests_int3.cpp
                           tests/tests_int2.cpp
                           Image2d.cpp
-                          Bitmap.cpp)
+                          )
 
 set_target_properties(math_tests PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
@@ -48,7 +48,7 @@ option(USE_STB_IMAGE "Use StbImage for 'png'" OFF)
 if(USE_STB_IMAGE)
   add_definitions(-DUSE_STB_IMAGE)
   include_directories("${CMAKE_SOURCE_DIR}/external")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-duplicated-branches -Wduplicated-cond ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-duplicated-branches -Wno-duplicated-cond ")
 endif()
 
 #if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
