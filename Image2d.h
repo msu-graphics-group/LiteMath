@@ -72,7 +72,7 @@ namespace LiteImage
     Image2D& operator=(Image2D&& rhs)      = default; // may cause crash on some old compilers
     Image2D& operator=(const Image2D& rhs) = default; // may cause crash on some old compilers
     
-    void resize(unsigned int width, unsigned int height) { m_width = width; m_height = height; m_data.resize(width*height); m_fw = float(width); m_fh = float(height); }
+    void resize(unsigned int w, unsigned int h) { m_width = w; m_height = h; m_data.resize(w*h); m_fw = float(w); m_fh = float(h); }
     void clear(const Type val = Type(0))                 { for(auto& pixel : m_data) pixel = val; }  
   
     float4 sample(const Sampler& a_sampler, float2 a_uv) const;    

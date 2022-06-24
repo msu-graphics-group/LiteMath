@@ -325,6 +325,7 @@ void tests_all_images()
 
   #ifdef WIN32
   mkdir("flags");
+  chdir("..");
   #else
   mkdir("flags", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   std::ifstream test("data/texture1.bmp");
