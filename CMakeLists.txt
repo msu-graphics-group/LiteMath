@@ -55,7 +55,11 @@ if(USE_STB_IMAGE)
   endif()
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter ")
+if(WIN32)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter ")
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND BUILD_TESTING)
   message("CTEST is ENABLED")
