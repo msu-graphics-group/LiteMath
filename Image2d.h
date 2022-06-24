@@ -1,5 +1,5 @@
-#ifndef TEXTURE2D_H
-#define TEXTURE2D_H
+#ifndef IMAGE2D_H
+#define IMAGE2D_H
 
 #include <vector>
 #include <string>
@@ -150,7 +150,7 @@ namespace LiteImage
   template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
   
   template<typename Type> inline float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
-  template<typename T>    inline float MSE(const std::vector<T> image1, const std::vector<T> image2)
+  template<typename T>    float MSE(const std::vector<T> image1, const std::vector<T> image2)
   {
     if (image1.size() != image2.size())
       return std::max<float>(100000.0f, float(image1.size()+image2.size()));

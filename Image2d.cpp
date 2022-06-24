@@ -1519,7 +1519,7 @@ LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<> float LiteImage::extDotProd<uint32_t>(uint32_t a, uint32_t b) 
+template<> inline float LiteImage::extDotProd<uint32_t>(uint32_t a, uint32_t b) 
 { 
   unsigned r1 = (a & 0x000000FF);
   unsigned g1 = (a & 0x0000FF00) >> 8;
@@ -1530,4 +1530,4 @@ template<> float LiteImage::extDotProd<uint32_t>(uint32_t a, uint32_t b)
   return float(r1*r2 + g1*g2 + b1*b2); 
 }
 
-template<> float LiteImage::MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
+template<> inline float LiteImage::MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
