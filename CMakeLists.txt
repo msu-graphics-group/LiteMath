@@ -51,10 +51,6 @@ if(USE_STB_IMAGE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-duplicated-branches -Wno-duplicated-cond ")
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif()
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter ")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND BUILD_TESTING)

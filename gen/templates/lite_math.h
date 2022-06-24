@@ -31,8 +31,6 @@
 //#endif
 #endif
 
-#define __global 
-
 namespace LiteMath
 { 
   typedef unsigned int   uint;
