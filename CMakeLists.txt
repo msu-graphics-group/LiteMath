@@ -51,21 +51,6 @@ if(USE_STB_IMAGE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-duplicated-branches -Wno-duplicated-cond ")
 endif()
 
-#if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#  message("CODE_COVERAGE is ENABLED")
-#  # Add required flags (GCC & LLVM/Clang)
-#  target_compile_options(math_tests INTERFACE
-#    -O0        # no optimization
-#    -g         # generate debug info
-#    --coverage # sets all required flags
-#  )
-#  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-#    target_link_options(math_tests INTERFACE --coverage)
-#  else()
-#    target_link_libraries(math_tests INTERFACE --coverage)
-#  endif()
-#endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") # -Wno-unused-variable
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter ")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND BUILD_TESTING)
@@ -84,6 +69,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_COMPILER_IS_GNUCXX AND CODE_COVE
   #target_link_libraries(math_tests gcov)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fkeep-inline-functions -fno-inline -fno-inline-small-functions -fno-default-inline")
   #set(COVERAGE_EXCLUDES "dir1/*")
+  set(COVERAGE_EXCLUDES "${CMAKE_SOURCE_DIR}/external/*")
   setup_target_for_coverage_gcovr_html(NAME            coverage
                                        EXECUTABLE      math_tests
                                        BASE_DIRECTORY  "${PROJECT_SOURCE_DIR}"

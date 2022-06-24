@@ -1,6 +1,7 @@
 #include "Image2d.h"
 
 #include <iostream>
+#include <fstream>
 #include <iomanip>      // std::setfill, std::setw
 
 using LiteMath::float3;
@@ -8,6 +9,8 @@ using LiteMath::float4;
 using LiteMath::uchar4;
 
 using LiteMath::uint2;
+using LiteMath::int2;
+using LiteMath::float2;
 using LiteImage::Image2D;
 
 #ifdef WIN32
@@ -15,6 +18,7 @@ using LiteImage::Image2D;
 #else
   #include <sys/stat.h>   // for linux mkdir
   #include <sys/types.h>
+  #include <unistd.h>
 #endif
 
 bool test01_float3_save()
@@ -156,9 +160,11 @@ bool test04_uint1_save()
   LiteImage::SaveImage("flags/est.ppm", imgEst);
   LiteImage::SaveImage("flags/est.bmp", imgEst);
   LiteImage::SaveImage("flags/est.jpg", imgEst);
-  
+  LiteImage::SaveImage("flags/est.image4ub", imgEst);
+
   auto img2 = LiteImage::LoadImage<float4>("flags/est.ppm");
   auto img3 = LiteImage::LoadImage<float4>("flags/est.bmp");
+  auto img4 = LiteImage::LoadImage<uint32_t>("flags/est.image4ub");
   LiteImage::SaveImage("flags/est.png", img2);
   LiteImage::SaveImage("flags/est2.png", img3);
   
@@ -174,8 +180,9 @@ bool test04_uint1_save()
   const float err4 = LiteImage::MSE(imgEst, img14);
   const float err5 = LiteImage::MSE(imgEst, img15);
   const float err6 = LiteImage::MSE(imgEst, img16);
+  const float err7 = LiteImage::MSE(imgEst, img4);
   
-  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f);
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-4f) && (err6 < 1e-5f) && (err7 < 1e-5f);
 }
 
 bool test05_uchar4_save()
@@ -202,12 +209,14 @@ bool test05_uchar4_save()
   auto img3 = LiteImage::LoadImage<float3>("flags/ukr.bmp");
   LiteImage::SaveImage("flags/ukr.png", img2);
   LiteImage::SaveImage("flags/ukr2.png", img3);
+  LiteImage::SaveImage("flags/ukr.image4ub", imgUkr);
   
   auto img12 = LiteImage::LoadImage<uchar4>("flags/ukr.ppm");
   auto img13 = LiteImage::LoadImage<uchar4>("flags/ukr.bmp");
   auto img14 = LiteImage::LoadImage<uchar4>("flags/ukr.png");
   auto img15 = LiteImage::LoadImage<uchar4>("flags/ukr.jpg");
   auto img16 = LiteImage::LoadImage<uchar4>("flags/ukr2.png");
+  auto img17 = LiteImage::LoadImage<uchar4>("flags/ukr.image4ub");
   LiteImage::SaveImage("flags/ukr_15.bmp", img15);
   
   const float err2 = LiteImage::MSE(imgUkr, img12);
@@ -215,9 +224,89 @@ bool test05_uchar4_save()
   const float err4 = LiteImage::MSE(imgUkr, img14);
   const float err5 = LiteImage::MSE(imgUkr, img15);
   const float err6 = LiteImage::MSE(imgUkr, img16);
+  const float err7 = LiteImage::MSE(imgUkr, img17);
   
-  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-2f) && (err6 < 1e-5f);
+  return (err2 < 1e-5f) && (err3 < 1e-5f) && (err4 < 1e-5f) && (err5 < 1e-2f) && (err6 < 1e-5f) && (err7 < 1e-5f);
 }
+
+bool test06_textures()
+{
+  auto img0 = LiteImage::LoadImage<uchar4>("data/texture1.bmp");
+  auto img1 = LiteImage::LoadImage<uint32_t>("data/texture1.bmp");
+  auto img2 = LiteImage::LoadImage<float4>("data/texture1.bmp");
+
+  Image2D<float4> img3(img1.width()*2, img1.height()*2);
+  Image2D<float4> img4(img1.width()*2, img1.height()*2);
+  Image2D<float4> img5(img1.width()*2, img1.height()*2);
+  Image2D<float4> img6(img1.width()*2, img1.height()*2);
+  Image2D<float4> img7(img1.width()*2, img1.height()*2);
+  Image2D<float4> img8(img1.width()*2, img1.height()*2);
+  Image2D<float4> img9(img1.width()*2, img1.height()*2);
+  Image2D<float4> img10(img1.width()*2, img1.height()*2);
+  Image2D<float4> img11(img1.width()*2, img1.height()*2);
+  Image2D<float4> img12(img1.width()*2, img1.height()*2);
+  Image2D<float4> img13(img1.width()*2, img1.height()*2);
+
+  LiteImage::Sampler sam1, sam2, sam3, sam4;
+
+  sam1.addressU = LiteImage::Sampler::AddressMode::CLAMP;
+  sam1.addressV = LiteImage::Sampler::AddressMode::CLAMP;
+  sam1.filter   = LiteImage::Sampler::Filter::LINEAR;
+
+  sam2.addressU = LiteImage::Sampler::AddressMode::CLAMP;
+  sam2.addressV = LiteImage::Sampler::AddressMode::CLAMP;
+  sam2.filter   = LiteImage::Sampler::Filter::NEAREST;
+
+  sam3.addressU = LiteImage::Sampler::AddressMode::WRAP;
+  sam3.addressV = LiteImage::Sampler::AddressMode::WRAP;
+  sam3.filter   = LiteImage::Sampler::Filter::LINEAR;
+
+  sam4.addressU = LiteImage::Sampler::AddressMode::WRAP;
+  sam4.addressV = LiteImage::Sampler::AddressMode::WRAP;
+  sam4.filter   = LiteImage::Sampler::Filter::NEAREST;
+
+  for(int y=0; y < int(img3.height()); y++)
+  {
+    float texCoordY = (float(y) + 0.5f)/float(img3.height());
+    for(int x=0; x < int(img3.width()); x++)
+    {
+      float texCoordX = (float(x) + 0.5f)/float(img3.width());
+      
+      img3[int2(x,y)] = img1.sample(sam1, float2(texCoordX,texCoordY));
+      img4[int2(x,y)] = img2.sample(sam2, float2(texCoordX,texCoordY));
+      img5[int2(x,y)] = img2.sample(sam3, 2.0f*float2(texCoordX,texCoordY));
+      img6[int2(x,y)] = img1.sample(sam3, 2.0f*float2(texCoordX,texCoordY));
+      img7[int2(x,y)] = img0.sample(sam3, 2.0f*float2(texCoordX,texCoordY));
+      img8[int2(x,y)] = img0.sample(sam1, 2.0f*float2(texCoordX,texCoordY) - float2(0.5f));
+
+      img9 [int2(x,y)] = img0.sample(sam4, 4.0f*float2(texCoordX,texCoordY) - float2(0.25f));
+      img10[int2(x,y)] = img1.sample(sam4, 4.0f*float2(texCoordX,texCoordY) - float2(0.25f));
+      img11[int2(x,y)] = img2.sample(sam4, 4.0f*float2(texCoordX,texCoordY) - float2(0.25f));
+
+      img12[int2(x,y)] = img0.sample(sam2, 4.0f*float2(texCoordX,texCoordY) - float2(0.25f));
+      img13[int2(x,y)] = img1.sample(sam2, 4.0f*float2(texCoordX,texCoordY) - float2(0.25f));
+    }
+  }
+
+  LiteImage::SaveImage("flags/tex1_linear_512.bmp", img3);
+  LiteImage::SaveImage("flags/tex1_point_512.bmp",  img4);
+  LiteImage::SaveImage("flags/tex1_wrap1_512.bmp",  img5);
+  LiteImage::SaveImage("flags/tex1_wrap2_512.bmp",  img6);
+  LiteImage::SaveImage("flags/tex1_wrap3_512.bmp",  img7);
+  LiteImage::SaveImage("flags/tex1_clamp_512.bmp",  img8);
+  LiteImage::SaveImage("flags/tex1_near_wrap1.bmp", img9);
+  LiteImage::SaveImage("flags/tex1_near_wrap2.bmp", img10);
+  LiteImage::SaveImage("flags/tex1_near_wrap3.bmp", img11);
+  LiteImage::SaveImage("flags/tex1_near_clamp1.bmp", img12);
+  LiteImage::SaveImage("flags/tex1_near_clamp2.bmp", img13);
+
+  return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 using TestFuncType2 = bool (*)();
 struct TestRun2
@@ -238,16 +327,22 @@ void tests_all_images()
   mkdir("flags");
   #else
   mkdir("flags", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  std::ifstream test("data/texture1.bmp");
+  if(!test.is_open())
+    chdir("..");
+  else
+    test.close();
   #endif
 
   std::cout << std::endl;
   std::cout << "run images tests: " << std::endl;
 
-  TestRun2 tests[] = { {test01_float3_save, "test01_float3_save"},
-                      {test02_float4_save,  "test02_float4_save"},
-                      {test03_float1_save,  "test03_float1_save"},
-                      {test04_uint1_save,   "test04_uint1_save"},
-                      {test05_uchar4_save,  "test05_uchar4_save"},
+  TestRun2 tests[] = { {test01_float3_save,  "test01_float3_save"},
+                       {test02_float4_save,  "test02_float4_save"},
+                       {test03_float1_save,  "test03_float1_save"},
+                       {test04_uint1_save,   "test04_uint1_save"},
+                       {test05_uchar4_save,  "test05_uchar4_save"},
+                       {test06_textures,     "test06_textures"},
                      };
 
   

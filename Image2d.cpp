@@ -24,7 +24,7 @@ using LiteMath::ushort4;
 using LiteMath::uchar4;
 using LiteMath::clamp;
 
-static inline uint pitch(uint x, uint y, uint pitch) { return y * pitch + x; }  
+//static inline uint pitch(uint x, uint y, uint pitch) { return y * pitch + x; }  
 
 static inline float4 read_array_uchar4(const uchar4* a_data, int offset)
 {
@@ -1392,6 +1392,7 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
   else
     std::cout << "[LiteImage::LoadImage<uint>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
   
+  img.setSRGB(true);
   return img;
 }
 
@@ -1509,6 +1510,7 @@ LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, 
   else
     std::cout << "[LiteImage::LoadImage<uchar4>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
   
+  img.setSRGB(true);
   return img;
 }
 
