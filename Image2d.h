@@ -59,7 +59,7 @@ namespace LiteImage
     Image2D() : m_width(0), m_height(0) {}
     Image2D(unsigned int w, unsigned int h, const Type* a_data) : m_width(w), m_height(h) 
     {
-      resize(width, height);
+      resize(w, h);
       memcpy(m_data.data(), a_data, w*h*sizeof(Type));
     }
     
