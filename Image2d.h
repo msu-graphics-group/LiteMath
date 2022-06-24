@@ -149,7 +149,18 @@ namespace LiteImage
   template<typename Type> bool          SaveImage(const char* a_fileName, const Image2D<Type>& a_image, float a_gamma = 2.2f);
   template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
   
-  template<typename Type> inline float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
+  template<typename Type> float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
+  template<> inline float LiteImage::extDotProd<uint32_t>(uint32_t a, uint32_t b) 
+  { 
+    unsigned r1 = (a & 0x000000FF);
+    unsigned g1 = (a & 0x0000FF00) >> 8;
+    unsigned b1 = (a & 0x00FF0000) >> 16;
+    unsigned r2 = (b & 0x000000FF);
+    unsigned g2 = (b & 0x0000FF00) >> 8;
+    unsigned b2 = (b & 0x00FF0000) >> 16;
+    return float(r1*r2 + g1*g2 + b1*b2); 
+  }
+  
   template<typename T>    float MSE(const std::vector<T> image1, const std::vector<T> image2)
   {
     if (image1.size() != image2.size())
@@ -166,6 +177,7 @@ namespace LiteImage
   }
 
   template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(a.vector(), b.vector())/3.0f; }
+  template<> inline float LiteImage::MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
