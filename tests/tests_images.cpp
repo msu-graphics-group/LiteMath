@@ -325,15 +325,14 @@ void tests_all_images()
 
   #ifdef WIN32
   mkdir("flags");
-  chdir("..");
   #else
   mkdir("flags", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  #endif
   std::ifstream test("data/texture1.bmp");
   if(!test.is_open())
     chdir("..");
   else
     test.close();
-  #endif
 
   std::cout << std::endl;
   std::cout << "run images tests: " << std::endl;
