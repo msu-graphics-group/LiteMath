@@ -73,7 +73,7 @@ namespace LiteImage
     Image2D& operator=(const Image2D& rhs) = default; // may cause crash on some old compilers
     
     void resize(unsigned int w, unsigned int h) { m_width = w; m_height = h; m_data.resize(w*h); m_fw = float(w); m_fh = float(h); }
-    void clear(const Type val = Type(0))                 { for(auto& pixel : m_data) pixel = val; }  
+    void clear(const Type val)                  { for(auto& pixel : m_data) pixel = val; }  
   
     float4 sample(const Sampler& a_sampler, float2 a_uv) const;    
     
@@ -179,6 +179,25 @@ namespace LiteImage
   template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(a.vector(), b.vector())/3.0f; }
   template<> inline float LiteImage::MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
   
+  /**
+  \brief save 24 bit RGB bitmap images.
+  \param a      - input image1 (I)
+  \param b      - input image2 (I_target)
+  \return per pixel loss function: (I[x,y] - I_target[x,y])^2
+  */
+  template<typename T> Image2D<T> MSEImage(const Image2D<T>& a, const Image2D<T>& b) 
+  { 
+    assert(a.width()*a.height() == b.width()*b.height());
+    Image2D<T> result(a.width(), a.height());
+    const size_t imgSize = a.width()*a.height();
+    for(size_t i=0;i<imgSize;i++) {
+      const auto av = a.data()[i];
+      const auto bv = b.data()[i];
+      result.data()[i] = (bv - av)*(bv - av);
+    }
+    return result;
+  }
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
