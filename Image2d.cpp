@@ -541,7 +541,12 @@ std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int*
   }
 
   unsigned char info[54];
-  fread(info, sizeof(unsigned char), 54, f); // read the 54-byte header
+  if(fread(info, sizeof(unsigned char), 54, f) != 54) // read the 54-byte header
+  {
+    (*pW) = 0;
+    (*pH) = 0;
+    return std::vector<unsigned int>();
+  }
 
   int width  = *(int*)&info[18];
   int height = *(int*)&info[22];
@@ -553,7 +558,9 @@ std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int*
 
   for(int i = 0; i < height; i++)
   {
-    fread(data, sizeof(unsigned char), row_padded, f);
+    auto check = fread(data, sizeof(unsigned char), row_padded, f);
+    if(check != row_padded)
+      break;
     for(int j = 0; j < width; j++)
       res[i*width+j] = (uint32_t(data[j*3+0]) << 16) | (uint32_t(data[j*3+1]) << 8)  | (uint32_t(data[j*3+2]) << 0);
   }

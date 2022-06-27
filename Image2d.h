@@ -23,6 +23,9 @@ namespace LiteImage
   using LiteMath::uchar4;
   using LiteMath::clamp;
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   struct Sampler 
   {
     enum class AddressMode {
@@ -45,13 +48,16 @@ namespace LiteImage
     AddressMode addressW      = AddressMode::WRAP;
     float4      borderColor   = float4(0.0f, 0.0f, 0.0f, 0.0f);
     Filter      filter        = Filter::NEAREST;
-    //uint32_t    maxAnisotropy = 1;
-    //uint32_t    maxLOD        = 32;
-    //uint32_t    minLOD        = 0;
-    //uint32_t    mipLODBias    = 0;
+    uint32_t    maxAnisotropy = 1;
+    uint32_t    maxLOD        = 32;
+    uint32_t    minLOD        = 0;
+    uint32_t    mipLODBias    = 0;
   };
 
   template<typename T> uint32_t GetVulkanFormat(bool a_gamma22);
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   template<typename Type>
   struct Image2D
@@ -146,11 +152,66 @@ namespace LiteImage
   
   };
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+  \brief combined image of unknown type (could be any) and sampler
+  */
+  struct ICombinedImageSampler 
+  {
+    virtual ~ICombinedImageSampler() {}
+    virtual float4       sample(float2 a_uv) const = 0;  
+    
+    virtual unsigned int width()             const = 0;
+    virtual unsigned int height()            const = 0;
+    virtual unsigned int depth()             const = 0;
+    virtual unsigned int bpp()               const = 0;
+    virtual unsigned int format()            const = 0; ///<! return uint(VkFormat) value 
+    
+    virtual Sampler      sampler()           const = 0;
+    virtual const void*  data()              const = 0;
+  };
+
+  /**
+    \brief Can have specific effitient implementations for various textures and samplers
+  */
+  template<typename Type>
+  std::shared_ptr<ICombinedImageSampler> MakeCombinedTexture2D(std::shared_ptr< Image2D<Type> > a_texture, Sampler a_sampler) 
+  { 
+    // general implementation
+    //
+    struct CobminedImageSamplerGeneral : public ICombinedImageSampler
+    {
+      float4 sample(float2 a_uv) const override { return m_pTexture->sample(m_sampler, a_uv); }  
+    
+      unsigned int width()       const override { return m_pTexture->width();  }
+      unsigned int height()      const override { return m_pTexture->height(); }
+      unsigned int depth()       const override { return 1; }
+      unsigned int bpp()         const override { return m_pTexture->bpp();    }
+      unsigned int format()      const override { return m_pTexture->format();  } 
+      
+      Sampler      sampler()     const override { return m_sampler; }
+      const void*  data()        const override { return m_pTexture->data(); }
+  
+      std::shared_ptr<Image2D<Type> > m_pTexture;
+      Sampler                         m_sampler;
+    };
+  
+    std::shared_ptr<CobminedImageSamplerGeneral> pObj = std::make_shared<CobminedImageSamplerGeneral>();
+    pObj->m_pTexture = a_texture;
+    pObj->m_sampler  = a_sampler;
+    return pObj;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   template<typename Type> bool          SaveImage(const char* a_fileName, const Image2D<Type>& a_image, float a_gamma = 2.2f);
   template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
   
   template<typename Type> float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
-  template<> inline float LiteImage::extDotProd<uint32_t>(uint32_t a, uint32_t b) 
+  template<> inline       float extDotProd<uint32_t>(uint32_t a, uint32_t b) 
   { 
     unsigned r1 = (a & 0x000000FF);
     unsigned g1 = (a & 0x0000FF00) >> 8;
@@ -177,7 +238,7 @@ namespace LiteImage
   }
 
   template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(a.vector(), b.vector())/3.0f; }
-  template<> inline float LiteImage::MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
+  template<> inline    float MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
   
   /**
   \brief save 24 bit RGB bitmap images.

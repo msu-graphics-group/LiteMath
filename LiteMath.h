@@ -35,12 +35,6 @@
 #define __global
 #endif
 
-#ifdef KERNEL_SLICER
-#define KSLICER_SIZE(x) __attribute__((size(#x)))
-#else
-#define KSLICER_SIZE(x) 
-#endif
-
 namespace LiteMath
 { 
   typedef unsigned int   uint;
