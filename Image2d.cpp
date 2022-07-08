@@ -575,7 +575,7 @@ std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int*
 
 static inline int tonemap(float x, float a_gammaInv) 
 { 
-  const int colorLDR = int( std::pow(x, a_gammaInv)*255.0f + float(.5f) );
+  const int colorLDR = int( std::pow(std::abs(x), a_gammaInv)*255.0f + float(.5f) );
   if(colorLDR < 0)        return 0;
   else if(colorLDR > 255) return 255;
   else                    return colorLDR;
