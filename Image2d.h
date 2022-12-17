@@ -39,6 +39,7 @@ namespace LiteImage
     enum class Filter {
       NEAREST = 0,
       LINEAR  = 1,
+      CUBIC   = 1000015000, // VK_FILTER_CUBIC_EXT = 1000015000, not supported on CPU
     };
   
     // sampler state
@@ -183,6 +184,7 @@ namespace LiteImage
     //
     struct CobminedImageSamplerGeneral : public ICombinedImageSampler
     {
+      ~CobminedImageSamplerGeneral(){}
       float4 sample(float2 a_uv) const override { return m_pTexture->sample(m_sampler, a_uv); }  
     
       unsigned int width()       const override { return m_pTexture->width();  }
@@ -190,7 +192,7 @@ namespace LiteImage
       unsigned int depth()       const override { return 1; }
       unsigned int bpp()         const override { return m_pTexture->bpp();    }
       unsigned int format()      const override { return m_pTexture->format();  } 
-      
+
       Sampler      sampler()     const override { return m_sampler; }
       const void*  data()        const override { return m_pTexture->data(); }
   
