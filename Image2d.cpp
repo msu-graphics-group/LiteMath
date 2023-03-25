@@ -24,7 +24,13 @@ using LiteMath::ushort4;
 using LiteMath::uchar4;
 using LiteMath::clamp;
 
-//static inline uint pitch(uint x, uint y, uint pitch) { return y * pitch + x; }  
+namespace LiteImage {
+
+  #if defined(__ANDROID__)
+    static AAssetManager* g_AssetManager = nullptr;
+  #endif
+
+}; // namespace LiteImage
 
 static inline float4 read_array_uchar4(const uchar4* a_data, int offset)
 {
@@ -459,7 +465,67 @@ bool LiteImage::SaveBMP(const char* fname, const unsigned int* pixels, int w, in
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int* pH)
+namespace LiteImage {
+
+#if defined(__ANDROID__)
+
+void setAssetManager(AAssetManager* assetManager) {
+  g_AssetManager = assetManager;
+}
+
+AAssetManager* getAssetManager() {
+  return g_AssetManager;
+}
+
+std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
+{
+  assert(g_AssetManager);
+  AAsset* file = AAssetManager_open(g_AssetManager, filename, AASSET_MODE_BUFFER);
+
+  if(file == NULL)
+  {
+    (*pW) = 0;
+    (*pH) = 0;
+    return std::vector<unsigned int>();
+  }
+
+  unsigned char info[54];
+  size_t headerSize = 54 * sizeof(unsigned char);
+  if(AAsset_read(file, &info, headerSize) != headerSize) // read the 54-byte header
+  {
+    (*pW) = 0;
+    (*pH) = 0;
+    return std::vector<unsigned int>();
+  }
+
+  int width  = *(int*)&info[18];
+  int height = *(int*)&info[22];
+
+  int row_padded      = (width*3 + 3) & (~3);
+  unsigned char* data = new unsigned char[row_padded];
+
+  std::vector<unsigned int> res(width*height);
+
+  for(int i = 0; i < height; i++)
+  {
+    auto check = AAsset_read(file, data, sizeof(unsigned char) * row_padded);
+    if(check != row_padded)
+      break;
+    for(int j = 0; j < width; j++)
+      res[i*width+j] = (uint32_t(data[j*3+0]) << 16) | (uint32_t(data[j*3+1]) << 8)  | (uint32_t(data[j*3+2]) << 0);
+  }
+
+  AAsset_close(file);
+  delete [] data;
+
+  (*pW) = width;
+  (*pH) = height;
+  return res;
+}
+
+#else
+
+std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
 {
   FILE* f = fopen(filename, "rb");
 
@@ -502,6 +568,10 @@ std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int*
   (*pH) = height;
   return res;
 }
+
+#endif
+
+}; // namespace LiteImage
 
 static inline int tonemap(float x, float a_gammaInv) 
 { 

@@ -284,6 +284,11 @@ namespace LiteImage
   */
   std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH);
 
+#if defined(__ANDROID__)
+  void setAssetManager(AAssetManager* assetManager);
+  AAssetManager* getAssetManager();
+#endif
+
 }; // end namespace
 
 #endif
