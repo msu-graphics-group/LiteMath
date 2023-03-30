@@ -31,7 +31,7 @@
 //#endif
 #endif
 
-#ifndef __APPLE__
+#if not defined(__APPLE__) and not defined(__ANDROID__)
 #define __global
 #endif
 

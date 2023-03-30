@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "LiteMath.h"
+#include "LiteData.h"
 
 namespace LiteImage 
 {

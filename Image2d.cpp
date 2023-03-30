@@ -1,4 +1,3 @@
-#include "LiteMath.h"
 #include "Image2d.h"
 
 #ifdef USE_STB_IMAGE
@@ -26,9 +25,9 @@ using LiteMath::clamp;
 
 namespace LiteImage {
 
-  #if defined(__ANDROID__)
-    static AAssetManager* g_AssetManager = nullptr;
-  #endif
+#if defined(__ANDROID__)
+  static AAssetManager* g_AssetManager = nullptr;
+#endif
 
 }; // namespace LiteImage
 
