@@ -9,6 +9,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream> 
+
+namespace LiteImage {
 
 using LiteMath::float2;
 using LiteMath::float3;
@@ -23,14 +26,6 @@ using LiteMath::ushort4;
 using LiteMath::uchar4;
 using LiteMath::clamp;
 
-namespace LiteImage {
-
-#if defined(__ANDROID__)
-  static AAssetManager* g_AssetManager = nullptr;
-#endif
-
-}; // namespace LiteImage
-
 static inline float4 read_array_uchar4(const uchar4* a_data, int offset)
 {
   const float mult = 0.003921568f; // (1.0f/255.0f);
@@ -43,62 +38,62 @@ static inline float4 read_array_uchar4(const uint32_t* a_data, int offset)
   return read_array_uchar4((const uchar4*)a_data, offset);
 }
 
-static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteImage::Sampler& a_sampler, const int w, const int h)
+static inline int4 bilinearOffsets(const float ffx, const float ffy, const Sampler& a_sampler, const int w, const int h)
 {
-	const int sx = (ffx > 0.0f) ? 1 : -1;
-	const int sy = (ffy > 0.0f) ? 1 : -1;
+  const int sx = (ffx > 0.0f) ? 1 : -1;
+  const int sy = (ffy > 0.0f) ? 1 : -1;
 
-	const int px = (int)(ffx);
-	const int py = (int)(ffy);
+  const int px = (int)(ffx);
+  const int py = (int)(ffy);
 
-	int px_w0, px_w1, py_w0, py_w1;
+  int px_w0, px_w1, py_w0, py_w1;
 
-	if (a_sampler.addressU == LiteImage::Sampler::AddressMode::CLAMP)
-	{
-		px_w0 = (px     >= w) ? w - 1 : px;
-		px_w1 = (px + 1 >= w) ? w - 1 : px + 1;
+  if (a_sampler.addressU == Sampler::AddressMode::CLAMP)
+  {
+    px_w0 = (px     >= w) ? w - 1 : px;
+    px_w1 = (px + 1 >= w) ? w - 1 : px + 1;
 
-		px_w0 = (px_w0 < 0) ? 0 : px_w0;
-		px_w1 = (px_w1 < 0) ? 0 : px_w1;
-	}
-	else
-	{
-		px_w0 = px        % w;
-		px_w1 = (px + sx) % w;
+    px_w0 = (px_w0 < 0) ? 0 : px_w0;
+    px_w1 = (px_w1 < 0) ? 0 : px_w1;
+  }
+  else
+  {
+    px_w0 = px        % w;
+    px_w1 = (px + sx) % w;
 
-		px_w0 = (px_w0 < 0) ? px_w0 + w : px_w0;
-		px_w1 = (px_w1 < 0) ? px_w1 + w : px_w1;
-	}
+    px_w0 = (px_w0 < 0) ? px_w0 + w : px_w0;
+    px_w1 = (px_w1 < 0) ? px_w1 + w : px_w1;
+  }
 
-	if (a_sampler.addressV == LiteImage::Sampler::AddressMode::CLAMP)
-	{
-		py_w0 = (py     >= h) ? h - 1 : py;
-		py_w1 = (py + 1 >= h) ? h - 1 : py + 1;
+  if (a_sampler.addressV == Sampler::AddressMode::CLAMP)
+  {
+    py_w0 = (py     >= h) ? h - 1 : py;
+    py_w1 = (py + 1 >= h) ? h - 1 : py + 1;
 
-		py_w0 = (py_w0 < 0) ? 0 : py_w0;
-		py_w1 = (py_w1 < 0) ? 0 : py_w1;
-	}
-	else
-	{
-		py_w0 = py        % h;
-		py_w1 = (py + sy) % h;
+    py_w0 = (py_w0 < 0) ? 0 : py_w0;
+    py_w1 = (py_w1 < 0) ? 0 : py_w1;
+  }
+  else
+  {
+    py_w0 = py        % h;
+    py_w1 = (py + sy) % h;
 
-		py_w0 = (py_w0 < 0) ? py_w0 + h : py_w0;
-		py_w1 = (py_w1 < 0) ? py_w1 + h : py_w1;
-	}
+    py_w0 = (py_w0 < 0) ? py_w0 + h : py_w0;
+    py_w1 = (py_w1 < 0) ? py_w1 + h : py_w1;
+  }
 
-	const int offset0 = py_w0*w + px_w0;
-	const int offset1 = py_w0*w + px_w1;
-	const int offset2 = py_w1*w + px_w0;
-	const int offset3 = py_w1*w + px_w1;
+  const int offset0 = py_w0*w + px_w0;
+  const int offset1 = py_w0*w + px_w1;
+  const int offset2 = py_w1*w + px_w0;
+  const int offset3 = py_w1*w + px_w1;
 
-	return int4(offset0, offset1, offset2, offset3);
+  return int4(offset0, offset1, offset2, offset3);
 }
 
 ///////////////////////////////////////////////////////////////////////
 
 template<> 
-float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, float2 a_uv) const
+float4 Image2D<float4>::sample(const Sampler& a_sampler, float2 a_uv) const
 {
   float ffx = a_uv.x * m_fw - 0.5f; // a_texCoord should not be very large, so that the float does not overflow later. 
   float ffy = a_uv.y * m_fh - 0.5f; // This is left to the responsibility of the top level.
@@ -133,13 +128,7 @@ float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, f
       const float4 f4    = m_data[offsets.w];
 
       // Calculate the weighted sum of pixels (for each color channel)
-      //
-      const float outr = f1.x * w1 + f2.x * w2 + f3.x * w3 + f4.x * w4;
-      const float outg = f1.y * w1 + f2.y * w2 + f3.y * w3 + f4.y * w4;
-      const float outb = f1.z * w1 + f2.z * w2 + f3.z * w3 + f4.z * w4;
-      const float outa = f1.w * w1 + f2.w * w2 + f3.w * w3 + f4.w * w4;
-  
-      res = float4(outr, outg, outb, outa);
+      res = f1 * w1 + f2 * w2 + f3 * w3 + f4 * w4;
     }
     break;
 
@@ -194,7 +183,7 @@ static inline float sRGBToLinear(float s) // https://entropymine.com/imageworsen
 static inline float4 sRGBToLinear4f(float4 s) { return float4(sRGBToLinear(s.x), sRGBToLinear(s.y), sRGBToLinear(s.z), sRGBToLinear(s.w)); }
 
 template<> 
-float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, float2 a_uv) const
+float4 Image2D<uchar4>::sample(const Sampler& a_sampler, float2 a_uv) const
 {
   float ffx = a_uv.x * m_fw - 0.5f; // a_texCoord should not be very large, so that the float does not overflow later. 
   float ffy = a_uv.y * m_fh - 0.5f; // This is left to the responsibility of the top level.
@@ -236,13 +225,7 @@ float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, f
       }
 
       // Calculate the weighted sum of pixels (for each color channel)
-      //
-      const float outr = f1.x * w1 + f2.x * w2 + f3.x * w3 + f4.x * w4;
-      const float outg = f1.y * w1 + f2.y * w2 + f3.y * w3 + f4.y * w4;
-      const float outb = f1.z * w1 + f2.z * w2 + f3.z * w3 + f4.z * w4;
-      const float outa = f1.w * w1 + f2.w * w2 + f3.w * w3 + f4.w * w4;
-  
-      res = float4(outr, outg, outb, outa);
+      res = f1 * w1 + f2 * w2 + f3 * w3 + f4 * w4;
     }
     break;
 
@@ -285,7 +268,7 @@ float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, f
 
 
 template<> 
-float4 LiteImage::Image2D<uint32_t>::sample(const LiteImage::Sampler& a_sampler, float2 a_uv) const
+float4 Image2D<uint32_t>::sample(const Sampler& a_sampler, float2 a_uv) const
 {
   float ffx = a_uv.x * m_fw - 0.5f; // a_texCoord should not be very large, so that the float does not overflow later. 
   float ffy = a_uv.y * m_fh - 0.5f; // This is left to the responsibility of the top level.
@@ -325,14 +308,9 @@ float4 LiteImage::Image2D<uint32_t>::sample(const LiteImage::Sampler& a_sampler,
         f3 = sRGBToLinear4f(f3);
         f4 = sRGBToLinear4f(f4);
       }
+
       // Calculate the weighted sum of pixels (for each color channel)
-      //
-      const float outr = f1.x * w1 + f2.x * w2 + f3.x * w3 + f4.x * w4;
-      const float outg = f1.y * w1 + f2.y * w2 + f3.y * w3 + f4.y * w4;
-      const float outb = f1.z * w1 + f2.z * w2 + f3.z * w3 + f4.z * w4;
-      const float outa = f1.w * w1 + f2.w * w2 + f3.w * w3 + f4.w * w4;
-  
-      res = float4(outr, outg, outb, outa);
+      res = f1 * w1 + f2 * w2 + f3 * w3 + f4 * w4;
     }
     break;
 
@@ -395,27 +373,48 @@ namespace myvulkan
   } VkFormat;
 };
 
-template<> uint32_t LiteImage::GetVulkanFormat<uint32_t>(bool a_gamma22) { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_UNORM); } // SRGB, UNORM 
-template<> uint32_t LiteImage::GetVulkanFormat<uchar4>(bool a_gamma22)   { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_UNORM); }
+template<> uint32_t GetVulkanFormat<uint32_t>(bool a_gamma22) { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_UNORM); } // SRGB, UNORM 
+template<> uint32_t GetVulkanFormat<uchar4>(bool a_gamma22)   { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_UNORM); }
 
-template<> uint32_t LiteImage::GetVulkanFormat<uint64_t>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
-template<> uint32_t LiteImage::GetVulkanFormat<ushort4>(bool a_gamma22)  { return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
+template<> uint32_t GetVulkanFormat<uint64_t>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
+template<> uint32_t GetVulkanFormat<ushort4>(bool a_gamma22)  { return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
 
-template<> uint32_t LiteImage::GetVulkanFormat<uint16_t>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R16_UNORM); }
-template<> uint32_t LiteImage::GetVulkanFormat<uint8_t>(bool a_gamma22)  { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8_UNORM); }
+template<> uint32_t GetVulkanFormat<uint16_t>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R16_UNORM); }
+template<> uint32_t GetVulkanFormat<uint8_t>(bool a_gamma22)  { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8_UNORM); }
 
-template<> uint32_t LiteImage::GetVulkanFormat<float4>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32G32B32A32_SFLOAT); }
-template<> uint32_t LiteImage::GetVulkanFormat<float2>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32G32_SFLOAT); }
-template<> uint32_t LiteImage::GetVulkanFormat<float> (bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32_SFLOAT); }
+template<> uint32_t GetVulkanFormat<float4>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32G32B32A32_SFLOAT); }
+template<> uint32_t GetVulkanFormat<float2>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32G32_SFLOAT); }
+template<> uint32_t GetVulkanFormat<float> (bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32_SFLOAT); }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static inline unsigned ColorToUint32(int r, int g, int b, int a = 255) {
+  return unsigned(r | (g << 8) | (b << 16) | (a << 24));
+}
+
+static inline void Uint32ToColor(unsigned color, int &r, int &g, int &b, int &a) {
+  a = (color & 0xFF000000) >> 24;
+  b = (color & 0x00FF0000) >> 16;
+  g = (color & 0x0000FF00) >> 8;
+  r = (color & 0x000000FF);
+}
 
 struct Pixel { unsigned char r, g, b; };
 
-static bool WriteBMP(const char* fname, Pixel* a_pixelData, int width, int height)
+bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int height)
 {
+  std::vector<Pixel> pixels2(width*height);
+
+  for (size_t i = 0; i < pixels2.size(); i++) {
+    int r, g, b, a;
+    Uint32ToColor(pixels[i], r, g, b, a);
+    pixels2[i].r = r;
+    pixels2[i].g = g;
+    pixels2[i].b = b;
+  }
+
   int paddedsize = (width*height) * sizeof(Pixel);
   unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
   unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
@@ -434,143 +433,90 @@ static bool WriteBMP(const char* fname, Pixel* a_pixelData, int width, int heigh
   bmpinfoheader[10] = (unsigned char)(height>>16);
   bmpinfoheader[11] = (unsigned char)(height>>24);
 
-  std::ofstream out(fname, std::ios::out | std::ios::binary);
-  if(!out.is_open())
-    return false;
-  out.write((const char*)bmpfileheader, 14);
-  out.write((const char*)bmpinfoheader, 40);
-  out.write((const char*)a_pixelData, paddedsize);
-  out.flush();
-  out.close();
+  char *buffer = new char[54 + paddedsize];
+
+  memcpy(buffer, bmpfileheader, 14);
+  memcpy(buffer + 14, bmpinfoheader, 40);
+  memcpy(buffer + 54, pixels2.data(), paddedsize);
+
+  LiteData::WriteFile(filename, 54 + paddedsize, buffer);
+
+  delete [] buffer;
   return true;
 }
 
-bool LiteImage::SaveBMP(const char* fname, const unsigned int* pixels, int w, int h)
-{
-  std::vector<Pixel> pixels2(w*h);
-
-  for (size_t i = 0; i < pixels2.size(); i++)
-  {
-    Pixel px;
-    px.r       = (pixels[i] & 0x00FF0000) >> 16;
-    px.g       = (pixels[i] & 0x0000FF00) >> 8;
-    px.b       = (pixels[i] & 0x000000FF);
-    pixels2[i] = px;
-  }
-
-  return WriteBMP(fname, &pixels2[0], w, h);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace LiteImage {
-
-#if defined(__ANDROID__)
-
-void setAssetManager(AAssetManager* assetManager) {
-  g_AssetManager = assetManager;
-}
-
-AAssetManager* getAssetManager() {
-  return g_AssetManager;
-}
-
 std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
 {
-  assert(g_AssetManager);
-  AAsset* file = AAssetManager_open(g_AssetManager, filename, AASSET_MODE_BUFFER);
+  long fileSize = 0;
+  unsigned char* data = (unsigned char*)LiteData::ReadFile(filename, fileSize);
 
-  if(file == NULL)
-  {
+  if(fileSize < 54) { // 54-byte header
     (*pW) = 0;
     (*pH) = 0;
     return std::vector<unsigned int>();
   }
 
-  unsigned char info[54];
-  size_t headerSize = 54 * sizeof(unsigned char);
-  if(AAsset_read(file, &info, headerSize) != headerSize) // read the 54-byte header
-  {
-    (*pW) = 0;
-    (*pH) = 0;
-    return std::vector<unsigned int>();
+  int width  = *(int*)&data[18];
+  int height = *(int*)&data[22];
+
+  unsigned char* colorData = data + 54;
+  std::vector<unsigned int> result(width*height);
+  for(int i = 0; i < height; i++) {
+    for(int j = 0; j < width; j++) {
+      long shift = (i * width + j) * 3;
+      result[i * width + j] = ColorToUint32(colorData[shift + 0], colorData[shift + 1], colorData[shift + 2], 0);
+    }
   }
-
-  int width  = *(int*)&info[18];
-  int height = *(int*)&info[22];
-
-  int row_padded      = (width*3 + 3) & (~3);
-  unsigned char* data = new unsigned char[row_padded];
-
-  std::vector<unsigned int> res(width*height);
-
-  for(int i = 0; i < height; i++)
-  {
-    auto check = AAsset_read(file, data, sizeof(unsigned char) * row_padded);
-    if(check != row_padded)
-      break;
-    for(int j = 0; j < width; j++)
-      res[i*width+j] = (uint32_t(data[j*3+0]) << 16) | (uint32_t(data[j*3+1]) << 8)  | (uint32_t(data[j*3+2]) << 0);
-  }
-
-  AAsset_close(file);
-  delete [] data;
 
   (*pW) = width;
   (*pH) = height;
-  return res;
-}
 
-#else
-
-std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
-{
-  FILE* f = fopen(filename, "rb");
-
-  if(f == NULL)
-  {
-    (*pW) = 0;
-    (*pH) = 0;
-    return std::vector<unsigned int>();
-  }
-
-  unsigned char info[54];
-  if(fread(info, sizeof(unsigned char), 54, f) != 54) // read the 54-byte header
-  {
-    (*pW) = 0;
-    (*pH) = 0;
-    return std::vector<unsigned int>();
-  }
-
-  int width  = *(int*)&info[18];
-  int height = *(int*)&info[22];
-
-  int row_padded      = (width*3 + 3) & (~3);
-  unsigned char* data = new unsigned char[row_padded];
-
-  std::vector<unsigned int> res(width*height);
-
-  for(int i = 0; i < height; i++)
-  {
-    auto check = fread(data, sizeof(unsigned char), row_padded, f);
-    if(check != row_padded)
-      break;
-    for(int j = 0; j < width; j++)
-      res[i*width+j] = (uint32_t(data[j*3+0]) << 16) | (uint32_t(data[j*3+1]) << 8)  | (uint32_t(data[j*3+2]) << 0);
-  }
-
-  fclose(f);
   delete [] data;
-
-  (*pW) = width;
-  (*pH) = height;
-  return res;
+  return result;
 }
 
-#endif
+std::vector<unsigned int> LoadPPM(const char* filename, int &width, int &height, int &maxval) {
+  long size = 0;
+  char* data = LiteData::ReadFile(filename, size);
 
-}; // namespace LiteImage
+  std::vector<unsigned int> img;
+  if(!data) {
+    std::cout << "[LoadPPM]: can't open file " << filename << " " << std::endl;
+    return img;
+  }
+  std::istringstream iss(data);
+
+  std::string header;
+  std::getline(iss, header);
+  if(header != "P3") {
+    std::cout << "[LoadPPM]: bad PPM header in file '" << filename << "' " << std::endl;
+    return img;
+  }
+
+  iss >> width >> height >> maxval;
+  if(width <= 0 || height <=0) {
+    std::cout << "[LoadPPM]: bad PPM resolution in file '" << filename << "' " << std::endl;
+    return img;
+  }
+
+  if(maxval != 255) {
+      std::cout << "[LoadPPM]: bad PPM maxval = " << maxval << " " << std::endl;
+  }
+    
+  const size_t totalSize = size_t(width*height);
+  img.resize(totalSize);
+  for(size_t i = 0; i < totalSize; i++) {
+    int color[3] = {0,0,0};
+    iss >> color[0] >> color[1] >> color[2];
+    img[i] = ColorToUint32(color[0], color[1], color[2], 0);
+  }
+
+  delete [] data;
+  return img;
+}
 
 static inline int tonemap(float x, float a_gammaInv) 
 { 
@@ -580,15 +526,13 @@ static inline int tonemap(float x, float a_gammaInv)
   else                    return colorLDR;
 }
 
-static inline unsigned IntColorUint32(int r, int g, int b) { return unsigned(r | (g << 8) | (b << 16) | 0xFF000000); }
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image2D<float4>& a_image, float a_gamma) 
+bool SaveImage<float4>(const char* a_fileName, const Image2D<float4>& a_image, float a_gamma) 
 {
   const float gammaInv = 1.0f/a_gamma;
   const std::string fileStr(a_fileName);
@@ -630,7 +574,7 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
       for(unsigned x=0; x<a_image.width(); x++)
       {
         auto c = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = IntColorUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
+        flipedYData[offset2+x] = ColorToUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
       }
     }
 
@@ -662,7 +606,7 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image2D<float3>& a_image, float a_gamma) 
+bool SaveImage<float3>(const char* a_fileName, const Image2D<float3>& a_image, float a_gamma) 
 {
   const float gammaInv = 1.0f/a_gamma;
   const std::string fileStr(a_fileName);
@@ -704,7 +648,7 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
       for(unsigned x=0; x<a_image.width(); x++)
       {
         auto c = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = IntColorUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
+        flipedYData[offset2+x] = ColorToUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
       }
     }
 
@@ -736,7 +680,7 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2D<float>& a_image, float a_gamma) 
+bool SaveImage<float>(const char* a_fileName, const Image2D<float>& a_image, float a_gamma) 
 {
   const float gammaInv = 1.0f/a_gamma;
   const std::string fileStr(a_fileName);
@@ -781,7 +725,7 @@ bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2
       {
         auto c   = a_image.data()[offset1 + x];
         auto val = tonemap(c, gammaInv);
-        flipedYData[offset2+x] = IntColorUint32(val, val, val);
+        flipedYData[offset2+x] = ColorToUint32(val, val, val);
       }
     }
 
@@ -814,7 +758,7 @@ bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-bool LiteImage::SaveImage<uint32_t>(const char* a_fileName, const LiteImage::Image2D<uint32_t>& a_image, float a_gamma) 
+bool SaveImage<uint32_t>(const char* a_fileName, const Image2D<uint32_t>& a_image, float a_gamma) 
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
@@ -887,7 +831,7 @@ bool LiteImage::SaveImage<uint32_t>(const char* a_fileName, const LiteImage::Ima
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image2D<uchar4>& a_image, float a_gamma) 
+bool SaveImage<uchar4>(const char* a_fileName, const Image2D<uchar4>& a_image, float a_gamma) 
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
@@ -928,7 +872,7 @@ bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image
       for(unsigned x=0; x<a_image.width(); x++)
       {
         const auto c           = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = IntColorUint32(int(c[0]), int(c[1]), int(c[2]));
+        flipedYData[offset2+x] = ColorToUint32(int(c[0]), int(c[1]), int(c[2]));
       }
     }
 
@@ -963,79 +907,46 @@ bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, float a_gamma)
+Image2D<float4> LoadImage<float4>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
-  LiteImage::Image2D<float4> img;
+  Image2D<float4> img;
 
-  if(fileExt == ".ppm" || fileExt == ".PPM")
-  {
-    std::ifstream fin(a_fileName);
-    if(!fin.is_open())
-    {
-      std::cout << "[LoadImage<float4>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    std::string header;
-    std::getline(fin, header);
-    if(header != "P3")
-    {
-      std::cout << "[LoadImage<float4>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    int wh[3] = {0,0,0};
-    fin >> wh[0] >> wh[1] >> wh[2];
-    if(wh[0] <= 0 || wh[1] <=0)
-    {
-      std::cout << "[LoadImage<float4>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    if(wh[2] != 255)
-      std::cout << "[LoadImage<float4>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+  if(fileExt == ".ppm" || fileExt == ".PPM") {
+    int width, height, maxval;
+    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
     
-    img.resize(wh[0], wh[1]);
-    const size_t totalSize = size_t(wh[0]*wh[1]);
-    const float  invDiv    = 1.0f/float(wh[2]); 
-    size_t i=0;
-    while(fin.is_open() && i < totalSize)
-    {
-      int color[3] = {0,0,0};
-      fin >> color[0] >> color[1] >> color[2];
-      float4 colf(std::pow(float(color[0])*invDiv, a_gamma), 
-                  std::pow(float(color[1])*invDiv, a_gamma), 
-                  std::pow(float(color[2])*invDiv, a_gamma), 0.0f);
-      img.data()[i] = colf;
-      i++;
+    img.resize(width, height);
+    const size_t totalSize = size_t(width*height);
+    const float  invDiv    = 1.0f/float(maxval);
+
+    for (size_t i = 0; i < totalSize; i++) {
+      int color[4] = {};
+      Uint32ToColor(colorData[i], color[0], color[1], color[2], color[3]);
+      img.data()[i] = float4(std::pow(float(color[0])*invDiv, a_gamma),
+                             std::pow(float(color[1])*invDiv, a_gamma),
+                             std::pow(float(color[2])*invDiv, a_gamma), 0.0f);
     }
-    fin.close();
   }
   else if(fileExt == ".bmp" || fileExt == ".BMP")
   {
-    int w=0, h=0;
+    int w = 0, h = 0;
     std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0)
-    {
+    if(w == 0 || h == 0) {
       std::cout << "[LoadImage<float4>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
 
     img.resize(w,h);
     const float  invDiv = 1.0f/255.0f; 
-    for(int y=0;y<h;y++)
-    {
+    for(int y=0;y<h;y++) {
       const int offset1 = (h-y-1)*w;
       const int offset2 = y*w;
-      for(int x=0;x<w;x++) 
-      {
-        unsigned c = data[offset2+x];
-        unsigned r = (c & 0x000000FF);
-        unsigned g = (c & 0x0000FF00) >> 8;
-        unsigned b = (c & 0x00FF0000) >> 16;
+      for(int x=0;x<w;x++) {
+        int r, g, b, a;
+        Uint32ToColor(data[offset2+x], r, g, b, a);
         float4 colf(std::pow(float(r)*invDiv, a_gamma), 
                     std::pow(float(g)*invDiv, a_gamma), 
                     std::pow(float(b)*invDiv, a_gamma), 0.0f);
@@ -1104,79 +1015,46 @@ LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, float a_gamma)
+Image2D<float3> LoadImage<float3>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
-  LiteImage::Image2D<float3> img;
+  Image2D<float3> img;
 
-  if(fileExt == ".ppm" || fileExt == ".PPM")
-  {
-    std::ifstream fin(a_fileName);
-    if(!fin.is_open())
-    {
-      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    std::string header;
-    std::getline(fin, header);
-    if(header != "P3")
-    {
-      std::cout << "[LoadImage<float3>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    int wh[3] = {0,0,0};
-    fin >> wh[0] >> wh[1] >> wh[2];
-    if(wh[0] <= 0 || wh[1] <=0)
-    {
-      std::cout << "[LoadImage<float3>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    if(wh[2] != 255)
-      std::cout << "[LoadImage<float3>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+  if(fileExt == ".ppm" || fileExt == ".PPM") {
+    int width, height, maxval;
+    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
     
-    img.resize(wh[0], wh[1]);
-    const size_t totalSize = size_t(wh[0]*wh[1]);
-    const float  invDiv    = 1.0f/float(wh[2]); 
-    size_t i=0;
-    while(fin.is_open() && i < totalSize)
-    {
-      int color[3] = {0,0,0};
-      fin >> color[0] >> color[1] >> color[2];
-      float3 colf(std::pow(float(color[0])*invDiv, a_gamma), 
-                  std::pow(float(color[1])*invDiv, a_gamma), 
-                  std::pow(float(color[2])*invDiv, a_gamma));
-      img.data()[i] = colf;
-      i++;
+    img.resize(width, height);
+    const size_t totalSize = size_t(width*height);
+    const float  invDiv    = 1.0f/float(maxval);
+
+    for (size_t i = 0; i < totalSize; i++) {
+      int color[4] = {};
+      Uint32ToColor(colorData[i], color[0], color[1], color[2], color[3]);
+      img.data()[i] = float3(std::pow(float(color[0])*invDiv, a_gamma),
+                             std::pow(float(color[1])*invDiv, a_gamma),
+                             std::pow(float(color[2])*invDiv, a_gamma));
     }
-    fin.close();
   }
   else if(fileExt == ".bmp" || fileExt == ".BMP")
   {
     int w=0, h=0;
     std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0)
-    {
+    if(w == 0 || h == 0) {
       std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
 
     img.resize(w,h);
     const float  invDiv = 1.0f/255.0f; 
-    for(int y=0;y<h;y++)
-    {
+    for(int y=0;y<h;y++) {
       const int offset1 = (h-y-1)*w;
       const int offset2 = y*w;
-      for(int x=0;x<w;x++) 
-      {
-        unsigned c = data[offset2+x];
-        unsigned r = (c & 0x000000FF);
-        unsigned g = (c & 0x0000FF00) >> 8;
-        unsigned b = (c & 0x00FF0000) >> 16;
+      for(int x=0;x<w;x++) {
+        int r, g, b, a;
+        Uint32ToColor(data[offset2+x], r, g, b, a);
         float3 colf(std::pow(float(r)*invDiv, a_gamma), 
                     std::pow(float(g)*invDiv, a_gamma), 
                     std::pow(float(b)*invDiv, a_gamma));
@@ -1245,14 +1123,14 @@ LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, float a_gamma)
+Image2D<float> LoadImage<float>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
 
   if(fileExt == ".image1f")
   {
-    LiteImage::Image2D<float> img;
+    Image2D<float> img;
     unsigned wh[2] = { 0,0};
     std::ifstream fin(a_fileName, std::fstream::out | std::ios::binary);
     if(!fin.is_open())
@@ -1267,7 +1145,7 @@ LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, fl
     return img;
   }
 
-  LiteImage::Image2D<float3> rgbImage = LiteImage::LoadImage<float3>(a_fileName, a_gamma);
+  Image2D<float3> rgbImage = LoadImage<float3>(a_fileName, a_gamma);
   Image2D<float> result(rgbImage.width(), rgbImage.height());
 
   size_t imSize = size_t(rgbImage.width()*rgbImage.height());
@@ -1281,52 +1159,24 @@ LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, fl
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileName, float a_gamma)
+Image2D<uint32_t> LoadImage<uint32_t>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
-  LiteImage::Image2D<uint32_t> img;
+  Image2D<uint32_t> img;
 
-  if(fileExt == ".ppm" || fileExt == ".PPM")
-  {
-    std::ifstream fin(a_fileName);
-    if(!fin.is_open())
-    {
-      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    std::string header;
-    std::getline(fin, header);
-    if(header != "P3")
-    {
-      std::cout << "[LoadImage<uint>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    int wh[3] = {0,0,0};
-    fin >> wh[0] >> wh[1] >> wh[2];
-    if(wh[0] <= 0 || wh[1] <=0)
-    {
-      std::cout << "[LoadImage<uint>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
+  if(fileExt == ".ppm" || fileExt == ".PPM") {
 
-    if(wh[2] != 255)
-      std::cout << "[LoadImage<uint>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+    int width, height, maxval;
+    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
     
-    img.resize(wh[0], wh[1]);
-    const size_t totalSize = size_t(wh[0]*wh[1]);
-    size_t i=0;
-    while(fin.is_open() && i < totalSize)
-    {
-      unsigned color[3] = {0,0,0};
-      fin >> color[0] >> color[1] >> color[2];
-      img.data()[i] = color[0] | (color[1] << 8) | (color[2] << 16);
-      i++;
+    img.resize(width, height);
+    const size_t totalSize = size_t(width*height);
+
+    for (size_t i = 0; i < totalSize; i++) {
+      img.data()[i] = colorData[i];
     }
-    fin.close();
   } 
   else if(fileExt == ".image1ui" || fileExt == ".image4ub")
   {
@@ -1346,19 +1196,19 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
   {
     int w=0, h=0;
     std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0)
-    {
+    if(w == 0 || h == 0) {
       std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
 
     img.resize(w,h);
-    for(int y=0;y<h;y++)
-    {
+    for(int y=0; y < h; y++) {
       const int offset1 = (h-y-1)*w;
       const int offset2 = y*w;
-      for(int x=0;x<w;x++) 
-        img.data()[offset1+x] = data[offset2+x];
+      memcpy((void*)(img.data() + offset1), (void*)(data.data() + offset2), w*sizeof(unsigned));
+      // for(int x=0;x<w;x++) {
+      //   img.data()[offset1+x] = data[offset2+x];
+      // }
     }
   }
   else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
@@ -1405,52 +1255,25 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, float a_gamma)
+Image2D<uchar4> LoadImage<uchar4>(const char* a_fileName, float a_gamma)
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
-  LiteImage::Image2D<uchar4> img;
+  Image2D<uchar4> img;
 
-  if(fileExt == ".ppm" || fileExt == ".PPM")
-  {
-    std::ifstream fin(a_fileName);
-    if(!fin.is_open())
-    {
-      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    std::string header;
-    std::getline(fin, header);
-    if(header != "P3")
-    {
-      std::cout << "[LoadImage<uchar4>]: bad PPM header in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-  
-    int wh[3] = {0,0,0};
-    fin >> wh[0] >> wh[1] >> wh[2];
-    if(wh[0] <= 0 || wh[1] <=0)
-    {
-      std::cout << "[LoadImage<uchar4>]: bad PPM resolution in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    if(wh[2] != 255)
-      std::cout << "[LoadImage<uchar4>]: bad PPM maxval = " << wh[2] << " " << std::endl;
+  if(fileExt == ".ppm" || fileExt == ".PPM") {
+    int width, height, maxval;
+    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
     
-    img.resize(wh[0], wh[1]);
-    const size_t totalSize = size_t(wh[0]*wh[1]);
-    size_t i=0;
-    while(fin.is_open() && i < totalSize)
-    {
-      unsigned color[3] = {0,0,0};
-      fin >> color[0] >> color[1] >> color[2];
-      img.data()[i] = uchar4( (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], 0);
-      i++;
+    img.resize(width, height);
+    const size_t totalSize = size_t(width*height);
+
+    for (size_t i = 0; i < totalSize; i++) {
+      int color[4] = {};
+      Uint32ToColor(colorData[i], color[0], color[1], color[2], color[3]);
+      img.data()[i] = uchar4((unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], 0); // @todo ??
     }
-    fin.close();
   } 
   else if(fileExt == ".image1ui" || fileExt == ".image4ub")
   {
@@ -1519,3 +1342,5 @@ LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, 
   img.setSRGB(true);
   return img;
 }
+
+} //namespace LiteImage

@@ -145,7 +145,7 @@ namespace LiteImage
       return res;
     }
   
-  protected: 
+  protected:
   
     unsigned int m_width, m_height;
     float        m_fw,    m_fh;
@@ -211,7 +211,7 @@ namespace LiteImage
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   template<typename Type> bool          SaveImage(const char* a_fileName, const Image2D<Type>& a_image, float a_gamma = 2.2f);
-  template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
+    template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
   
   template<typename Type> float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
   template<> inline       float extDotProd<uint32_t>(uint32_t a, uint32_t b) 
@@ -284,12 +284,7 @@ namespace LiteImage
           If you want to support gray-scale images or images with palette, please upgrade its implementation.
   */
   std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH);
-
-#if defined(__ANDROID__)
-  void setAssetManager(AAssetManager* assetManager);
-  AAssetManager* getAssetManager();
-#endif
-
-}; // end namespace
+  std::vector<unsigned int> LoadPPM(const char* filename, int &width, int &height, int &maxval);
+}; // end namespace LiteImage
 
 #endif

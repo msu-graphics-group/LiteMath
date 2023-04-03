@@ -26,7 +26,7 @@ namespace LiteData {
     return g_fileDir;
   }
 
-  char * ReadFile(const char * filepath, unsigned int &size) {
+  char * ReadFile(const char * filepath, long &size) {
     if(!g_AssetManager) {
       size = 0;
       return nullptr;
@@ -43,7 +43,7 @@ namespace LiteData {
     return buffer;
   }
 
-  void WriteFile(const char * filepath, const unsigned int size, char * data) {
+  void WriteFile(const char * filepath, const unsigned int size, const char * data) {
     if(!g_fileDir) {
       return;
     }
@@ -85,7 +85,7 @@ namespace LiteData {
     return buffer;
   }
 
-  void WriteFile(const char* filepath, const unsigned int size, char* data) {
+  void WriteFile(const char* filepath, const unsigned int size, const char* data) {
     std::ofstream outfile(filepath, std::ifstream::binary);
 
     if(!outfile) {

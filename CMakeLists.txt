@@ -35,6 +35,7 @@ add_executable(math_tests tests/tests_main.cpp
                           tests/tests_int3.cpp
                           tests/tests_int2.cpp
                           Image2d.cpp
+                          LiteData.cpp
                           )
 
 set_target_properties(math_tests PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

@@ -17,8 +17,8 @@ namespace LiteData {
 
 #endif
 
-  char* ReadFile(const char* filepath, unsigned int &size);
-  void WriteFile(const char* filepath, unsigned int size, char* data);
+  char* ReadFile(const char* filepath, long &size);
+  void WriteFile(const char* filepath, unsigned int size, const char* data);
 
 } // namespace LiteData
 
