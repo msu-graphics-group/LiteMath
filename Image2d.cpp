@@ -391,38 +391,46 @@ template<> uint32_t GetVulkanFormat<float> (bool a_gamma22) { return uint32_t(my
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static inline unsigned ColorToUint32(int r, int g, int b, int a = 255) {
-  return unsigned(r | (g << 8) | (b << 16) | (a << 24));
+  return unsigned((r << 24) | (g << 16) | (b << 8) | a);
 }
 
 static inline void Uint32ToColor(unsigned color, int &r, int &g, int &b, int &a) {
-  a = (color & 0xFF000000) >> 24;
-  b = (color & 0x00FF0000) >> 16;
-  g = (color & 0x0000FF00) >> 8;
-  r = (color & 0x000000FF);
+  r = (color & 0xFF000000) >> 24;
+  g = (color & 0x00FF0000) >> 16;
+  b = (color & 0x0000FF00) >> 8;
+  a = (color & 0x000000FF);
+}
+
+struct stbiContext {
+  void *buffer;
+  int buferSize;
+  int lastPos;
+};
+
+static void StbiWriteToBuffer(void *context, void *data, int size) {
+  stbiContext *c = (stbiContext*)context;
+
+  if(c->lastPos + size > c->buferSize) {
+    c->buferSize <<= 2;
+    c->buffer = realloc(c->buffer, c->buferSize);
+  }
+  memcpy(c->buffer + c->lastPos, data, size);
+  c->lastPos += size;
 }
 
 struct Pixel { unsigned char r, g, b; };
 
-bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int height)
-{
-  std::vector<Pixel> pixels2(width*height);
+bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int height) {
+  const int totalSize = width * height * 3;
+  char *buffer = new char[54 + totalSize];
 
-  for (size_t i = 0; i < pixels2.size(); i++) {
-    int r, g, b, a;
-    Uint32ToColor(pixels[i], r, g, b, a);
-    pixels2[i].r = r;
-    pixels2[i].g = g;
-    pixels2[i].b = b;
-  }
-
-  int paddedsize = (width*height) * sizeof(Pixel);
   unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
   unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
 
-  bmpfileheader[ 2] = (unsigned char)(paddedsize    );
-  bmpfileheader[ 3] = (unsigned char)(paddedsize>> 8);
-  bmpfileheader[ 4] = (unsigned char)(paddedsize>>16);
-  bmpfileheader[ 5] = (unsigned char)(paddedsize>>24);
+  bmpfileheader[ 2] = (unsigned char)(totalSize    );
+  bmpfileheader[ 3] = (unsigned char)(totalSize>> 8);
+  bmpfileheader[ 4] = (unsigned char)(totalSize>>16);
+  bmpfileheader[ 5] = (unsigned char)(totalSize>>24);
 
   bmpinfoheader[ 4] = (unsigned char)(width    );
   bmpinfoheader[ 5] = (unsigned char)(width>> 8);
@@ -433,25 +441,101 @@ bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int he
   bmpinfoheader[10] = (unsigned char)(height>>16);
   bmpinfoheader[11] = (unsigned char)(height>>24);
 
-  char *buffer = new char[54 + paddedsize];
-
   memcpy(buffer, bmpfileheader, 14);
   memcpy(buffer + 14, bmpinfoheader, 40);
-  memcpy(buffer + 54, pixels2.data(), paddedsize);
 
-  LiteData::WriteFile(filename, 54 + paddedsize, buffer);
+  for(int i = 0; i < height; i++) {
+    for(int j = 0; j < width; j++) {
+      int shift = 54 + ((height - i - 1) * width + j) * 3;
+      int r, g, b, a;
+      Uint32ToColor(pixels[i * width + j], r, g, b, a);
+      buffer[shift + 0] = r;
+      buffer[shift + 1] = g;
+      buffer[shift + 2] = b;
+    }
+  }
+
+  LiteData::WriteFile(filename, 54 + totalSize, buffer);
 
   delete [] buffer;
   return true;
 }
 
+bool SavePNG(const char* filename, const unsigned int* pixels, int width, int height) {
+#if defined(USE_STB_IMAGE)
+  const size_t totalSize = size_t(width*height);
+  int channels = 4;
+  char *buffer = new char[totalSize * channels];
+  for(size_t i = 0; i < totalSize; i++) {
+    int r, g, b, a;
+    Uint32ToColor(pixels[i], r, g, b, a);
+    buffer[i * channels + 0] = r;
+    buffer[i * channels + 1] = g;
+    buffer[i * channels + 2] = b;
+    buffer[i * channels + 3] = 255;
+  }
+
+  void* contextBuffer = malloc(totalSize * channels);
+  stbiContext context{contextBuffer, totalSize * channels, 0};
+  int check = stbi_write_png_to_func(StbiWriteToBuffer, (void*)&context, width, height, channels, buffer, 0);
+
+  if (!check) {
+    std::cout << "[SavePNG]: unvalid img buffer '" << filename << "' " << std::endl;
+    return false;
+  }
+
+  LiteData::WriteFile(filename, context.lastPos, (char*)context.buffer);
+
+  free(context.buffer);
+  delete [] buffer;
+  return true;
+#else
+  std::cout << "[SavePNG]: '.png' via stbimage is DISABLED!" << std::endl;
+  return false
+#endif
+}
+
+bool SaveJPG(const char* filename, const unsigned int* pixels, int width, int height) {
+#if defined(USE_STB_IMAGE)
+  const size_t totalSize = size_t(width*height);
+  int channels = 4;
+  char *buffer = new char[totalSize * channels];
+  for(size_t i = 0; i < totalSize; i++) {
+    int r, g, b, a;
+    Uint32ToColor(pixels[i], r, g, b, a);
+    buffer[i * channels + 0] = r;
+    buffer[i * channels + 1] = g;
+    buffer[i * channels + 2] = b;
+    buffer[i * channels + 3] = 255;
+  }
+
+  void* contextBuffer = malloc(totalSize * channels);
+  stbiContext context{contextBuffer, totalSize * channels, 0};
+  int check = stbi_write_jpg_to_func(StbiWriteToBuffer, (void*)&context, width, height, channels, buffer, 100);
+
+  if (!check) {
+    std::cout << "[SaveJPG]: unvalid img buffer '" << filename << "' " << std::endl;
+    return false;
+  }
+
+  LiteData::WriteFile(filename, context.lastPos, (char*)context.buffer);
+
+  free(context.buffer);
+  delete [] buffer;
+  return true;
+#else
+  std::cout << "[SaveJPG]: '.jpg' via stbimage is DISABLED!" << std::endl;
+  return false
+#endif
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
-{
+std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH) {
   long fileSize = 0;
   unsigned char* data = (unsigned char*)LiteData::ReadFile(filename, fileSize);
+  std::vector<unsigned int> img;
 
   if(fileSize < 54) { // 54-byte header
     (*pW) = 0;
@@ -463,11 +547,12 @@ std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
   int height = *(int*)&data[22];
 
   unsigned char* colorData = data + 54;
-  std::vector<unsigned int> result(width*height);
+
+  img.resize(width*height);
   for(int i = 0; i < height; i++) {
     for(int j = 0; j < width; j++) {
-      long shift = (i * width + j) * 3;
-      result[i * width + j] = ColorToUint32(colorData[shift + 0], colorData[shift + 1], colorData[shift + 2], 0);
+      int shift = ((height - i - 1) * width + j) * 3;
+      img[i * width + j] = ColorToUint32(colorData[shift + 0], colorData[shift + 1], colorData[shift+ 2], 0);
     }
   }
 
@@ -475,14 +560,14 @@ std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH)
   (*pH) = height;
 
   delete [] data;
-  return result;
+  return img;
 }
 
 std::vector<unsigned int> LoadPPM(const char* filename, int &width, int &height, int &maxval) {
   long size = 0;
   char* data = LiteData::ReadFile(filename, size);
-
   std::vector<unsigned int> img;
+
   if(!data) {
     std::cout << "[LoadPPM]: can't open file " << filename << " " << std::endl;
     return img;
@@ -515,6 +600,74 @@ std::vector<unsigned int> LoadPPM(const char* filename, int &width, int &height,
   }
 
   delete [] data;
+  return img;
+}
+
+std::vector<unsigned int> LoadPNG(const char* filename, int &width, int &height) {
+  std::vector<unsigned int> img;
+#if defined(USE_STB_IMAGE)
+  long size = 0;
+  char* data = LiteData::ReadFile(filename, size);
+
+  int channels = 0;
+  unsigned char *imgData = stbi_load_from_memory((unsigned char*)data, size, &width, &height, &channels, 0);
+
+  if(imgData == NULL) {
+    std::cout << "[LoadPNG]: unvalid img buffer '" << filename << "' " << std::endl;
+    return img;
+  }
+
+  if(channels < 3) {
+    std::cout << "[LoadPNG]: bad channels number << '" << channels << "' in file '" << filename << "' " << std::endl;
+    return img;
+  }
+
+  const size_t totalSize = size_t(width*height);
+  img.resize(totalSize);
+  for(size_t i = 0; i < totalSize; i++) {
+    long shift = i * channels;
+    img[i] = ColorToUint32(imgData[shift + 0], imgData[shift + 1], imgData[shift + 2], 0);
+  }
+
+  stbi_image_free(imgData);
+  delete [] data;
+#else
+  std::cout << "[LoadPNG]: '.png' via stbimage is DISABLED!" << std::endl;
+#endif
+  return img;
+}
+
+std::vector<unsigned int> LoadJPG(const char* filename, int &width, int &height) {
+  std::vector<unsigned int> img;
+#if defined(USE_STB_IMAGE)
+  long size = 0;
+  char* data = LiteData::ReadFile(filename, size);
+
+  int channels = 0;
+  unsigned char *imgData = stbi_load_from_memory((unsigned char*)data, size, &width, &height, &channels, 0);
+
+  if(imgData == NULL) {
+    std::cout << "[LoadJPG]: unvalid img buffer '" << filename << "' " << std::endl;
+    return img;
+  }
+
+  if(channels < 3) {
+    std::cout << "[LoadJPG]: bad channels number << '" << channels << "' in file '" << filename << "' " << std::endl;
+    return img;
+  }
+
+  const size_t totalSize = size_t(width*height);
+  img.resize(totalSize);
+  for(size_t i = 0; i < totalSize; i++) {
+    long shift = i * channels;
+    img[i] = ColorToUint32(imgData[shift + 0], imgData[shift + 1], imgData[shift + 2], 0);
+  }
+
+  stbi_image_free(imgData);
+  delete [] data;
+#else
+  std::cout << "[LoadJPG]: '.jpg' via stbimage is DISABLED!" << std::endl;
+#endif
   return img;
 }
 
@@ -565,26 +718,20 @@ bool SaveImage<float4>(const char* a_fileName, const Image2D<float4>& a_image, f
      fileExt == ".png" || fileExt == ".PNG" || 
      fileExt == ".jpg" || fileExt == ".JPG")
   {
-    const bool doFlip = (fileExt == ".bmp" || fileExt == ".BMP");
     std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
-    for (unsigned y = 0; y < a_image.height(); y++)
-    {
-      const unsigned offset1 = doFlip ? (a_image.height() - y - 1)*a_image.width() : y*a_image.width(); 
-      const unsigned offset2 = y*a_image.width();
-      for(unsigned x=0; x<a_image.width(); x++)
-      {
-        auto c = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = ColorToUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
-      }
+    size_t totalSize = a_image.height() * a_image.width();
+    for(size_t i = 0; i < totalSize; i++) {
+      auto c = a_image.data()[i];
+      flipedYData[i] = ColorToUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
     }
 
     if(fileExt == ".bmp" || fileExt == ".BMP")
       return SaveBMP(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
     #ifdef USE_STB_IMAGE
     else if(fileExt == ".png" || fileExt == ".PNG") 
-      return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), a_image.width() * 4);
+      return SavePNG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
     else if(fileExt == ".jpg" || fileExt == ".JPG") 
-      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), 100);
+      return SaveJPG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
     #else
     else if(fileExt == ".png" || fileExt == ".PNG") 
     {
@@ -635,42 +782,22 @@ bool SaveImage<float3>(const char* a_fileName, const Image2D<float3>& a_image, f
     return true;
   }
   
-  if(fileExt == ".bmp" || fileExt == ".BMP" || 
-     fileExt == ".png" || fileExt == ".PNG" || 
-     fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    const bool doFlip = (fileExt == ".bmp" || fileExt == ".BMP");
+  if(fileExt == ".bmp" || fileExt == ".BMP" ||
+     fileExt == ".png" || fileExt == ".PNG" ||
+     fileExt == ".jpg" || fileExt == ".JPG") {
     std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
-    for (unsigned y = 0; y < a_image.height(); y++)
-    {
-      const unsigned offset1 = doFlip ? (a_image.height() - y - 1)*a_image.width() : y*a_image.width(); 
-      const unsigned offset2 = y*a_image.width();
-      for(unsigned x=0; x<a_image.width(); x++)
-      {
-        auto c = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = ColorToUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
-      }
+    size_t totalSize = a_image.height() * a_image.width();
+    for(size_t i = 0; i < totalSize; i++) {
+      auto c = a_image.data()[i];
+      flipedYData[i] = ColorToUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
     }
 
     if(fileExt == ".bmp" || fileExt == ".BMP")
       return SaveBMP(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
-    #ifdef USE_STB_IMAGE
-    else if(fileExt == ".png" || fileExt == ".PNG") 
-      return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), a_image.width() * 4);
+    else if(fileExt == ".png" || fileExt == ".PNG")
+      return SavePNG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
     else if(fileExt == ".jpg" || fileExt == ".JPG") 
-      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), 100);
-    #else
-    else if(fileExt == ".png" || fileExt == ".PNG") 
-    {
-      std::cout << "[SaveImage<float3>]: '.png' via stbimage is DISABLED!" << std::endl;
-      return false;
-    }
-    else if(fileExt == ".jpg" || fileExt == ".JPG") 
-    {
-      std::cout << "[SaveImage<float3>]: '.jpg' via stbimage is DISABLED!" << std::endl;
-      return false;
-    }
-    #endif
+      return SaveJPG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
   }
 
   std::cout << "[SaveImage<float3>]: unsupported extension '" << fileExt.c_str() << "'" << std::endl;
@@ -715,39 +842,20 @@ bool SaveImage<float>(const char* a_fileName, const Image2D<float>& a_image, flo
      fileExt == ".png" || fileExt == ".PNG" || 
      fileExt == ".jpg" || fileExt == ".JPG")
   {
-    const bool doFlip = (fileExt == ".bmp" || fileExt == ".BMP");
     std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
-    for (unsigned y = 0; y < a_image.height(); y++)
-    {
-      const unsigned offset1 = doFlip ? (a_image.height() - y - 1)*a_image.width() : y*a_image.width(); 
-      const unsigned offset2 = y*a_image.width();
-      for(unsigned x=0; x<a_image.width(); x++)
-      {
-        auto c   = a_image.data()[offset1 + x];
-        auto val = tonemap(c, gammaInv);
-        flipedYData[offset2+x] = ColorToUint32(val, val, val);
-      }
+    size_t totalSize = a_image.height() * a_image.width();
+    for(size_t i = 0; i < totalSize; i++) {
+      auto c = a_image.data()[i];
+      auto val = tonemap(c, gammaInv);
+      flipedYData[i] = ColorToUint32(val, val, val);
     }
 
     if(fileExt == ".bmp" || fileExt == ".BMP")
       return SaveBMP(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
-    #ifdef USE_STB_IMAGE
     else if(fileExt == ".png" || fileExt == ".PNG") 
-      return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), a_image.width() * 4);
+      return SavePNG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
     else if(fileExt == ".jpg" || fileExt == ".JPG") 
-      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)flipedYData.data(), 100);
-    #else
-    else if(fileExt == ".png" || fileExt == ".PNG")
-    {
-      std::cout << "[SaveImage<float>]: '.png' via stbimage is DISABLED!" << std::endl;
-      return false;
-    }
-    else if(fileExt == ".jpg" || fileExt == ".JPG")
-    {
-      std::cout << "[SaveImage<float>]: '.jpg' via stbimage is DISABLED!" << std::endl;
-      return false;
-    }
-    #endif
+      return SaveJPG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
   }
 
   std::cout << "[SaveImage<float>]: unsupported extension '" << fileExt.c_str() << "'" << std::endl;
@@ -763,23 +871,20 @@ bool SaveImage<uint32_t>(const char* a_fileName, const Image2D<uint32_t>& a_imag
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
 
-  if(fileExt == ".ppm" || fileExt == ".PPM")
-  {
+  if(fileExt == ".ppm" || fileExt == ".PPM") {
     std::ofstream fout(a_fileName, std::fstream::out);
     if(!fout.is_open())
       return false;
     fout << "P3" << std::endl << a_image.width() << " " << a_image.height() << " 255" << std::endl;
     for (auto c : a_image.vector()) {
-      auto r = (c & 0x000000FF);
-      auto g = (c & 0x0000FF00) >> 8;
-      auto b = (c & 0x00FF0000) >> 16;
+      auto r = (c & 0xFF000000) >> 24;
+      auto g = (c & 0x00FF0000) >> 16;
+      auto b = (c & 0x0000FF00) >> 8;
       fout << r << " " << g << " " << b << " ";
     }
     fout.close();
     return true;
-  }
-  else if(fileExt == ".image1ui" || fileExt == ".image4ub")
-  {
+  } else if(fileExt == ".image1ui" || fileExt == ".image4ub") {
     unsigned wh[2] = { a_image.width(), a_image.height() };
     std::ofstream fout(a_fileName, std::fstream::out | std::ios::binary);
     if(!fout.is_open())
@@ -788,40 +893,12 @@ bool SaveImage<uint32_t>(const char* a_fileName, const Image2D<uint32_t>& a_imag
     fout.write((char*)a_image.data(), size_t(wh[0]*wh[1])*sizeof(uint32_t));
     fout.close();
     return true;
-  }
-  else if(fileExt == ".bmp" || fileExt == ".BMP")
-  {
-    std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
-    for (unsigned y = 0; y < a_image.height(); y++)
-    {
-      const unsigned offset1 = (a_image.height() - y - 1)*a_image.width(); 
-      const unsigned offset2 = y*a_image.width();
-      for(unsigned x=0; x<a_image.width(); x++)
-      {
-        auto c   = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = c;
-      }
-    }
-
-    return SaveBMP(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
-  }
-  else if(fileExt == ".png" || fileExt == ".PNG")
-  {
-    #ifdef USE_STB_IMAGE 
-      return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), a_image.width() * 4);
-    #else
-      std::cout << "[SaveImage<uint32_t>]: '.png' via stbimage is DISABLED!" << std::endl;
-      return false;
-    #endif
-  }
-  else if(fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    #ifdef USE_STB_IMAGE 
-      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), 100);
-    #else
-      std::cout << "[SaveImage<uchar4>]: '.jpg' via stbimage is DISABLED!" << std::endl;
-      return false;
-    #endif
+  } else if(fileExt == ".bmp" || fileExt == ".BMP") {
+    return SaveBMP(a_fileName, a_image.data(), a_image.width(), a_image.height());
+  } else if(fileExt == ".png" || fileExt == ".PNG") {
+    return SavePNG(a_fileName, a_image.data(), a_image.width(), a_image.height());
+  } else if(fileExt == ".jpg" || fileExt == ".JPG") {
+    return SaveJPG(a_fileName, a_image.data(), a_image.width(), a_image.height());
   }
 
   std::cout << "[SaveImage<uint32_t>]: unsupported extension '" << fileExt.c_str() << "'" << std::endl;
@@ -836,8 +913,7 @@ bool SaveImage<uchar4>(const char* a_fileName, const Image2D<uchar4>& a_image, f
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
 
-  if(fileExt == ".ppm" || fileExt == ".PPM")
-  {
+  if(fileExt == ".ppm" || fileExt == ".PPM") {
     std::ofstream fout(a_fileName, std::fstream::out);
     if(!fout.is_open())
       return false;
@@ -850,9 +926,7 @@ bool SaveImage<uchar4>(const char* a_fileName, const Image2D<uchar4>& a_image, f
     }
     fout.close();
     return true;
-  }
-  else if(fileExt == ".image1ui" || fileExt == ".image4ub")
-  {
+  } else if(fileExt == ".image1ui" || fileExt == ".image4ub") {
     unsigned wh[2] = { a_image.width(), a_image.height() };
     std::ofstream fout(a_fileName, std::fstream::out | std::ios::binary);
     if(!fout.is_open())
@@ -861,40 +935,31 @@ bool SaveImage<uchar4>(const char* a_fileName, const Image2D<uchar4>& a_image, f
     fout.write((char*)a_image.data(), size_t(wh[0]*wh[1])*sizeof(uint32_t));
     fout.close();
     return true;
-  }
-  else if(fileExt == ".bmp" || fileExt == ".BMP")
-  {
-    std::vector<unsigned> flipedYData(a_image.width()*a_image.height());
-    for (unsigned y = 0; y < a_image.height(); y++)
-    {
-      const unsigned offset1 = (a_image.height() - y - 1)*a_image.width(); 
-      const unsigned offset2 = y*a_image.width();
-      for(unsigned x=0; x<a_image.width(); x++)
-      {
-        const auto c           = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = ColorToUint32(int(c[0]), int(c[1]), int(c[2]));
-      }
+  } else if(fileExt == ".bmp" || fileExt == ".BMP") {
+    size_t totalSize = a_image.width() * a_image.height();
+    std::vector<unsigned> img(totalSize);
+    for (size_t i = 0; i < totalSize; i++) {
+      const auto c = a_image.data()[i];
+      img[i] = ColorToUint32(int(c[0]), int(c[1]), int(c[2]));
     }
 
-    return SaveBMP(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
-  }
-  else if(fileExt == ".png" || fileExt == ".PNG")
-  {
-    #ifdef USE_STB_IMAGE 
-      return stbi_write_png(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), a_image.width() * 4);
-    #else
-      std::cout << "[SaveImage<uchar4>]: '.png' via stbimage is DISABLED!" << std::endl;
-      return false;
-    #endif
-  }
-  else if(fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    #ifdef USE_STB_IMAGE 
-      return stbi_write_jpg(a_fileName, a_image.width(), a_image.height(), 4, (unsigned char*)a_image.data(), 100);
-    #else
-      std::cout << "[SaveImage<uchar4>]: '.jpg' via stbimage is DISABLED!" << std::endl;
-      return false;
-    #endif
+    return SaveBMP(a_fileName, img.data(), a_image.width(), a_image.height());
+  } else if(fileExt == ".png" || fileExt == ".PNG") {
+    size_t totalSize = a_image.width() * a_image.height();
+    std::vector<unsigned> img(totalSize);
+    for (size_t i = 0; i < totalSize; i++) {
+      const auto c = a_image.data()[i];
+      img[i] = ColorToUint32(int(c[0]), int(c[1]), int(c[2]));
+    }
+    return SavePNG(a_fileName, img.data(), a_image.width(), a_image.height());
+  } else if(fileExt == ".jpg" || fileExt == ".JPG") {
+    size_t totalSize = a_image.width() * a_image.height();
+    std::vector<unsigned> img(totalSize);
+    for (size_t i = 0; i < totalSize; i++) {
+      const auto c = a_image.data()[i];
+      img[i] = ColorToUint32(int(c[0]), int(c[1]), int(c[2]));
+    }
+    return SaveJPG(a_fileName, img.data(), a_image.width(), a_image.height());
   }
 
   std::cout << "[SaveImage<uchar4>]: unsupported extension '" << fileExt.c_str() << "'" << std::endl;
@@ -913,88 +978,19 @@ Image2D<float4> LoadImage<float4>(const char* a_fileName, float a_gamma)
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
   Image2D<float4> img;
+  int width, height, maxval = 255;
+  std::vector<unsigned int> data;
 
   if(fileExt == ".ppm" || fileExt == ".PPM") {
-    int width, height, maxval;
-    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
-    
-    img.resize(width, height);
-    const size_t totalSize = size_t(width*height);
-    const float  invDiv    = 1.0f/float(maxval);
-
-    for (size_t i = 0; i < totalSize; i++) {
-      int color[4] = {};
-      Uint32ToColor(colorData[i], color[0], color[1], color[2], color[3]);
-      img.data()[i] = float4(std::pow(float(color[0])*invDiv, a_gamma),
-                             std::pow(float(color[1])*invDiv, a_gamma),
-                             std::pow(float(color[2])*invDiv, a_gamma), 0.0f);
-    }
-  }
-  else if(fileExt == ".bmp" || fileExt == ".BMP")
-  {
-    int w = 0, h = 0;
-    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0) {
-      std::cout << "[LoadImage<float4>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(w,h);
-    const float  invDiv = 1.0f/255.0f; 
-    for(int y=0;y<h;y++) {
-      const int offset1 = (h-y-1)*w;
-      const int offset2 = y*w;
-      for(int x=0;x<w;x++) {
-        int r, g, b, a;
-        Uint32ToColor(data[offset2+x], r, g, b, a);
-        float4 colf(std::pow(float(r)*invDiv, a_gamma), 
-                    std::pow(float(g)*invDiv, a_gamma), 
-                    std::pow(float(b)*invDiv, a_gamma), 0.0f);
-        img.data()[offset1+x] = colf;
-      }
-    }
-  }
-  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    #ifdef USE_STB_IMAGE
-    int width, height, channels;
-    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
-    
-    if(imgData == NULL) 
-    {
-      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-    else if(channels < 3)
-    {
-       std::cout << "[LoadImage<float3>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(width,height);
-    const size_t imSize = size_t(width*height);
-    const float  invDiv = 1.0f/255.0f;
-    for(size_t i=0;i<imSize;i++)
-    {
-      unsigned r = imgData[i*channels+0];
-      unsigned g = imgData[i*channels+1];
-      unsigned b = imgData[i*channels+2];
-      float4 colf(std::pow(float(r)*invDiv, a_gamma), 
-                  std::pow(float(g)*invDiv, a_gamma), 
-                  std::pow(float(b)*invDiv, a_gamma), 0.0f);
-      img.data()[i] = colf;
-    }
-
-    stbi_image_free(imgData);
-    return img;
-    #else
-    std::cout << "[LoadImage<float3>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
-    return img;
-    #endif
-  }  
-  else if(fileExt == ".image4f")
-  {
-    unsigned wh[2] = { 0,0};
+    data = LoadPPM(a_fileName, width, height, maxval);
+  } else if(fileExt == ".bmp" || fileExt == ".BMP") {
+    data = LoadBMP(a_fileName, &width, &height);
+  } else if(fileExt == ".png" || fileExt == ".PNG") {
+    data = LoadPNG(a_fileName, width, height);
+  } else if(fileExt == ".jpg" || fileExt == ".JPG") {
+    data = LoadJPG(a_fileName, width, height);
+  } else if(fileExt == ".image4f") {
+    unsigned wh[2] = {0, 0};
     std::ifstream fin(a_fileName, std::ios::binary);
     if(!fin.is_open())
     {
@@ -1005,10 +1001,25 @@ Image2D<float4> LoadImage<float4>(const char* a_fileName, float a_gamma)
     img.resize(wh[0], wh[1]);
     fin.read((char*)img.data(), size_t(wh[0]*wh[1]*4)*sizeof(float));
     fin.close();
-  }
-  else
+    return img;
+  } else {
     std::cout << "[LiteImage::LoadImage<float4>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
-  
+  }
+
+  if(data.empty()) {
+    std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
+    return img;
+  }
+  img.resize(width,height);
+  const size_t totalSize = size_t(width * height);
+  const float invDiv = 1.0f/float(maxval);
+  for (size_t i = 0; i < totalSize; i++) {
+    int r, g, b, a;
+    Uint32ToColor(data[i], r, g, b, a);
+    img.data()[i] = float4(std::pow(float(r)*invDiv, a_gamma),
+                           std::pow(float(g)*invDiv, a_gamma),
+                           std::pow(float(b)*invDiv, a_gamma), 0.0f);
+  }
   return img;
 }
 
@@ -1021,87 +1032,18 @@ Image2D<float3> LoadImage<float3>(const char* a_fileName, float a_gamma)
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
   Image2D<float3> img;
+  int width, height, maxval = 255;
+  std::vector<unsigned int> data;
 
   if(fileExt == ".ppm" || fileExt == ".PPM") {
-    int width, height, maxval;
-    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
-    
-    img.resize(width, height);
-    const size_t totalSize = size_t(width*height);
-    const float  invDiv    = 1.0f/float(maxval);
-
-    for (size_t i = 0; i < totalSize; i++) {
-      int color[4] = {};
-      Uint32ToColor(colorData[i], color[0], color[1], color[2], color[3]);
-      img.data()[i] = float3(std::pow(float(color[0])*invDiv, a_gamma),
-                             std::pow(float(color[1])*invDiv, a_gamma),
-                             std::pow(float(color[2])*invDiv, a_gamma));
-    }
-  }
-  else if(fileExt == ".bmp" || fileExt == ".BMP")
-  {
-    int w=0, h=0;
-    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0) {
-      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(w,h);
-    const float  invDiv = 1.0f/255.0f; 
-    for(int y=0;y<h;y++) {
-      const int offset1 = (h-y-1)*w;
-      const int offset2 = y*w;
-      for(int x=0;x<w;x++) {
-        int r, g, b, a;
-        Uint32ToColor(data[offset2+x], r, g, b, a);
-        float3 colf(std::pow(float(r)*invDiv, a_gamma), 
-                    std::pow(float(g)*invDiv, a_gamma), 
-                    std::pow(float(b)*invDiv, a_gamma));
-        img.data()[offset1+x] = colf;
-      }
-    }
-  } 
-  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    #ifdef USE_STB_IMAGE
-    int width, height, channels;
-    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
-    
-    if(imgData == NULL) 
-    {
-      std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-    else if(channels < 3)
-    {
-       std::cout << "[LoadImage<float3>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(width,height);
-    const size_t imSize = size_t(width*height);
-    const float  invDiv = 1.0f/255.0f;
-    for(size_t i=0;i<imSize;i++)
-    {
-      unsigned r = imgData[i*channels+0];
-      unsigned g = imgData[i*channels+1];
-      unsigned b = imgData[i*channels+2];
-      float3 colf(std::pow(float(r)*invDiv, a_gamma), 
-                  std::pow(float(g)*invDiv, a_gamma), 
-                  std::pow(float(b)*invDiv, a_gamma));
-      img.data()[i] = colf;
-    }
-
-    stbi_image_free(imgData);
-    return img;
-    #else
-    std::cout << "[LoadImage<float3>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
-    return img;
-    #endif
-  } 
-  else if(fileExt == ".image3f")
-  {
+    data = LoadPPM(a_fileName, width, height, maxval);
+  } else if(fileExt == ".bmp" || fileExt == ".BMP") {
+    data = LoadBMP(a_fileName, &width, &height);
+  } else if(fileExt == ".png" || fileExt == ".PNG") {
+    data = LoadPNG(a_fileName, width, height);
+  } else if(fileExt == ".jpg" || fileExt == ".JPG") {
+    data = LoadJPG(a_fileName, width, height);
+  } else if(fileExt == ".image3f") {
     unsigned wh[2] = { 0,0};
     std::ifstream fin(a_fileName, std::fstream::out | std::ios::binary);
     if(!fin.is_open())
@@ -1113,10 +1055,24 @@ Image2D<float3> LoadImage<float3>(const char* a_fileName, float a_gamma)
     img.resize(wh[0], wh[1]);
     fin.read((char*)img.data(), size_t(wh[0]*wh[1]*3)*sizeof(float));
     fin.close();
-  }
-  else
+  } else {
     std::cout << "[LiteImage::LoadImage<float3>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
-  
+  }
+
+  if(data.empty()) {
+    std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
+    return img;
+  }
+  img.resize(width,height);
+  const size_t totalSize = size_t(width * height);
+  const float invDiv = 1.0f/float(maxval);
+  for (size_t i = 0; i < totalSize; i++) {
+    int r, g, b, a;
+    Uint32ToColor(data[i], r, g, b, a);
+    img.data()[i] = float3(std::pow(float(r)*invDiv, a_gamma),
+                           std::pow(float(g)*invDiv, a_gamma),
+                           std::pow(float(b)*invDiv, a_gamma));
+  }
   return img;
 }
 
@@ -1165,22 +1121,19 @@ Image2D<uint32_t> LoadImage<uint32_t>(const char* a_fileName, float a_gamma)
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
   Image2D<uint32_t> img;
+  int width, height, maxval = 255;
+  std::vector<unsigned int> data;
 
   if(fileExt == ".ppm" || fileExt == ".PPM") {
-
-    int width, height, maxval;
-    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
-    
-    img.resize(width, height);
-    const size_t totalSize = size_t(width*height);
-
-    for (size_t i = 0; i < totalSize; i++) {
-      img.data()[i] = colorData[i];
-    }
-  } 
-  else if(fileExt == ".image1ui" || fileExt == ".image4ub")
-  {
-    unsigned wh[2] = { 0,0};
+    data = LoadPPM(a_fileName, width, height, maxval);
+  } else if(fileExt == ".bmp" || fileExt == ".BMP") {
+    data = LoadBMP(a_fileName, &width, &height);
+  } else if(fileExt == ".png" || fileExt == ".PNG") {
+    data = LoadPNG(a_fileName, width, height);
+  } else if(fileExt == ".jpg" || fileExt == ".JPG") {
+    data = LoadJPG(a_fileName, width, height);
+  } else if(fileExt == ".image1ui" || fileExt == ".image4ub") {
+    unsigned wh[2] = {0, 0};
     std::ifstream fin(a_fileName, std::ios::binary);
     if(!fin.is_open())
     {
@@ -1191,63 +1144,23 @@ Image2D<uint32_t> LoadImage<uint32_t>(const char* a_fileName, float a_gamma)
     img.resize(wh[0], wh[1]);
     fin.read((char*)img.data(), size_t(wh[0]*wh[1])*sizeof(uint32_t));
     fin.close();
-  }
-  else if(fileExt == ".bmp" || fileExt == ".BMP")
-  {
-    int w=0, h=0;
-    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0) {
-      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(w,h);
-    for(int y=0; y < h; y++) {
-      const int offset1 = (h-y-1)*w;
-      const int offset2 = y*w;
-      memcpy((void*)(img.data() + offset1), (void*)(data.data() + offset2), w*sizeof(unsigned));
-      // for(int x=0;x<w;x++) {
-      //   img.data()[offset1+x] = data[offset2+x];
-      // }
-    }
-  }
-  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    #ifdef USE_STB_IMAGE
-    int width, height, channels;
-    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
-    
-    if(imgData == NULL) 
-    {
-      std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-    else if(channels < 3)
-    {
-      std::cout << "[LoadImage<uint>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(width,height);
-    const size_t imSize = size_t(width*height);
-    for(size_t i=0;i<imSize;i++)
-    {
-      unsigned r = imgData[i*channels+0];
-      unsigned g = imgData[i*channels+1];
-      unsigned b = imgData[i*channels+2];
-      img.data()[i] = r | (g << 8) | (b << 16);
-    }
-
-    stbi_image_free(imgData);
+    img.setSRGB(true);
     return img;
-    #else
-    std::cout << "[LoadImage<uint>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
-    return img;
-    #endif
-  }  
-  else
+  } else {
     std::cout << "[LiteImage::LoadImage<uint>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
-  
+  }
+
+  if(data.empty()) {
+    std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
+    return img;
+  }
+  img.resize(width, height);
+  const size_t totalSize = size_t(width*height);
+
+  for (size_t i = 0; i < totalSize; i++) {
+    img.data()[i] = data[i];
+  }
+
   img.setSRGB(true);
   return img;
 }
@@ -1255,28 +1168,24 @@ Image2D<uint32_t> LoadImage<uint32_t>(const char* a_fileName, float a_gamma)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<> 
-Image2D<uchar4> LoadImage<uchar4>(const char* a_fileName, float a_gamma)
+Image2D<uchar4> LoadImage<uchar4>(const char* a_fileName, float a_gamma) // @todo maybe optimal?
 {
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
   
   Image2D<uchar4> img;
+  int width, height, maxval = 255;
+  std::vector<unsigned int> data;
 
   if(fileExt == ".ppm" || fileExt == ".PPM") {
-    int width, height, maxval;
-    std::vector<unsigned int> colorData = LoadPPM(a_fileName, width, height, maxval);
-    
-    img.resize(width, height);
-    const size_t totalSize = size_t(width*height);
-
-    for (size_t i = 0; i < totalSize; i++) {
-      int color[4] = {};
-      Uint32ToColor(colorData[i], color[0], color[1], color[2], color[3]);
-      img.data()[i] = uchar4((unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], 0); // @todo ??
-    }
-  } 
-  else if(fileExt == ".image1ui" || fileExt == ".image4ub")
-  {
+    data = LoadPPM(a_fileName, width, height, maxval);
+  } else if(fileExt == ".bmp" || fileExt == ".BMP") {
+    data = LoadBMP(a_fileName, &width, &height);
+  } else if(fileExt == ".png" || fileExt == ".PNG") {
+    data = LoadPNG(a_fileName, width, height);
+  } else if(fileExt == ".jpg" || fileExt == ".JPG") {
+    data = LoadJPG(a_fileName, width, height);
+  } else if(fileExt == ".image1ui" || fileExt == ".image4ub") {
     unsigned wh[2] = { 0,0};
     std::ifstream fin(a_fileName, std::ios::binary);
     if(!fin.is_open())
@@ -1288,56 +1197,23 @@ Image2D<uchar4> LoadImage<uchar4>(const char* a_fileName, float a_gamma)
     img.resize(wh[0], wh[1]);
     fin.read((char*)img.data(), size_t(wh[0]*wh[1])*sizeof(uint32_t));
     fin.close();
-  }
-  else if(fileExt == ".bmp" || fileExt == ".BMP")
-  {
-    int w=0, h=0;
-    std::vector<unsigned int> data = LoadBMP(a_fileName, &w, &h);
-    if(w == 0 || h == 0)
-    {
-      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(w,h);
-    for(int y=0;y<h;y++)
-    {
-      const int offset1 = (h-y-1)*w;
-      const int offset2 = y*w;
-      memcpy((void*)(img.data() + offset1), (void*)(data.data() + offset2), w*sizeof(unsigned));
-    }
-  }
-  else if(fileExt == ".png" || fileExt == ".PNG" || fileExt == ".jpg" || fileExt == ".JPG")
-  {
-    #ifdef USE_STB_IMAGE
-    int width, height, channels;
-    unsigned char *imgData = stbi_load(a_fileName, &width, &height, &channels, 0);
-    
-    if(imgData == NULL) 
-    {
-      std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-    else if(channels < 3)
-    {
-      std::cout << "[LoadImage<uchar4>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
-
-    img.resize(width,height);
-    const size_t imSize = size_t(width*height);
-    for(size_t i=0;i<imSize;i++)
-      img.data()[i] = uchar4(imgData[i*channels+0], imgData[i*channels+1], imgData[i*channels+2], 0);
-
-    stbi_image_free(imgData);
+    img.setSRGB(true);
     return img;
-    #else
-    std::cout << "[LoadImage<uchar4>]: png/jpg support is DISABLED! File: '" << a_fileName << "' " << std::endl;
-    return img;
-    #endif
-  }  
-  else
+  } else {
     std::cout << "[LiteImage::LoadImage<uchar4>]: unsopported image format '" << fileExt.c_str() << "'" << std::endl;
+  }
+
+  if(data.empty()) {
+    std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
+    return img;
+  }
+  img.resize(width,height);
+  const size_t totalSize = size_t(width * height);
+  for (size_t i = 0; i < totalSize; i++) {
+    int r, g, b, a;
+    Uint32ToColor(data[i], r, g, b, a);
+    img.data()[i] = uchar4((unsigned char)r, (unsigned char)g, (unsigned char)b, 0);
+  }
   
   img.setSRGB(true);
   return img;
