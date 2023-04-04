@@ -51,7 +51,7 @@ bool test01_float3_save()
   auto img4 = LiteImage::LoadImage<float3>("flags/rus.bmp");
   auto img5 = LiteImage::LoadImage<float3>("flags/rus.jpg");
   auto img6 = LiteImage::LoadImage<float3>("flags/rus.png");
-  LiteImage::SaveImage("flags/rus6.bmp", img5);
+  //LiteImage::SaveImage("flags/rus6.png", img6);
 
   const float err2 = LiteImage::MSE(imgRus, img2);
   const float err3 = LiteImage::MSE(imgRus, img3);
@@ -149,7 +149,7 @@ bool test04_uint1_save()
     if(y < imgEst.height()/3)
       color = 0x0071CDFF;
     else if(y < 2*imgEst.height()/3)
-      color = 0;
+      color = 0xFF;
     else 
       color = 0xFFFFFFFF;
 
@@ -173,7 +173,7 @@ bool test04_uint1_save()
   auto img14 = LiteImage::LoadImage<uint32_t>("flags/est.png");
   auto img15 = LiteImage::LoadImage<uint32_t>("flags/est.jpg");
   auto img16 = LiteImage::LoadImage<uint32_t>("flags/est2.png");
-  LiteImage::SaveImage("flags/est12.png", img14);
+  //LiteImage::SaveImage("flags/est_12.bmp", img12);
   
   const float err2 = LiteImage::MSE(imgEst, img12);
   const float err3 = LiteImage::MSE(imgEst, img13);

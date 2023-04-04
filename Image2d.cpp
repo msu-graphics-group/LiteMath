@@ -449,9 +449,9 @@ bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int he
       int shift = 54 + ((height - i - 1) * width + j) * 3;
       int r, g, b, a;
       Uint32ToColor(pixels[i * width + j], r, g, b, a);
-      buffer[shift + 0] = r;
+      buffer[shift + 0] = b;
       buffer[shift + 1] = g;
-      buffer[shift + 2] = b;
+      buffer[shift + 2] = r;
     }
   }
 
@@ -472,7 +472,7 @@ bool SavePNG(const char* filename, const unsigned int* pixels, int width, int he
     buffer[i * channels + 0] = r;
     buffer[i * channels + 1] = g;
     buffer[i * channels + 2] = b;
-    buffer[i * channels + 3] = 255;
+    buffer[i * channels + 3] = a;
   }
 
   void* contextBuffer = malloc(totalSize * channels);
@@ -506,7 +506,7 @@ bool SaveJPG(const char* filename, const unsigned int* pixels, int width, int he
     buffer[i * channels + 0] = r;
     buffer[i * channels + 1] = g;
     buffer[i * channels + 2] = b;
-    buffer[i * channels + 3] = 255;
+    buffer[i * channels + 3] = a;
   }
 
   void* contextBuffer = malloc(totalSize * channels);
@@ -552,7 +552,7 @@ std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH) {
   for(int i = 0; i < height; i++) {
     for(int j = 0; j < width; j++) {
       int shift = ((height - i - 1) * width + j) * 3;
-      img[i * width + j] = ColorToUint32(colorData[shift + 0], colorData[shift + 1], colorData[shift+ 2], 0);
+      img[i * width + j] = ColorToUint32(colorData[shift + 2], colorData[shift + 1], colorData[shift+ 0]);
     }
   }
 
@@ -596,7 +596,7 @@ std::vector<unsigned int> LoadPPM(const char* filename, int &width, int &height,
   for(size_t i = 0; i < totalSize; i++) {
     int color[3] = {0,0,0};
     iss >> color[0] >> color[1] >> color[2];
-    img[i] = ColorToUint32(color[0], color[1], color[2], 0);
+    img[i] = ColorToUint32(color[0], color[1], color[2]);
   }
 
   delete [] data;
@@ -626,7 +626,7 @@ std::vector<unsigned int> LoadPNG(const char* filename, int &width, int &height)
   img.resize(totalSize);
   for(size_t i = 0; i < totalSize; i++) {
     long shift = i * channels;
-    img[i] = ColorToUint32(imgData[shift + 0], imgData[shift + 1], imgData[shift + 2], 0);
+    img[i] = ColorToUint32(imgData[shift + 0], imgData[shift + 1], imgData[shift + 2]);
   }
 
   stbi_image_free(imgData);
@@ -660,7 +660,7 @@ std::vector<unsigned int> LoadJPG(const char* filename, int &width, int &height)
   img.resize(totalSize);
   for(size_t i = 0; i < totalSize; i++) {
     long shift = i * channels;
-    img[i] = ColorToUint32(imgData[shift + 0], imgData[shift + 1], imgData[shift + 2], 0);
+    img[i] = ColorToUint32(imgData[shift + 0], imgData[shift + 1], imgData[shift + 2]);
   }
 
   stbi_image_free(imgData);
