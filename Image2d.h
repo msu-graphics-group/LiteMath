@@ -268,11 +268,13 @@ namespace LiteImage
   /**
   \brief save 24 bit RGB bitmap images.
   \param fname  - file name
-  \param w      - input image width
-  \param h      - input image height
+  \param width  - input image width
+  \param height - input image height
   \param pixels - R8G8B8A8 data, 4 bytes per pixel, one byte for channel.
   */
-  bool SaveBMP(const char* fname, const unsigned int* pixels, int w, int h);
+  bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int height);
+  bool SavePNG(const char* filename, const unsigned int* pixels, int width, int height);
+  bool SaveJPG(const char* filename, const unsigned int* pixels, int width, int height);
 
   /**
   \brief load 24 bit RGB bitmap images.
@@ -285,6 +287,8 @@ namespace LiteImage
   */
   std::vector<unsigned int> LoadBMP(const char* filename, int* pW, int* pH);
   std::vector<unsigned int> LoadPPM(const char* filename, int &width, int &height, int &maxval);
+  std::vector<unsigned int> LoadPNG(const char* filename, int &width, int &height);
+  std::vector<unsigned int> LoadJPG(const char* filename, int &width, int &height);
 }; // end namespace LiteImage
 
 #endif

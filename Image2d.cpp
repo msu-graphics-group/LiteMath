@@ -418,8 +418,6 @@ static void StbiWriteToBuffer(void *context, void *data, int size) {
   c->lastPos += size;
 }
 
-struct Pixel { unsigned char r, g, b; };
-
 bool SaveBMP(const char* filename, const unsigned int* pixels, int width, int height) {
   const int totalSize = width * height * 3;
   char *buffer = new char[54 + totalSize];
@@ -727,23 +725,10 @@ bool SaveImage<float4>(const char* a_fileName, const Image2D<float4>& a_image, f
 
     if(fileExt == ".bmp" || fileExt == ".BMP")
       return SaveBMP(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
-    #ifdef USE_STB_IMAGE
     else if(fileExt == ".png" || fileExt == ".PNG") 
       return SavePNG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
     else if(fileExt == ".jpg" || fileExt == ".JPG") 
       return SaveJPG(a_fileName, flipedYData.data(), a_image.width(), a_image.height());
-    #else
-    else if(fileExt == ".png" || fileExt == ".PNG") 
-    {
-      std::cout << "[SaveImage<float4>]: '.png' via stbimage is DISABLED!" << std::endl;
-      return false;
-    }
-    else if(fileExt == ".jpg" || fileExt == ".JPG") 
-    {
-      std::cout << "[SaveImage<float4>]: '.jpg' via stbimage is DISABLED!" << std::endl;
-      return false;
-    }
-    #endif
   }
   
   std::cout << "[SaveImage<float4>]: unsupported extension '" << fileExt.c_str() << "'" << std::endl;
