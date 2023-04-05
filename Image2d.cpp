@@ -414,7 +414,7 @@ static void StbiWriteToBuffer(void *context, void *data, int size) {
     c->buferSize <<= 2;
     c->buffer = realloc(c->buffer, c->buferSize);
   }
-  memcpy(c->buffer + c->lastPos, data, size);
+  memcpy((char*)c->buffer + c->lastPos, data, size);
   c->lastPos += size;
 }
 
@@ -489,7 +489,7 @@ bool SavePNG(const char* filename, const unsigned int* pixels, int width, int he
   return true;
 #else
   std::cout << "[SavePNG]: '.png' via stbimage is DISABLED!" << std::endl;
-  return false
+  return false;
 #endif
 }
 
@@ -523,7 +523,7 @@ bool SaveJPG(const char* filename, const unsigned int* pixels, int width, int he
   return true;
 #else
   std::cout << "[SaveJPG]: '.jpg' via stbimage is DISABLED!" << std::endl;
-  return false
+  return false;
 #endif
 }
 
