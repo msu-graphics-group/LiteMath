@@ -402,17 +402,17 @@ static inline void Uint32ToColor(unsigned color, int &r, int &g, int &b, int &a)
 }
 
 struct stbiContext {
-  void *buffer;
-  int buferSize;
-  int lastPos;
+  void  *buffer;
+  size_t bufferSize;
+  size_t lastPos;
 };
 
 static void StbiWriteToBuffer(void *context, void *data, int size) {
   stbiContext *c = (stbiContext*)context;
 
-  if(c->lastPos + size > c->buferSize) {
-    c->buferSize <<= 2;
-    c->buffer = realloc(c->buffer, c->buferSize);
+  if(c->lastPos + size > c->bufferSize) {
+    c->bufferSize <<= 2;
+    c->buffer = realloc(c->buffer, c->bufferSize);
   }
   memcpy((char*)c->buffer + c->lastPos, data, size);
   c->lastPos += size;
