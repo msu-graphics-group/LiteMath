@@ -390,15 +390,26 @@ template<> uint32_t GetVulkanFormat<float> (bool a_gamma22) { return uint32_t(my
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+union Transform {
+  unsigned char color[4];
+  unsigned int uint32;
+};
+
 static inline unsigned ColorToUint32(int r, int g, int b, int a = 255) {
-  return unsigned((r << 24) | (g << 16) | (b << 8) | a);
+  Transform tmp;
+  tmp.color[0] = r;
+  tmp.color[1] = g;
+  tmp.color[2] = b;
+  tmp.color[3] = a;
+  return tmp.uint32;
 }
 
 static inline void Uint32ToColor(unsigned color, int &r, int &g, int &b, int &a) {
-  r = (color & 0xFF000000) >> 24;
-  g = (color & 0x00FF0000) >> 16;
-  b = (color & 0x0000FF00) >> 8;
-  a = (color & 0x000000FF);
+  Transform tmp{.uint32{color}};
+  r = tmp.color[0];
+  g = tmp.color[1];
+  b = tmp.color[2];
+  a = tmp.color[3];
 }
 
 struct stbiContext {
