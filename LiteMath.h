@@ -11,6 +11,11 @@
 #include <algorithm>        // for std::min/std::max 
 #include <initializer_list> //
 
+#ifndef MAXFLOAT
+    #include <cfloat>
+    #define MAXFLOAT FLT_MAX
+#endif
+
 #ifdef M_PI
 #undef M_PI // same if we have such macro some-where else ...
 #endif
