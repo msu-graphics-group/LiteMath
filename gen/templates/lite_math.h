@@ -400,14 +400,22 @@ namespace LiteMath
     };
   };
 
-  static inline uchar4 operator * (const uchar4 & u, float v) { return uchar4(u.x * v, u.y * v, u.z * v, u.w * v); }
-  static inline uchar4 operator / (const uchar4 & u, float v) { return uchar4(u.x / v, u.y / v, u.z / v, u.w / v); }
-  static inline uchar4 operator + (const uchar4 & u, float v) { return uchar4(u.x + v, u.y + v, u.z + v, u.w + v); }
-  static inline uchar4 operator - (const uchar4 & u, float v) { return uchar4(u.x - v, u.y - v, u.z - v, u.w - v); }
-  static inline uchar4 operator * (float v, const uchar4 & u) { return uchar4(v * u.x, v * u.y, v * u.z, v * u.w); }
-  static inline uchar4 operator / (float v, const uchar4 & u) { return uchar4(v / u.x, v / u.y, v / u.z, v / u.w); }
-  static inline uchar4 operator + (float v, const uchar4 & u) { return uchar4(u.x + v, u.y + v, u.z + v, u.w + v); }
-  static inline uchar4 operator - (float v, const uchar4 & u) { return uchar4(u.x - v, u.y - v, u.z - v, u.w - v); }
+  static inline uchar4 operator * (const uchar4 & u, float v) { return uchar4(uchar(float(u.x) * v), uchar(float(u.y) * v),
+                                                                              uchar(float(u.z) * v), uchar(float(u.w) * v)); }
+  static inline uchar4 operator / (const uchar4 & u, float v) { return uchar4(uchar(float(u.x) / v), uchar(float(u.y) / v),
+                                                                              uchar(float(u.z) / v), uchar(float(u.w) / v)); }
+  static inline uchar4 operator + (const uchar4 & u, float v) { return uchar4(uchar(float(u.x) + v), uchar(float(u.y) + v),
+                                                                              uchar(float(u.z) + v), uchar(float(u.w) + v)); }
+  static inline uchar4 operator - (const uchar4 & u, float v) { return uchar4(uchar(float(u.x) - v), uchar(float(u.y) - v),
+                                                                              uchar(float(u.z) - v), uchar(float(u.w) - v)); }
+  static inline uchar4 operator * (float v, const uchar4 & u) { return uchar4(uchar(v * float(u.x)), uchar(v * float(u.y)),
+                                                                              uchar(v * float(u.z)), uchar(v * float(u.w))); }
+  static inline uchar4 operator / (float v, const uchar4 & u) { return uchar4(uchar(v / float(u.x)), uchar(v / float(u.y)),
+                                                                              uchar(v / float(u.z)), uchar(v / float(u.w))); }
+  static inline uchar4 operator + (float v, const uchar4 & u) { return uchar4(uchar(float(u.x) + v), uchar(float(u.y) + v),
+                                                                              uchar(float(u.z) + v), uchar(float(u.w) + v)); }
+  static inline uchar4 operator - (float v, const uchar4 & u) { return uchar4(uchar(float(u.x) - v), uchar(float(u.y) - v),
+                                                                              uchar(float(u.z) - v), uchar(float(u.w) - v)); }
 
   static inline uchar4 operator + (const uchar4 & u, const uchar4 & v) { return uchar4(u.x + v.x, u.y + v.y, u.z + v.z, u.w + v.w); }
   static inline uchar4 operator - (const uchar4 & u, const uchar4 & v) { return uchar4(u.x - v.x, u.y - v.y, u.z - v.z, u.w - v.w); }
