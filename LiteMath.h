@@ -1,7 +1,7 @@
 #ifndef LITE_MATH_G
 #define LITE_MATH_G
 #ifdef __OPENCL_VERSION__
-  #include "LiteMathGPU.h"  // if this file is included in OpenCL shaders 
+  #include "LiteMathCL.h"  // if this file is included in OpenCL shaders 
 #else
 
 #include <cstdint>
