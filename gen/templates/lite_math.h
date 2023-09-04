@@ -1,8 +1,11 @@
-#ifndef LITE_MATH_G
-#define LITE_MATH_G
+#pragma once
+
 #ifdef __OPENCL_VERSION__
   #include "LiteMathCL.h"  // if this file is included in OpenCL shaders 
 #else
+#ifdef ISPC
+  #include "LiteMathISPC.h"
+#else  
 
 #include <cstdint>
 #include <cmath>
@@ -1023,3 +1026,4 @@ namespace LiteMath
 
 #endif
 #endif
+
