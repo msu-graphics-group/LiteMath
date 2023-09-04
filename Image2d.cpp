@@ -393,15 +393,15 @@ namespace myvulkan
 template<> uint32_t LiteImage::GetVulkanFormat<uint32_t>(bool a_gamma22) { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_UNORM); } // SRGB, UNORM 
 template<> uint32_t LiteImage::GetVulkanFormat<uchar4>(bool a_gamma22)   { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8G8B8A8_UNORM); }
 
-template<> uint32_t LiteImage::GetVulkanFormat<uint64_t>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
-template<> uint32_t LiteImage::GetVulkanFormat<ushort4>(bool a_gamma22)  { return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
+template<> uint32_t LiteImage::GetVulkanFormat<uint64_t>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
+template<> uint32_t LiteImage::GetVulkanFormat<ushort4>(bool a_gamma22)  { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R16G16B16A16_UNORM); }
 
-template<> uint32_t LiteImage::GetVulkanFormat<uint16_t>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R16_UNORM); }
+template<> uint32_t LiteImage::GetVulkanFormat<uint16_t>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R16_UNORM); }
 template<> uint32_t LiteImage::GetVulkanFormat<uint8_t>(bool a_gamma22)  { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8_UNORM); }
 
-template<> uint32_t LiteImage::GetVulkanFormat<float4>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32G32B32A32_SFLOAT); }
-template<> uint32_t LiteImage::GetVulkanFormat<float2>(bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32G32_SFLOAT); }
-template<> uint32_t LiteImage::GetVulkanFormat<float> (bool a_gamma22) { return uint32_t(myvulkan::VK_FORMAT_R32_SFLOAT); }
+template<> uint32_t LiteImage::GetVulkanFormat<float4>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32G32B32A32_SFLOAT); }
+template<> uint32_t LiteImage::GetVulkanFormat<float2>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32G32_SFLOAT); }
+template<> uint32_t LiteImage::GetVulkanFormat<float> (bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32_SFLOAT); }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int*
 
 static inline int tonemap(float x, float a_gammaInv) 
 { 
-  const int colorLDR = int( std::pow(x, a_gammaInv)*255.0f + float(.5f) );
+  const int colorLDR = int( std::pow(x, a_gammaInv) * 255.0f + 0.5f );
   if(colorLDR < 0)        return 0;
   else if(colorLDR > 255) return 255;
   else                    return colorLDR;
