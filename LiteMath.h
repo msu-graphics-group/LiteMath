@@ -1141,9 +1141,9 @@ namespace LiteMath
   static inline float4 refract(const float4 incidentVec, const float4 normal, float eta)
   {
     float N_dot_I = dot(normal, incidentVec);
-    float k = float(1.f) - eta * eta * (float(1.f) - N_dot_I * N_dot_I);
-    if (k < float(0.f))
-      return float4(0.f);
+    float k = 1.0f - eta * eta * (1.0f - N_dot_I * N_dot_I);
+    if (k < 0.0f)
+      return float4(0.0f);
     else
       return eta * incidentVec - (eta * N_dot_I + std::sqrt(k)) * normal;
   }
@@ -1834,8 +1834,8 @@ namespace LiteMath
       return abc[0]*abc[1]*abc[2];       // #TODO: hmul3
     }
   
-    inline void setStart(uint i) { boxMin = packUIntW(boxMin, uint(i)); }
-    inline void setCount(uint i) { boxMax = packUIntW(boxMax, uint(i)); }
+    inline void setStart(uint i) { boxMin = packUIntW(boxMin, i); }
+    inline void setCount(uint i) { boxMax = packUIntW(boxMax, i); }
     inline uint getStart() const { return extractUIntW(boxMin); }
     inline uint getCount() const { return extractUIntW(boxMax); }
     inline bool isAxisAligned(int axis, float split) const { return (boxMin[axis] == boxMax[axis]) && (boxMin[axis]==split); }
