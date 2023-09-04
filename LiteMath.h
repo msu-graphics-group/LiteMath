@@ -1738,6 +1738,17 @@ namespace LiteMath
     res.m_col[3] = float4{ 0.0f, 0.0f, (-temp * zFar) / temp4, 0.0f };
     return res;
   }
+
+  // http://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+  //
+  static inline float4x4 OpenglToVulkanProjectionMatrixFix()
+  {
+    float4x4 res;
+    res(1,1) = -1.0f;
+    res(2,2) = 0.5f;
+    res(2,3) = 0.5f;
+    return res;
+  }
   
   static inline float4 packFloatW(const float4& a, float data) { return blend(a, float4(data),            uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
   static inline float4 packIntW(const float4& a, int data)     { return blend(a, as_float32(int4(data)),  uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
