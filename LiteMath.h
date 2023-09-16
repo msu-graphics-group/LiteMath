@@ -1649,6 +1649,75 @@ namespace LiteMath
     return m;
   }
 
+  // complex numbers adapted from PBRT-v4
+  struct complex 
+  {
+    complex(float re) : re(re), im(0) {}
+    complex(float re, float im) : re(re), im(im) {}
+
+    complex operator-() const { return {-re, -im}; }
+
+    complex operator+(complex z) const { return {re + z.re, im + z.im}; }
+
+    complex operator-(complex z) const { return {re - z.re, im - z.im}; }
+
+    complex operator*(complex z) const 
+    {
+        return {re * z.re - im * z.im, re * z.im + im * z.re};
+    }
+
+    complex operator/(complex z) const 
+    {
+        float scale = 1 / (z.re * z.re + z.im * z.im);
+        return {scale * (re * z.re + im * z.im), scale * (im * z.re - re * z.im)};
+    }
+
+    friend complex operator+(float value, complex z) { return complex(value) + z; }
+
+    friend complex operator-(float value, complex z) { return complex(value) - z; }
+
+    friend complex operator*(float value, complex z) { return complex(value) * z; }
+
+    friend complex operator/(float value, complex z) { return complex(value) / z; }
+
+
+    float re, im;
+  };
+
+  inline static float real(const complex &z) 
+  {
+    return z.re;
+  }
+
+  inline static float imag(const complex &z) 
+  {
+    return z.im;
+  }
+
+  inline static float complex_norm(const complex &z) 
+  {
+    return z.re * z.re + z.im * z.im;
+  }
+
+  inline static float complex_abs(const complex &z) {
+    return std::sqrt(complex_norm(z));
+  }
+
+  inline static complex complex_sqrt(const complex &z) 
+  {
+    float n = complex_abs(z);
+    float t1 = std::sqrt(0.5f * (n + std::abs(z.re)));
+    float t2 = 0.5f * z.im / t1;
+
+    if (n == 0)
+      return 0;
+
+    if (z.re >= 0)
+      return {t1, t2};
+    else
+      return {std::abs(t2), std::copysign(t1, z.im)};
+  }
+
 
   ///////////////////////////////////////////////////////////////////
   ///// Auxilary functions which are not in the core of library /////
@@ -1685,6 +1754,7 @@ namespace LiteMath
     const int alpha = (packedColor & 0xFF000000) >> 24;
     return float4((float)red, (float)green, (float)blue, (float)alpha)*(1.0f / 255.0f);
   }
+  
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
