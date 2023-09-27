@@ -1649,6 +1649,30 @@ namespace LiteMath
     return m;
   }
 
+  static inline float4x4 operator*(const float4x4 &m, float scalar)
+  {
+    float4x4 res;
+    res.col(0) = m.col(0) * scalar;
+    res.col(1) = m.col(1) * scalar;
+    res.col(2) = m.col(2) * scalar;
+    res.col(3) = m.col(3) * scalar;
+    return res;
+  }
+
+  static inline float4x4 operator*(float scalar, const float4x4 &m)
+  {
+    return m * scalar;
+  }
+
+  static inline float4x4 operator+(const float4x4 &m1, const float4x4 &m2)
+  {
+    float4x4 res;
+    res.col(0) = m1.col(0) + m2.col(0);
+    res.col(1) = m1.col(1) + m2.col(1);
+    res.col(2) = m1.col(2) + m2.col(2);
+    return res;
+  }
+
   // complex numbers adapted from PBRT-v4
   struct complex 
   {
@@ -1869,6 +1893,29 @@ namespace LiteMath
 
   static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
   static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
+
+  static inline float3x3 operator*(const float3x3 &m, float scalar)
+  {
+    float3x3 res;
+    res.row[0] = m.row[0] * scalar;
+    res.row[1] = m.row[1] * scalar;
+    res.row[2] = m.row[2] * scalar;
+    return res;
+  }
+
+  static inline float3x3 operator*(float scalar, const float3x3 &m)
+  {
+    return m * scalar;
+  }
+
+  static inline float3x3 operator+(const float3x3 &m1, const float3x3 &m2)
+  {
+    float3x3 res;
+    res.row[0] = m1.row[0] + m2.row[0];
+    res.row[1] = m1.row[1] + m2.row[1];
+    res.row[2] = m1.row[2] + m2.row[2];
+    return res;
+  }
 
   /////////////////////////////////////////
   /////////////// Boxes stuff /////////////
