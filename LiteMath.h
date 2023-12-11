@@ -23,6 +23,10 @@
 #undef M_PI // same if we have such macro some-where else ...
 #endif
 
+#ifdef M_1_PI
+#undef M_1_PI // same if we have such macro some-where else ...
+#endif
+
 #ifdef min 
 #undef min // if we on windows, need thid due to macro definitions in windows.h; same if we have such macro some-where else.
 #endif
@@ -55,6 +59,7 @@ namespace LiteMath
   
   constexpr float DEG_TO_RAD   = float(3.14159265358979323846f) / 180.0f;
   constexpr float M_PI         = float(3.14159265358979323846f);
+  constexpr float M_1_PI		   = float(0.31830988618379067154f);
   constexpr float M_TWOPI      = M_PI*2.0f;
   constexpr float INV_PI       = 1.0f/M_PI;
   constexpr float INV_TWOPI    = 1.0f/(2.0f*M_PI);
