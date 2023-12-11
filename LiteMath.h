@@ -1870,7 +1870,32 @@ namespace LiteMath
     res.z = m.row[2].x*v.x + m.row[2].y*v.y + m.row[2].z*v.z;
     return res;
   }
+  
+  static inline float3 operator*(float3x3 m, const float3 v) { return mul3x3x3(m,v); }
 
+  static inline float3x3 inverse3x3(float3x3 a)
+  {
+    float det = a.row[0].x * (a.row[1].y * a.row[2].z - a.row[1].z * a.row[2].y) -
+                a.row[0].y * (a.row[1].x * a.row[2].z - a.row[1].z * a.row[2].x) +
+                a.row[0].z * (a.row[1].x * a.row[2].y - a.row[1].y * a.row[2].x);
+  
+    float3x3 b;
+    b.row[0].x = (a.row[1].y * a.row[2].z - a.row[1].z * a.row[2].y);
+    b.row[0].y = -(a.row[0].y * a.row[2].z - a.row[0].z * a.row[2].y);
+    b.row[0].z = (a.row[0].y * a.row[1].z - a.row[0].z * a.row[1].y);
+    b.row[1].x = -(a.row[1].x * a.row[2].z - a.row[1].z * a.row[2].x);
+    b.row[1].y = (a.row[0].x * a.row[2].z - a.row[0].z * a.row[2].x);
+    b.row[1].z = -(a.row[0].x * a.row[1].z - a.row[0].z * a.row[1].x);
+    b.row[2].x = (a.row[1].x * a.row[2].y - a.row[1].y * a.row[2].x);
+    b.row[2].y = -(a.row[0].x * a.row[2].y - a.row[0].y * a.row[2].x);
+    b.row[2].z = (a.row[0].x * a.row[1].y - a.row[0].y * a.row[1].x);
+  
+    float s = 1.0f / det;
+    b.row[0] *= s;
+    b.row[1] *= s;
+    b.row[2] *= s;
+    return b;
+  }
 
   static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
   static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
