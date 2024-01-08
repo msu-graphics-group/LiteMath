@@ -173,6 +173,82 @@ float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, f
   return res;
 }
 
+template<> 
+float4 LiteImage::Image2D<float>::sample(const LiteImage::Sampler& a_sampler, float2 a_uv) const
+{
+  float ffx = a_uv.x * m_fw - 0.5f; // a_texCoord should not be very large, so that the float does not overflow later. 
+  float ffy = a_uv.y * m_fh - 0.5f; // This is left to the responsibility of the top level.
+
+  if ((a_sampler.addressU == Sampler::AddressMode::CLAMP) != 0 && ffx < 0) ffx = 0.0f;
+  if ((a_sampler.addressV == Sampler::AddressMode::CLAMP) != 0 && ffy < 0) ffy = 0.0f;
+  
+  float res;
+  switch (a_sampler.filter)
+  {
+    case Sampler::Filter::LINEAR:
+    {
+      // Calculate the weights for each pixel
+      //
+      const int   px = (int)(ffx);
+      const int   py = (int)(ffy);
+  
+      const float fx  = std::abs(ffx - (float)px);
+      const float fy  = std::abs(ffy - (float)py);
+      const float fx1 = 1.0f - fx;
+      const float fy1 = 1.0f - fy;
+  
+      const float w1 = fx1 * fy1;
+      const float w2 = fx  * fy1;
+      const float w3 = fx1 * fy;
+      const float w4 = fx  * fy;
+  
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height);
+      const float f1     = m_data[offsets.x];
+      const float f2     = m_data[offsets.y];
+      const float f3     = m_data[offsets.z];
+      const float f4     = m_data[offsets.w];
+
+      // Calculate the weighted sum of pixels (for each color channel)
+      //
+      res =  f1 * w1 + f2 * w2 + f3 * w3 + f4 * w4;
+    }
+    break;
+
+    case Sampler::Filter::NEAREST:
+    default:
+    {
+      int px = (ffx > 0.0f) ? (int)(ffx + 0.5f) : (int)(ffx - 0.5f);
+      int py = (ffy > 0.0f) ? (int)(ffy + 0.5f) : (int)(ffy - 0.5f);
+
+      if (a_sampler.addressU == Sampler::AddressMode::CLAMP)
+      {
+        px = (px >= int(m_width)) ? m_width - 1 : px;
+        px = (px < 0) ? 0 : px;
+      }
+      else
+      {
+        px = px % m_width;
+        px = (px < 0) ? px + m_width : px;
+      }
+  
+      if (a_sampler.addressV == Sampler::AddressMode::CLAMP)
+      {
+        py = (py >= int(m_height)) ? m_height - 1 : py;
+        py = (py < 0) ? 0 : py;
+      }
+      else
+      {
+        py = py % m_height;
+        py = (py < 0) ? py + m_height : py;
+      }
+      res = m_data[py*m_width + px];
+    }
+    break;
+  };
+  
+  return float4(res, res, res, res);
+}
+
 // // https://www.shadertoy.com/view/WlG3zG
 // inline float4 exp2m1(float4 v) { return float4(std::exp2(v.x), std::exp2(v.y), std::exp2(v.z), std::exp2(v.w)) - float4(1.0f); }
 // inline float4 pow_22(float4 x) { return (exp2m1(0.718151f*x)-0.503456f*x)*7.07342f; }
@@ -1204,7 +1280,7 @@ LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, fl
   size_t imSize = size_t(rgbImage.width()*rgbImage.height());
   for(size_t i=0;i<imSize;i++) {
     float3 color = rgbImage.data()[i];
-    result.data()[i] = 0.333334f*(color[0] + color[1] + color[2]);
+    result.data()[i] = 0.3333334f*(color[0] + color[1] + color[2]);
   }
   return result;
 }
