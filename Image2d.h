@@ -8,6 +8,10 @@
 
 #include "LiteMath.h"
 
+#ifdef LoadImage
+#undef LoadImage
+#endif
+
 namespace LiteImage 
 {
   using LiteMath::float2;
