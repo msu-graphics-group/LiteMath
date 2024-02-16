@@ -1657,33 +1657,34 @@ namespace LiteMath
   // complex numbers adapted from PBRT-v4
   struct complex 
   {
-    complex(float re) : re(re), im(0) {}
-    complex(float re, float im) : re(re), im(im) {}
+    inline complex() : re(0), im(0) {}
+    inline complex(float re) : re(re), im(0) {}
+    inline complex(float re, float im) : re(re), im(im) {}
 
-    complex operator-() const { return {-re, -im}; }
+    inline complex operator-() const { return {-re, -im}; }
 
-    complex operator+(complex z) const { return {re + z.re, im + z.im}; }
+    inline complex operator+(complex z) const { return {re + z.re, im + z.im}; }
 
-    complex operator-(complex z) const { return {re - z.re, im - z.im}; }
+    inline complex operator-(complex z) const { return {re - z.re, im - z.im}; }
 
-    complex operator*(complex z) const 
+    inline complex operator*(complex z) const 
     {
         return {re * z.re - im * z.im, re * z.im + im * z.re};
     }
 
-    complex operator/(complex z) const 
+    inline complex operator/(complex z) const 
     {
         float scale = 1 / (z.re * z.re + z.im * z.im);
         return {scale * (re * z.re + im * z.im), scale * (im * z.re - re * z.im)};
     }
 
-    friend complex operator+(float value, complex z) { return complex(value) + z; }
+    inline friend complex operator+(float value, complex z) { return complex(value) + z; }
 
-    friend complex operator-(float value, complex z) { return complex(value) - z; }
+    inline friend complex operator-(float value, complex z) { return complex(value) - z; }
 
-    friend complex operator*(float value, complex z) { return complex(value) * z; }
+    inline friend complex operator*(float value, complex z) { return complex(value) * z; }
 
-    friend complex operator/(float value, complex z) { return complex(value) / z; }
+    inline friend complex operator/(float value, complex z) { return complex(value) / z; }
 
 
     float re, im;
