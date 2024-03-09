@@ -173,6 +173,7 @@ namespace LiteMath
   static inline uint4 operator-(const uint4 a, const uint4 b) { return uint4{a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w}; }
   static inline uint4 operator*(const uint4 a, const uint4 b) { return uint4{a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w}; }
   static inline uint4 operator/(const uint4 a, const uint4 b) { return uint4{a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w}; }
+  static inline uint4 operator-(const uint4 a) { return uint4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline uint4 operator * (const uint4 a, uint b) { return uint4{a.x * b, a.y * b, a.z * b, a.w * b}; }
   static inline uint4 operator / (const uint4 a, uint b) { return uint4{a.x / b, a.y / b, a.z / b, a.w / b}; }
@@ -285,6 +286,7 @@ namespace LiteMath
   static inline int4 operator-(const int4 a, const int4 b) { return int4{a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w}; }
   static inline int4 operator*(const int4 a, const int4 b) { return int4{a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w}; }
   static inline int4 operator/(const int4 a, const int4 b) { return int4{a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w}; }
+  static inline int4 operator-(const int4 a) { return int4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline int4 operator * (const int4 a, int b) { return int4{a.x * b, a.y * b, a.z * b, a.w * b}; }
   static inline int4 operator / (const int4 a, int b) { return int4{a.x / b, a.y / b, a.z / b, a.w / b}; }
@@ -400,6 +402,7 @@ namespace LiteMath
   static inline float4 operator-(const float4 a, const float4 b) { return float4{a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w}; }
   static inline float4 operator*(const float4 a, const float4 b) { return float4{a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w}; }
   static inline float4 operator/(const float4 a, const float4 b) { return float4{a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w}; }
+  static inline float4 operator-(const float4 a) { return float4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline float4 operator * (const float4 a, float b) { return float4{a.x * b, a.y * b, a.z * b, a.w * b}; }
   static inline float4 operator / (const float4 a, float b) { return float4{a.x / b, a.y / b, a.z / b, a.w / b}; }
@@ -535,6 +538,7 @@ namespace LiteMath
   static inline uint3 operator-(const uint3 a, const uint3 b) { return uint3{a.x - b.x, a.y - b.y, a.z - b.z}; }
   static inline uint3 operator*(const uint3 a, const uint3 b) { return uint3{a.x * b.x, a.y * b.y, a.z * b.z}; }
   static inline uint3 operator/(const uint3 a, const uint3 b) { return uint3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+  static inline uint3 operator-(const uint3 a) { return uint3{-a.x, -a.y, -a.z}; }
 
   static inline uint3 operator * (const uint3 a, uint b) { return uint3{a.x * b, a.y * b, a.z * b}; }
   static inline uint3 operator / (const uint3 a, uint b) { return uint3{a.x / b, a.y / b, a.z / b}; }
@@ -642,6 +646,7 @@ namespace LiteMath
   static inline int3 operator-(const int3 a, const int3 b) { return int3{a.x - b.x, a.y - b.y, a.z - b.z}; }
   static inline int3 operator*(const int3 a, const int3 b) { return int3{a.x * b.x, a.y * b.y, a.z * b.z}; }
   static inline int3 operator/(const int3 a, const int3 b) { return int3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+  static inline int3 operator-(const int3 a) { return int3{-a.x, -a.y, -a.z}; }
 
   static inline int3 operator * (const int3 a, int b) { return int3{a.x * b, a.y * b, a.z * b}; }
   static inline int3 operator / (const int3 a, int b) { return int3{a.x / b, a.y / b, a.z / b}; }
@@ -752,6 +757,7 @@ namespace LiteMath
   static inline float3 operator-(const float3 a, const float3 b) { return float3{a.x - b.x, a.y - b.y, a.z - b.z}; }
   static inline float3 operator*(const float3 a, const float3 b) { return float3{a.x * b.x, a.y * b.y, a.z * b.z}; }
   static inline float3 operator/(const float3 a, const float3 b) { return float3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+  static inline float3 operator-(const float3 a) { return float3{-a.x, -a.y, -a.z}; }
 
   static inline float3 operator * (const float3 a, float b) { return float3{a.x * b, a.y * b, a.z * b}; }
   static inline float3 operator / (const float3 a, float b) { return float3{a.x / b, a.y / b, a.z / b}; }
@@ -861,6 +867,7 @@ namespace LiteMath
   static inline uint2 operator-(const uint2 a, const uint2 b) { return uint2{a.x - b.x, a.y - b.y}; }
   static inline uint2 operator*(const uint2 a, const uint2 b) { return uint2{a.x * b.x, a.y * b.y}; }
   static inline uint2 operator/(const uint2 a, const uint2 b) { return uint2{a.x / b.x, a.y / b.y}; }
+  static inline uint2 operator-(const uint2 a) { return uint2{-a.x, -a.y}; }
 
   static inline uint2 operator * (const uint2 a, uint b) { return uint2{a.x * b, a.y * b}; }
   static inline uint2 operator / (const uint2 a, uint b) { return uint2{a.x / b, a.y / b}; }
@@ -952,6 +959,7 @@ namespace LiteMath
   static inline int2 operator-(const int2 a, const int2 b) { return int2{a.x - b.x, a.y - b.y}; }
   static inline int2 operator*(const int2 a, const int2 b) { return int2{a.x * b.x, a.y * b.y}; }
   static inline int2 operator/(const int2 a, const int2 b) { return int2{a.x / b.x, a.y / b.y}; }
+  static inline int2 operator-(const int2 a) { return int2{-a.x, -a.y}; }
 
   static inline int2 operator * (const int2 a, int b) { return int2{a.x * b, a.y * b}; }
   static inline int2 operator / (const int2 a, int b) { return int2{a.x / b, a.y / b}; }
@@ -1046,6 +1054,7 @@ namespace LiteMath
   static inline float2 operator-(const float2 a, const float2 b) { return float2{a.x - b.x, a.y - b.y}; }
   static inline float2 operator*(const float2 a, const float2 b) { return float2{a.x * b.x, a.y * b.y}; }
   static inline float2 operator/(const float2 a, const float2 b) { return float2{a.x / b.x, a.y / b.y}; }
+  static inline float2 operator-(const float2 a) { return float2{-a.x, -a.y}; }
 
   static inline float2 operator * (const float2 a, float b) { return float2{a.x * b, a.y * b}; }
   static inline float2 operator / (const float2 a, float b) { return float2{a.x / b, a.y / b}; }
