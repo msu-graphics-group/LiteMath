@@ -1386,13 +1386,18 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
     }
 
     img.resize(width,height);
-    const size_t imSize = size_t(width*height);
-    for(size_t i=0;i<imSize;i++)
+    
+    size_t i = 0;
+    for(size_t y = 0; y < size_t(height); ++y)
     {
-      unsigned r = imgData[i*channels+0];
-      unsigned g = imgData[i*channels+1];
-      unsigned b = imgData[i*channels+2];
-      img.data()[i] = r | (g << 8) | (b << 16);
+      for(size_t x = 0; x < size_t(width); ++x)
+      {
+        size_t idx = x + (height - y  - 1) * width;
+        unsigned r = imgData[idx * channels + 0];
+        unsigned g = imgData[idx * channels + 1];
+        unsigned b = imgData[idx * channels + 2];
+        img.data()[i++] = r | (g << 8) | (b << 16);
+      }
     }
 
     stbi_image_free(imgData);
