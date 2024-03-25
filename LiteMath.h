@@ -1667,8 +1667,8 @@ namespace LiteMath
   struct complex 
   {
     inline complex() : re(0), im(0) {}
-    inline complex(float re) : re(re), im(0) {}
-    inline complex(float re, float im) : re(re), im(im) {}
+    inline complex(float re_) : re(re_), im(0) {}
+    inline complex(float re_, float im_) : re(re_), im(im_) {}
 
     inline complex operator-() const { return {-re, -im}; }
 
