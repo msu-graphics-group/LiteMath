@@ -15,13 +15,3 @@ Lightweight image implementation for most common tasts: mainly for algorithms pr
 
 # Examples
 TBD
-
-## How to get code coverage in HTML
-
-* sudo apt-get install gcovr
-* mkdir build && cd build 
-* cmake -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON .. -DUSE_STB_IMAGE=ON
-* make -j 8
-* make coverage
-* see results in 'coverage' directory
-
