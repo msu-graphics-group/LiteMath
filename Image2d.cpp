@@ -1392,7 +1392,7 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
     {
       for(size_t x = 0; x < size_t(width); ++x)
       {
-        size_t idx = x + (height - y  - 1) * width;
+        size_t idx = x + y * width;
         unsigned r = imgData[idx * channels + 0];
         unsigned g = imgData[idx * channels + 1];
         unsigned b = imgData[idx * channels + 2];
