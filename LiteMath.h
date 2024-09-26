@@ -142,6 +142,7 @@ namespace LiteMath
   struct uint3;
   struct int3;
   struct float3;
+  struct double3;
   struct uint2;
   struct int2;
   struct float2;
@@ -836,6 +837,481 @@ namespace LiteMath
   {
     const float3 a_yzx = shuffle_yzx(a);
     const float3 b_yzx = shuffle_yzx(b);
+    return shuffle_yzx(a*b_yzx - a_yzx*b);
+  }
+ 
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  struct double3
+  {
+    inline double3() : x(0), y(0), z(0) {}
+    inline double3(double a_x, double a_y, double a_z) : x(a_x), y(a_y), z(a_z) {}
+    inline explicit double3(double a_val) : x(a_val), y(a_val), z(a_val) {}
+    inline explicit double3(const double a[3]) : x(a[0]), y(a[1]), z(a[2]) {}
+
+    inline explicit double3(float3 a); 
+    inline explicit double3(int3 a); 
+    
+    inline double& operator[](int i)       { return M[i]; }
+    inline double  operator[](int i) const { return M[i]; }
+
+    union
+    {
+      struct { double x, y, z; };
+      #ifdef LAYOUT_STD140
+      double M[4];
+      #else
+      double M[3];
+      #endif
+    };
+  };
+
+  static inline double3 operator+(const double3 a, const double3 b) { return double3{a.x + b.x, a.y + b.y, a.z + b.z}; }
+  static inline double3 operator-(const double3 a, const double3 b) { return double3{a.x - b.x, a.y - b.y, a.z - b.z}; }
+  static inline double3 operator*(const double3 a, const double3 b) { return double3{a.x * b.x, a.y * b.y, a.z * b.z}; }
+  static inline double3 operator/(const double3 a, const double3 b) { return double3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+
+  static inline double3 operator * (const double3 a, double b) { return double3{a.x * b, a.y * b, a.z * b}; }
+  static inline double3 operator / (const double3 a, double b) { return double3{a.x / b, a.y / b, a.z / b}; }
+  static inline double3 operator * (double a, const double3 b) { return double3{a * b.x, a * b.y, a * b.z}; }
+  static inline double3 operator / (double a, const double3 b) { return double3{a / b.x, a / b.y, a / b.z}; }
+
+  static inline double3 operator + (const double3 a, double b) { return double3{a.x + b, a.y + b, a.z + b}; }
+  static inline double3 operator - (const double3 a, double b) { return double3{a.x - b, a.y - b, a.z - b}; }
+  static inline double3 operator + (double a, const double3 b) { return double3{a + b.x, a + b.y, a + b.z}; }
+  static inline double3 operator - (double a, const double3 b) { return double3{a - b.x, a - b.y, a - b.z}; }
+
+  static inline double3& operator *= (double3& a, const double3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
+  static inline double3& operator /= (double3& a, const double3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
+  static inline double3& operator *= (double3& a, double b) { a.x *= b; a.y *= b; a.z *= b;  return a; }
+  static inline double3& operator /= (double3& a, double b) { a.x /= b; a.y /= b; a.z /= b;  return a; }
+
+  static inline double3& operator += (double3& a, const double3 b) { a.x += b.x; a.y += b.y; a.z += b.z;  return a; }
+  static inline double3& operator -= (double3& a, const double3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z;  return a; }
+  static inline double3& operator += (double3& a, double b) { a.x += b; a.y += b; a.z += b;  return a; }
+  static inline double3& operator -= (double3& a, double b) { a.x -= b; a.y -= b; a.z -= b;  return a; }
+
+  static inline uint3 operator> (const double3 a, const double3 b) { return uint3{a.x >  b.x ? 0xFFFFFFFF : 0, a.y >  b.y ? 0xFFFFFFFF : 0, a.z >  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator< (const double3 a, const double3 b) { return uint3{a.x <  b.x ? 0xFFFFFFFF : 0, a.y <  b.y ? 0xFFFFFFFF : 0, a.z <  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator>=(const double3 a, const double3 b) { return uint3{a.x >= b.x ? 0xFFFFFFFF : 0, a.y >= b.y ? 0xFFFFFFFF : 0, a.z >= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator<=(const double3 a, const double3 b) { return uint3{a.x <= b.x ? 0xFFFFFFFF : 0, a.y <= b.y ? 0xFFFFFFFF : 0, a.z <= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator==(const double3 a, const double3 b) { return uint3{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0, a.z == b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator!=(const double3 a, const double3 b) { return uint3{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0, a.z != b.z ? 0xFFFFFFFF : 0}; }
+
+  static inline void store  (double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }
+  static inline void store_u(double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }  
+
+
+  static inline double3 min  (const double3 a, const double3 b) { return double3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
+  static inline double3 max  (const double3 a, const double3 b) { return double3{std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, const double3 a, const double3 b) { return double3{clamp(u.x, a.x, b.x), clamp(u.y, a.y, b.y), clamp(u.z, a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, double a, double b) { return double3{clamp(u.x, a, b), clamp(u.y, a, b), clamp(u.z, a, b)}; }
+
+  static inline double3 abs (const double3 a) { return double3{std::abs(a.x), std::abs(a.y), std::abs(a.z)}; } 
+  static inline double3 sign(const double3 a) { return double3{sign(a.x), sign(a.y), sign(a.z)}; }
+
+  static inline double3 lerp(const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 mix (const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 floor(const double3 a)                { return double3{std::floor(a.x), std::floor(a.y), std::floor(a.z)}; }
+  static inline double3 ceil(const double3 a)                 { return double3{std::ceil(a.x), std::ceil(a.y), std::ceil(a.z)}; }
+  static inline double3 rcp (const double3 a)                 { return double3{1.0f/a.x, 1.0f/a.y, 1.0f/a.z}; }
+  static inline double3 mod (const double3 x, const double3 y) { return x - y * floor(x/y); }
+  static inline double3 fract(const double3 x)                { return x - floor(x); }
+  static inline double3 sqrt(const double3 a)                 { return double3{std::sqrt(a.x), std::sqrt(a.y), std::sqrt(a.z)}; }
+  static inline double3 inversesqrt(const double3 a)          { return 1.0f/sqrt(a); }
+  
+  static inline  double dot(const double3 a, const double3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
+
+  static inline  double length(const double3 a) { return std::sqrt(dot(a,a)); }
+  static inline  double3 normalize(const double3 a) { double lenInv = double(1)/length(a); return a*lenInv; }
+
+
+  static inline double3 blend(const double3 a, const double3 b, const uint3 mask) { return double3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
+
+  static inline double extract_0(const double3 a) { return a.x; } 
+  static inline double extract_1(const double3 a) { return a.y; } 
+  static inline double extract_2(const double3 a) { return a.z; } 
+
+  static inline double3 splat_0(const double3 a) { return double3{a.x, a.x, a.x}; } 
+  static inline double3 splat_1(const double3 a) { return double3{a.y, a.y, a.y}; } 
+  static inline double3 splat_2(const double3 a) { return double3{a.z, a.z, a.z}; } 
+
+  static inline double hmin(const double3 a) { return std::min(a.x, std::min(a.y, a.z) ); }
+  static inline double hmax(const double3 a) { return std::max(a.x, std::max(a.y, a.z) ); }
+
+  static inline double3 shuffle_xzy(double3 a) { return double3{a.x, a.z, a.y}; }
+  static inline double3 shuffle_yxz(double3 a) { return double3{a.y, a.x, a.z}; }
+  static inline double3 shuffle_yzx(double3 a) { return double3{a.y, a.z, a.x}; }
+  static inline double3 shuffle_zxy(double3 a) { return double3{a.z, a.x, a.y}; }
+  static inline double3 shuffle_zyx(double3 a) { return double3{a.z, a.y, a.x}; }
+  static inline double3 cross(const double3 a, const double3 b) 
+  {
+    const double3 a_yzx = shuffle_yzx(a);
+    const double3 b_yzx = shuffle_yzx(b);
+    return shuffle_yzx(a*b_yzx - a_yzx*b);
+  }
+ 
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  struct double3
+  {
+    inline double3() : x(0), y(0), z(0) {}
+    inline double3(double a_x, double a_y, double a_z) : x(a_x), y(a_y), z(a_z) {}
+    inline explicit double3(double a_val) : x(a_val), y(a_val), z(a_val) {}
+    inline explicit double3(const double a[3]) : x(a[0]), y(a[1]), z(a[2]) {}
+
+    inline explicit double3(float3 a); 
+    inline explicit double3(int3 a); 
+    
+    inline double& operator[](int i)       { return M[i]; }
+    inline double  operator[](int i) const { return M[i]; }
+
+    union
+    {
+      struct { double x, y, z; };
+      #ifdef LAYOUT_STD140
+      double M[4];
+      #else
+      double M[3];
+      #endif
+    };
+  };
+
+  static inline double3 operator+(const double3 a, const double3 b) { return double3{a.x + b.x, a.y + b.y, a.z + b.z}; }
+  static inline double3 operator-(const double3 a, const double3 b) { return double3{a.x - b.x, a.y - b.y, a.z - b.z}; }
+  static inline double3 operator*(const double3 a, const double3 b) { return double3{a.x * b.x, a.y * b.y, a.z * b.z}; }
+  static inline double3 operator/(const double3 a, const double3 b) { return double3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+
+  static inline double3 operator * (const double3 a, double b) { return double3{a.x * b, a.y * b, a.z * b}; }
+  static inline double3 operator / (const double3 a, double b) { return double3{a.x / b, a.y / b, a.z / b}; }
+  static inline double3 operator * (double a, const double3 b) { return double3{a * b.x, a * b.y, a * b.z}; }
+  static inline double3 operator / (double a, const double3 b) { return double3{a / b.x, a / b.y, a / b.z}; }
+
+  static inline double3 operator + (const double3 a, double b) { return double3{a.x + b, a.y + b, a.z + b}; }
+  static inline double3 operator - (const double3 a, double b) { return double3{a.x - b, a.y - b, a.z - b}; }
+  static inline double3 operator + (double a, const double3 b) { return double3{a + b.x, a + b.y, a + b.z}; }
+  static inline double3 operator - (double a, const double3 b) { return double3{a - b.x, a - b.y, a - b.z}; }
+
+  static inline double3& operator *= (double3& a, const double3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
+  static inline double3& operator /= (double3& a, const double3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
+  static inline double3& operator *= (double3& a, double b) { a.x *= b; a.y *= b; a.z *= b;  return a; }
+  static inline double3& operator /= (double3& a, double b) { a.x /= b; a.y /= b; a.z /= b;  return a; }
+
+  static inline double3& operator += (double3& a, const double3 b) { a.x += b.x; a.y += b.y; a.z += b.z;  return a; }
+  static inline double3& operator -= (double3& a, const double3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z;  return a; }
+  static inline double3& operator += (double3& a, double b) { a.x += b; a.y += b; a.z += b;  return a; }
+  static inline double3& operator -= (double3& a, double b) { a.x -= b; a.y -= b; a.z -= b;  return a; }
+
+  static inline uint3 operator> (const double3 a, const double3 b) { return uint3{a.x >  b.x ? 0xFFFFFFFF : 0, a.y >  b.y ? 0xFFFFFFFF : 0, a.z >  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator< (const double3 a, const double3 b) { return uint3{a.x <  b.x ? 0xFFFFFFFF : 0, a.y <  b.y ? 0xFFFFFFFF : 0, a.z <  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator>=(const double3 a, const double3 b) { return uint3{a.x >= b.x ? 0xFFFFFFFF : 0, a.y >= b.y ? 0xFFFFFFFF : 0, a.z >= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator<=(const double3 a, const double3 b) { return uint3{a.x <= b.x ? 0xFFFFFFFF : 0, a.y <= b.y ? 0xFFFFFFFF : 0, a.z <= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator==(const double3 a, const double3 b) { return uint3{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0, a.z == b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator!=(const double3 a, const double3 b) { return uint3{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0, a.z != b.z ? 0xFFFFFFFF : 0}; }
+
+  static inline void store  (double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }
+  static inline void store_u(double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }  
+
+
+  static inline double3 min  (const double3 a, const double3 b) { return double3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
+  static inline double3 max  (const double3 a, const double3 b) { return double3{std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, const double3 a, const double3 b) { return double3{clamp(u.x, a.x, b.x), clamp(u.y, a.y, b.y), clamp(u.z, a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, double a, double b) { return double3{clamp(u.x, a, b), clamp(u.y, a, b), clamp(u.z, a, b)}; }
+
+  static inline double3 abs (const double3 a) { return double3{std::abs(a.x), std::abs(a.y), std::abs(a.z)}; } 
+  static inline double3 sign(const double3 a) { return double3{sign(a.x), sign(a.y), sign(a.z)}; }
+
+  static inline double3 lerp(const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 mix (const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 floor(const double3 a)                { return double3{std::floor(a.x), std::floor(a.y), std::floor(a.z)}; }
+  static inline double3 ceil(const double3 a)                 { return double3{std::ceil(a.x), std::ceil(a.y), std::ceil(a.z)}; }
+  static inline double3 rcp (const double3 a)                 { return double3{1.0f/a.x, 1.0f/a.y, 1.0f/a.z}; }
+  static inline double3 mod (const double3 x, const double3 y) { return x - y * floor(x/y); }
+  static inline double3 fract(const double3 x)                { return x - floor(x); }
+  static inline double3 sqrt(const double3 a)                 { return double3{std::sqrt(a.x), std::sqrt(a.y), std::sqrt(a.z)}; }
+  static inline double3 inversesqrt(const double3 a)          { return 1.0f/sqrt(a); }
+  
+  static inline  double dot(const double3 a, const double3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
+
+  static inline  double length(const double3 a) { return std::sqrt(dot(a,a)); }
+  static inline  double3 normalize(const double3 a) { double lenInv = double(1)/length(a); return a*lenInv; }
+
+
+  static inline double3 blend(const double3 a, const double3 b, const uint3 mask) { return double3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
+
+  static inline double extract_0(const double3 a) { return a.x; } 
+  static inline double extract_1(const double3 a) { return a.y; } 
+  static inline double extract_2(const double3 a) { return a.z; } 
+
+  static inline double3 splat_0(const double3 a) { return double3{a.x, a.x, a.x}; } 
+  static inline double3 splat_1(const double3 a) { return double3{a.y, a.y, a.y}; } 
+  static inline double3 splat_2(const double3 a) { return double3{a.z, a.z, a.z}; } 
+
+  static inline double hmin(const double3 a) { return std::min(a.x, std::min(a.y, a.z) ); }
+  static inline double hmax(const double3 a) { return std::max(a.x, std::max(a.y, a.z) ); }
+
+  static inline double3 shuffle_xzy(double3 a) { return double3{a.x, a.z, a.y}; }
+  static inline double3 shuffle_yxz(double3 a) { return double3{a.y, a.x, a.z}; }
+  static inline double3 shuffle_yzx(double3 a) { return double3{a.y, a.z, a.x}; }
+  static inline double3 shuffle_zxy(double3 a) { return double3{a.z, a.x, a.y}; }
+  static inline double3 shuffle_zyx(double3 a) { return double3{a.z, a.y, a.x}; }
+  static inline double3 cross(const double3 a, const double3 b) 
+  {
+    const double3 a_yzx = shuffle_yzx(a);
+    const double3 b_yzx = shuffle_yzx(b);
+    return shuffle_yzx(a*b_yzx - a_yzx*b);
+  }
+ 
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  struct double3
+  {
+    inline double3() : x(0), y(0), z(0) {}
+    inline double3(double a_x, double a_y, double a_z) : x(a_x), y(a_y), z(a_z) {}
+    inline explicit double3(double a_val) : x(a_val), y(a_val), z(a_val) {}
+    inline explicit double3(const double a[3]) : x(a[0]), y(a[1]), z(a[2]) {}
+
+    inline explicit double3(float3 a); 
+    inline explicit double3(int3 a); 
+    
+    inline double& operator[](int i)       { return M[i]; }
+    inline double  operator[](int i) const { return M[i]; }
+
+    union
+    {
+      struct { double x, y, z; };
+      #ifdef LAYOUT_STD140
+      double M[4];
+      #else
+      double M[3];
+      #endif
+    };
+  };
+
+  static inline double3 operator+(const double3 a, const double3 b) { return double3{a.x + b.x, a.y + b.y, a.z + b.z}; }
+  static inline double3 operator-(const double3 a, const double3 b) { return double3{a.x - b.x, a.y - b.y, a.z - b.z}; }
+  static inline double3 operator*(const double3 a, const double3 b) { return double3{a.x * b.x, a.y * b.y, a.z * b.z}; }
+  static inline double3 operator/(const double3 a, const double3 b) { return double3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+
+  static inline double3 operator * (const double3 a, double b) { return double3{a.x * b, a.y * b, a.z * b}; }
+  static inline double3 operator / (const double3 a, double b) { return double3{a.x / b, a.y / b, a.z / b}; }
+  static inline double3 operator * (double a, const double3 b) { return double3{a * b.x, a * b.y, a * b.z}; }
+  static inline double3 operator / (double a, const double3 b) { return double3{a / b.x, a / b.y, a / b.z}; }
+
+  static inline double3 operator + (const double3 a, double b) { return double3{a.x + b, a.y + b, a.z + b}; }
+  static inline double3 operator - (const double3 a, double b) { return double3{a.x - b, a.y - b, a.z - b}; }
+  static inline double3 operator + (double a, const double3 b) { return double3{a + b.x, a + b.y, a + b.z}; }
+  static inline double3 operator - (double a, const double3 b) { return double3{a - b.x, a - b.y, a - b.z}; }
+
+  static inline double3& operator *= (double3& a, const double3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
+  static inline double3& operator /= (double3& a, const double3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
+  static inline double3& operator *= (double3& a, double b) { a.x *= b; a.y *= b; a.z *= b;  return a; }
+  static inline double3& operator /= (double3& a, double b) { a.x /= b; a.y /= b; a.z /= b;  return a; }
+
+  static inline double3& operator += (double3& a, const double3 b) { a.x += b.x; a.y += b.y; a.z += b.z;  return a; }
+  static inline double3& operator -= (double3& a, const double3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z;  return a; }
+  static inline double3& operator += (double3& a, double b) { a.x += b; a.y += b; a.z += b;  return a; }
+  static inline double3& operator -= (double3& a, double b) { a.x -= b; a.y -= b; a.z -= b;  return a; }
+
+  static inline uint3 operator> (const double3 a, const double3 b) { return uint3{a.x >  b.x ? 0xFFFFFFFF : 0, a.y >  b.y ? 0xFFFFFFFF : 0, a.z >  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator< (const double3 a, const double3 b) { return uint3{a.x <  b.x ? 0xFFFFFFFF : 0, a.y <  b.y ? 0xFFFFFFFF : 0, a.z <  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator>=(const double3 a, const double3 b) { return uint3{a.x >= b.x ? 0xFFFFFFFF : 0, a.y >= b.y ? 0xFFFFFFFF : 0, a.z >= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator<=(const double3 a, const double3 b) { return uint3{a.x <= b.x ? 0xFFFFFFFF : 0, a.y <= b.y ? 0xFFFFFFFF : 0, a.z <= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator==(const double3 a, const double3 b) { return uint3{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0, a.z == b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator!=(const double3 a, const double3 b) { return uint3{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0, a.z != b.z ? 0xFFFFFFFF : 0}; }
+
+  static inline void store  (double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }
+  static inline void store_u(double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }  
+
+
+  static inline double3 min  (const double3 a, const double3 b) { return double3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
+  static inline double3 max  (const double3 a, const double3 b) { return double3{std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, const double3 a, const double3 b) { return double3{clamp(u.x, a.x, b.x), clamp(u.y, a.y, b.y), clamp(u.z, a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, double a, double b) { return double3{clamp(u.x, a, b), clamp(u.y, a, b), clamp(u.z, a, b)}; }
+
+  static inline double3 abs (const double3 a) { return double3{std::abs(a.x), std::abs(a.y), std::abs(a.z)}; } 
+  static inline double3 sign(const double3 a) { return double3{sign(a.x), sign(a.y), sign(a.z)}; }
+
+  static inline double3 lerp(const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 mix (const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 floor(const double3 a)                { return double3{std::floor(a.x), std::floor(a.y), std::floor(a.z)}; }
+  static inline double3 ceil(const double3 a)                 { return double3{std::ceil(a.x), std::ceil(a.y), std::ceil(a.z)}; }
+  static inline double3 rcp (const double3 a)                 { return double3{1.0f/a.x, 1.0f/a.y, 1.0f/a.z}; }
+  static inline double3 mod (const double3 x, const double3 y) { return x - y * floor(x/y); }
+  static inline double3 fract(const double3 x)                { return x - floor(x); }
+  static inline double3 sqrt(const double3 a)                 { return double3{std::sqrt(a.x), std::sqrt(a.y), std::sqrt(a.z)}; }
+  static inline double3 inversesqrt(const double3 a)          { return 1.0f/sqrt(a); }
+  
+  static inline  double dot(const double3 a, const double3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
+
+  static inline  double length(const double3 a) { return std::sqrt(dot(a,a)); }
+  static inline  double3 normalize(const double3 a) { double lenInv = double(1)/length(a); return a*lenInv; }
+
+
+  static inline double3 blend(const double3 a, const double3 b, const uint3 mask) { return double3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
+
+  static inline double extract_0(const double3 a) { return a.x; } 
+  static inline double extract_1(const double3 a) { return a.y; } 
+  static inline double extract_2(const double3 a) { return a.z; } 
+
+  static inline double3 splat_0(const double3 a) { return double3{a.x, a.x, a.x}; } 
+  static inline double3 splat_1(const double3 a) { return double3{a.y, a.y, a.y}; } 
+  static inline double3 splat_2(const double3 a) { return double3{a.z, a.z, a.z}; } 
+
+  static inline double hmin(const double3 a) { return std::min(a.x, std::min(a.y, a.z) ); }
+  static inline double hmax(const double3 a) { return std::max(a.x, std::max(a.y, a.z) ); }
+
+  static inline double3 shuffle_xzy(double3 a) { return double3{a.x, a.z, a.y}; }
+  static inline double3 shuffle_yxz(double3 a) { return double3{a.y, a.x, a.z}; }
+  static inline double3 shuffle_yzx(double3 a) { return double3{a.y, a.z, a.x}; }
+  static inline double3 shuffle_zxy(double3 a) { return double3{a.z, a.x, a.y}; }
+  static inline double3 shuffle_zyx(double3 a) { return double3{a.z, a.y, a.x}; }
+  static inline double3 cross(const double3 a, const double3 b) 
+  {
+    const double3 a_yzx = shuffle_yzx(a);
+    const double3 b_yzx = shuffle_yzx(b);
+    return shuffle_yzx(a*b_yzx - a_yzx*b);
+  }
+ 
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  struct double3
+  {
+    inline double3() : x(0), y(0), z(0) {}
+    inline double3(double a_x, double a_y, double a_z) : x(a_x), y(a_y), z(a_z) {}
+    inline explicit double3(double a_val) : x(a_val), y(a_val), z(a_val) {}
+    inline explicit double3(const double a[3]) : x(a[0]), y(a[1]), z(a[2]) {}
+
+    inline explicit double3(float3 a); 
+    inline explicit double3(int3 a); 
+    
+    inline double& operator[](int i)       { return M[i]; }
+    inline double  operator[](int i) const { return M[i]; }
+
+    union
+    {
+      struct { double x, y, z; };
+      #ifdef LAYOUT_STD140
+      double M[4];
+      #else
+      double M[3];
+      #endif
+    };
+  };
+
+
+  inline double3::double3(float3 a) : x(double(a[0])), y(double(a[1])), z(double(a[2])) {} 
+  inline double3::double3(int3 a) : x(double(a[0])), y(double(a[1])), z(double(a[2])) {} 
+  
+  static inline double3 reflect(const double3 dir, const double3 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
+  static inline double3 refract(const double3 incidentVec, const double3 normal, double eta)
+  {
+    double N_dot_I = dot(normal, incidentVec);
+    double k = double(1.f) - eta * eta * (double(1.f) - N_dot_I * N_dot_I);
+    if (k < double(0.f))
+      return double3(0.f);
+    else
+      return eta * incidentVec - (eta * N_dot_I + std::sqrt(k)) * normal;
+  }
+  // A floating-point, surface normal vector that is facing the view direction
+  static inline double3 faceforward(const double3 N, const double3 I, const double3 Ng) { return dot(I, Ng) < double(0) ? N : double(-1)*N; }
+ 
+
+  inline uint2::uint2(float2 a) : x(uint(a[0])), y(uint(a[1])) {} 
+  inline uint2::uint2(int2 a) : x(uint(a[0])), y(uint(a[1])) {} 
+  
+
+  static inline float2 to_float32(const uint2 a) { return float2 {float(a.x), float(a.y)}; }
+  static inline double3 operator+(const double3 a, const double3 b) { return double3{a.x + b.x, a.y + b.y, a.z + b.z}; }
+  static inline double3 operator-(const double3 a, const double3 b) { return double3{a.x - b.x, a.y - b.y, a.z - b.z}; }
+  static inline double3 operator*(const double3 a, const double3 b) { return double3{a.x * b.x, a.y * b.y, a.z * b.z}; }
+  static inline double3 operator/(const double3 a, const double3 b) { return double3{a.x / b.x, a.y / b.y, a.z / b.z}; }
+
+  static inline double3 operator * (const double3 a, double b) { return double3{a.x * b, a.y * b, a.z * b}; }
+  static inline double3 operator / (const double3 a, double b) { return double3{a.x / b, a.y / b, a.z / b}; }
+  static inline double3 operator * (double a, const double3 b) { return double3{a * b.x, a * b.y, a * b.z}; }
+  static inline double3 operator / (double a, const double3 b) { return double3{a / b.x, a / b.y, a / b.z}; }
+
+  static inline double3 operator + (const double3 a, double b) { return double3{a.x + b, a.y + b, a.z + b}; }
+  static inline double3 operator - (const double3 a, double b) { return double3{a.x - b, a.y - b, a.z - b}; }
+  static inline double3 operator + (double a, const double3 b) { return double3{a + b.x, a + b.y, a + b.z}; }
+  static inline double3 operator - (double a, const double3 b) { return double3{a - b.x, a - b.y, a - b.z}; }
+
+  static inline double3& operator *= (double3& a, const double3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
+  static inline double3& operator /= (double3& a, const double3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
+  static inline double3& operator *= (double3& a, double b) { a.x *= b; a.y *= b; a.z *= b;  return a; }
+  static inline double3& operator /= (double3& a, double b) { a.x /= b; a.y /= b; a.z /= b;  return a; }
+
+  static inline double3& operator += (double3& a, const double3 b) { a.x += b.x; a.y += b.y; a.z += b.z;  return a; }
+  static inline double3& operator -= (double3& a, const double3 b) { a.x -= b.x; a.y -= b.y; a.z -= b.z;  return a; }
+  static inline double3& operator += (double3& a, double b) { a.x += b; a.y += b; a.z += b;  return a; }
+  static inline double3& operator -= (double3& a, double b) { a.x -= b; a.y -= b; a.z -= b;  return a; }
+
+  static inline uint3 operator> (const double3 a, const double3 b) { return uint3{a.x >  b.x ? 0xFFFFFFFF : 0, a.y >  b.y ? 0xFFFFFFFF : 0, a.z >  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator< (const double3 a, const double3 b) { return uint3{a.x <  b.x ? 0xFFFFFFFF : 0, a.y <  b.y ? 0xFFFFFFFF : 0, a.z <  b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator>=(const double3 a, const double3 b) { return uint3{a.x >= b.x ? 0xFFFFFFFF : 0, a.y >= b.y ? 0xFFFFFFFF : 0, a.z >= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator<=(const double3 a, const double3 b) { return uint3{a.x <= b.x ? 0xFFFFFFFF : 0, a.y <= b.y ? 0xFFFFFFFF : 0, a.z <= b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator==(const double3 a, const double3 b) { return uint3{a.x == b.x ? 0xFFFFFFFF : 0, a.y == b.y ? 0xFFFFFFFF : 0, a.z == b.z ? 0xFFFFFFFF : 0}; }
+  static inline uint3 operator!=(const double3 a, const double3 b) { return uint3{a.x != b.x ? 0xFFFFFFFF : 0, a.y != b.y ? 0xFFFFFFFF : 0, a.z != b.z ? 0xFFFFFFFF : 0}; }
+
+  static inline void store  (double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }
+  static inline void store_u(double* p, const double3 a_val) { memcpy((void*)p, (void*)&a_val, sizeof(double)*3); }  
+
+
+  static inline double3 min  (const double3 a, const double3 b) { return double3{std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)}; }
+  static inline double3 max  (const double3 a, const double3 b) { return double3{std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, const double3 a, const double3 b) { return double3{clamp(u.x, a.x, b.x), clamp(u.y, a.y, b.y), clamp(u.z, a.z, b.z)}; }
+  static inline double3 clamp(const double3 u, double a, double b) { return double3{clamp(u.x, a, b), clamp(u.y, a, b), clamp(u.z, a, b)}; }
+
+  static inline double3 abs (const double3 a) { return double3{std::abs(a.x), std::abs(a.y), std::abs(a.z)}; } 
+  static inline double3 sign(const double3 a) { return double3{sign(a.x), sign(a.y), sign(a.z)}; }
+
+  static inline double3 lerp(const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 mix (const double3 a, const double3 b, double t) { return a + t * (b - a); }
+  static inline double3 floor(const double3 a)                { return double3{std::floor(a.x), std::floor(a.y), std::floor(a.z)}; }
+  static inline double3 ceil(const double3 a)                 { return double3{std::ceil(a.x), std::ceil(a.y), std::ceil(a.z)}; }
+  static inline double3 rcp (const double3 a)                 { return double3{1.0f/a.x, 1.0f/a.y, 1.0f/a.z}; }
+  static inline double3 mod (const double3 x, const double3 y) { return x - y * floor(x/y); }
+  static inline double3 fract(const double3 x)                { return x - floor(x); }
+  static inline double3 sqrt(const double3 a)                 { return double3{std::sqrt(a.x), std::sqrt(a.y), std::sqrt(a.z)}; }
+  static inline double3 inversesqrt(const double3 a)          { return 1.0f/sqrt(a); }
+  
+  static inline  double dot(const double3 a, const double3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
+
+  static inline  double length(const double3 a) { return std::sqrt(dot(a,a)); }
+  static inline  double3 normalize(const double3 a) { double lenInv = double(1)/length(a); return a*lenInv; }
+
+
+  static inline double3 blend(const double3 a, const double3 b, const uint3 mask) { return double3{(mask.x == 0) ? b.x : a.x, (mask.y == 0) ? b.y : a.y, (mask.z == 0) ? b.z : a.z}; }
+
+  static inline double extract_0(const double3 a) { return a.x; } 
+  static inline double extract_1(const double3 a) { return a.y; } 
+  static inline double extract_2(const double3 a) { return a.z; } 
+
+  static inline double3 splat_0(const double3 a) { return double3{a.x, a.x, a.x}; } 
+  static inline double3 splat_1(const double3 a) { return double3{a.y, a.y, a.y}; } 
+  static inline double3 splat_2(const double3 a) { return double3{a.z, a.z, a.z}; } 
+
+  static inline double hmin(const double3 a) { return std::min(a.x, std::min(a.y, a.z) ); }
+  static inline double hmax(const double3 a) { return std::max(a.x, std::max(a.y, a.z) ); }
+
+  static inline double3 shuffle_xzy(double3 a) { return double3{a.x, a.z, a.y}; }
+  static inline double3 shuffle_yxz(double3 a) { return double3{a.y, a.x, a.z}; }
+  static inline double3 shuffle_yzx(double3 a) { return double3{a.y, a.z, a.x}; }
+  static inline double3 shuffle_zxy(double3 a) { return double3{a.z, a.x, a.y}; }
+  static inline double3 shuffle_zyx(double3 a) { return double3{a.z, a.y, a.x}; }
+  static inline double3 cross(const double3 a, const double3 b) 
+  {
+    const double3 a_yzx = shuffle_yzx(a);
+    const double3 b_yzx = shuffle_yzx(b);
     return shuffle_yzx(a*b_yzx - a_yzx*b);
   }
  
