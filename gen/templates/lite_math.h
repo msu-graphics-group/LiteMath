@@ -90,6 +90,7 @@ namespace LiteMath
   static inline uint  as_uint32(float x) { return as_uint(x); }
   static inline float as_float32(int x)  { return as_float(x);  }
 
+  static inline double clamp(double u, double a, double b) { return std::min(std::max(a, u), b); }
   static inline float clamp(float u, float a, float b) { return std::min(std::max(a, u), b); }
   static inline uint  clamp(uint u,  uint a,  uint b)  { return std::min(std::max(a, u), b); }
   static inline int   clamp(int u,   int a,   int b)   { return std::min(std::max(a, u), b); }
@@ -120,6 +121,12 @@ namespace LiteMath
     if(x == 0.0f)     return 0.0f;
     else if(x < 0.0f) return -1.0f;
     else              return +1.0f;
+  } 
+  static inline double sign(double x) // TODO: on some architectures we can try to effitiently check sign bit       
+  { 
+    if(x == 0.0)     return 0.0;
+    else if(x < 0.0) return -1.0;
+    else             return +1.0;
   } 
   
   static inline float inversesqrt(float x) { return 1.0f/std::sqrt(x); }

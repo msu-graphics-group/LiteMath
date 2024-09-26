@@ -207,6 +207,32 @@ int main(int argc, const char** argv)
 
     nlohmann::json test;
     test["Number"]  = currNumber;
+    test["Type"]    = "double3";
+    test["TypeS"]   = "double";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
+    test["TypeC"]   = ByConstRefOrValue(test["Type"]);
+    test["VecLen"]  = 3;
+    test["XYZW"]    = XYZW3;
+    test["ValuesA"] = std::vector<int>({-1, 2, -3});
+    test["ValuesB"] = std::vector<int>({3, -4, 4});
+    test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3});
+    test["IsFloat"]  = true;
+    test["IsSigned"] = true;  
+  
+    dataLocal["Tests"].push_back(test);
+    ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_double3.cpp", dataLocal);
+    currNumber += 20;
+
+    data["AllTests"].push_back(dataLocal);
+  }
+
+  {
+    nlohmann::json dataLocal;
+    dataLocal["Tests"] = std::vector<std::string>();
+
+    nlohmann::json test;
+    test["Number"]  = currNumber;
     test["Type"]    = "uint2";
     test["TypeS"]   = "uint";
     test["TypesCV"] = TypesToConvert(test["TypeS"]);

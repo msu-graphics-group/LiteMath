@@ -103,49 +103,64 @@ bool test209_cstcnv_float3();
 bool test210_other_float3();
 bool test211_any_all_float3();
 
-bool test220_basev_uint2();
-bool test221_basek_uint2();
-bool test222_unaryv_uint2();
-bool test222_unaryk_uint2();
-bool test223_cmpv_uint2();
-bool test224_shuffle_uint2();
-bool test225_exsplat_uint2();
-bool test227_funcv_uint2();
+bool test220_basev_double3();
+bool test221_basek_double3();
+bool test222_unaryv_double3();
+bool test222_unaryk_double3();
+bool test223_cmpv_double3();
+bool test224_shuffle_double3();
+bool test225_exsplat_double3();
+bool test227_funcv_double3();
 
-bool test228_logicv_uint2();
-bool test229_cstcnv_uint2();
+bool test228_funcfv_double3();
+bool test229_cstcnv_double3();
 
-bool test230_other_uint2();
-bool test231_any_all_uint2();
+bool test230_other_double3();
+bool test231_any_all_double3();
 
-bool test240_basev_int2();
-bool test241_basek_int2();
-bool test242_unaryv_int2();
-bool test242_unaryk_int2();
-bool test243_cmpv_int2();
-bool test244_shuffle_int2();
-bool test245_exsplat_int2();
-bool test247_funcv_int2();
+bool test240_basev_uint2();
+bool test241_basek_uint2();
+bool test242_unaryv_uint2();
+bool test242_unaryk_uint2();
+bool test243_cmpv_uint2();
+bool test244_shuffle_uint2();
+bool test245_exsplat_uint2();
+bool test247_funcv_uint2();
 
-bool test248_logicv_int2();
-bool test249_cstcnv_int2();
+bool test248_logicv_uint2();
+bool test249_cstcnv_uint2();
 
-bool test250_other_int2();
-bool test251_any_all_int2();
+bool test250_other_uint2();
+bool test251_any_all_uint2();
 
-bool test260_basev_float2();
-bool test261_basek_float2();
-bool test262_unaryv_float2();
-bool test262_unaryk_float2();
-bool test263_cmpv_float2();
-bool test264_shuffle_float2();
-bool test265_exsplat_float2();
-bool test267_funcv_float2();
+bool test260_basev_int2();
+bool test261_basek_int2();
+bool test262_unaryv_int2();
+bool test262_unaryk_int2();
+bool test263_cmpv_int2();
+bool test264_shuffle_int2();
+bool test265_exsplat_int2();
+bool test267_funcv_int2();
 
-bool test268_funcfv_float2();
-bool test269_cstcnv_float2();
+bool test268_logicv_int2();
+bool test269_cstcnv_int2();
 
-bool test270_other_float2();
-bool test271_any_all_float2();
+bool test270_other_int2();
+bool test271_any_all_int2();
+
+bool test280_basev_float2();
+bool test281_basek_float2();
+bool test282_unaryv_float2();
+bool test282_unaryk_float2();
+bool test283_cmpv_float2();
+bool test284_shuffle_float2();
+bool test285_exsplat_float2();
+bool test287_funcv_float2();
+
+bool test288_funcfv_float2();
+bool test289_cstcnv_float2();
+
+bool test290_other_float2();
+bool test291_any_all_float2();
 
 

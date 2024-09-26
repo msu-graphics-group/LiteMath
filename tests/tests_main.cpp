@@ -138,54 +138,71 @@ int main(int argc, const char** argv)
 
 
 
-                      {test220_basev_uint2,         "test220_basev_uint2"},
-                      {test221_basek_uint2,         "test221_basek_uint2"},
-                      {test222_unaryv_uint2,        "test222_unaryv_uint2"},
-                      {test222_unaryk_uint2,        "test222_unaryk_uint2"}, 
-                      {test223_cmpv_uint2,          "test223_cmpv_uint2"}, 
-                      {test224_shuffle_uint2,       "test224_shuffle_uint2"},
-                      {test225_exsplat_uint2,       "test225_exsplat_uint2"},
-                      {test227_funcv_uint2,         "test227_funcv_uint2"},
+                      {test220_basev_double3,         "test220_basev_double3"},
+                      {test221_basek_double3,         "test221_basek_double3"},
+                      {test222_unaryv_double3,        "test222_unaryv_double3"},
+                      {test222_unaryk_double3,        "test222_unaryk_double3"}, 
+                      {test223_cmpv_double3,          "test223_cmpv_double3"}, 
+                      {test224_shuffle_double3,       "test224_shuffle_double3"},
+                      {test225_exsplat_double3,       "test225_exsplat_double3"},
+                      {test227_funcv_double3,         "test227_funcv_double3"},
 
-                      {test228_logicv_uint2,        "test228_logicv_uint2"},
-                      {test229_cstcnv_uint2,        "test229_cstcnv_uint2"},
+                      {test228_funcfv_double3,        "test228_funcfv_double3"},
+                      {test229_cstcnv_double3,        "test229_cstcnv_double3"},
 
-                      {test230_other_uint2,        "test230_other_uint2"},
-                      {test231_any_all_uint2,      "test231_any_all_uint2"},
-
-
-
-                      {test240_basev_int2,         "test240_basev_int2"},
-                      {test241_basek_int2,         "test241_basek_int2"},
-                      {test242_unaryv_int2,        "test242_unaryv_int2"},
-                      {test242_unaryk_int2,        "test242_unaryk_int2"}, 
-                      {test243_cmpv_int2,          "test243_cmpv_int2"}, 
-                      {test244_shuffle_int2,       "test244_shuffle_int2"},
-                      {test245_exsplat_int2,       "test245_exsplat_int2"},
-                      {test247_funcv_int2,         "test247_funcv_int2"},
-
-                      {test248_logicv_int2,        "test248_logicv_int2"},
-                      {test249_cstcnv_int2,        "test249_cstcnv_int2"},
-
-                      {test250_other_int2,        "test250_other_int2"},
-                      {test251_any_all_int2,      "test251_any_all_int2"},
+                      {test230_other_double3,        "test230_other_double3"},
+                      {test231_any_all_double3,      "test231_any_all_double3"},
 
 
 
-                      {test260_basev_float2,         "test260_basev_float2"},
-                      {test261_basek_float2,         "test261_basek_float2"},
-                      {test262_unaryv_float2,        "test262_unaryv_float2"},
-                      {test262_unaryk_float2,        "test262_unaryk_float2"}, 
-                      {test263_cmpv_float2,          "test263_cmpv_float2"}, 
-                      {test264_shuffle_float2,       "test264_shuffle_float2"},
-                      {test265_exsplat_float2,       "test265_exsplat_float2"},
-                      {test267_funcv_float2,         "test267_funcv_float2"},
+                      {test240_basev_uint2,         "test240_basev_uint2"},
+                      {test241_basek_uint2,         "test241_basek_uint2"},
+                      {test242_unaryv_uint2,        "test242_unaryv_uint2"},
+                      {test242_unaryk_uint2,        "test242_unaryk_uint2"}, 
+                      {test243_cmpv_uint2,          "test243_cmpv_uint2"}, 
+                      {test244_shuffle_uint2,       "test244_shuffle_uint2"},
+                      {test245_exsplat_uint2,       "test245_exsplat_uint2"},
+                      {test247_funcv_uint2,         "test247_funcv_uint2"},
 
-                      {test268_funcfv_float2,        "test268_funcfv_float2"},
-                      {test269_cstcnv_float2,        "test269_cstcnv_float2"},
+                      {test248_logicv_uint2,        "test248_logicv_uint2"},
+                      {test249_cstcnv_uint2,        "test249_cstcnv_uint2"},
 
-                      {test270_other_float2,        "test270_other_float2"},
-                      {test271_any_all_float2,      "test271_any_all_float2"},
+                      {test250_other_uint2,        "test250_other_uint2"},
+                      {test251_any_all_uint2,      "test251_any_all_uint2"},
+
+
+
+                      {test260_basev_int2,         "test260_basev_int2"},
+                      {test261_basek_int2,         "test261_basek_int2"},
+                      {test262_unaryv_int2,        "test262_unaryv_int2"},
+                      {test262_unaryk_int2,        "test262_unaryk_int2"}, 
+                      {test263_cmpv_int2,          "test263_cmpv_int2"}, 
+                      {test264_shuffle_int2,       "test264_shuffle_int2"},
+                      {test265_exsplat_int2,       "test265_exsplat_int2"},
+                      {test267_funcv_int2,         "test267_funcv_int2"},
+
+                      {test268_logicv_int2,        "test268_logicv_int2"},
+                      {test269_cstcnv_int2,        "test269_cstcnv_int2"},
+
+                      {test270_other_int2,        "test270_other_int2"},
+                      {test271_any_all_int2,      "test271_any_all_int2"},
+
+
+
+                      {test280_basev_float2,         "test280_basev_float2"},
+                      {test281_basek_float2,         "test281_basek_float2"},
+                      {test282_unaryv_float2,        "test282_unaryv_float2"},
+                      {test282_unaryk_float2,        "test282_unaryk_float2"}, 
+                      {test283_cmpv_float2,          "test283_cmpv_float2"}, 
+                      {test284_shuffle_float2,       "test284_shuffle_float2"},
+                      {test285_exsplat_float2,       "test285_exsplat_float2"},
+                      {test287_funcv_float2,         "test287_funcv_float2"},
+
+                      {test288_funcfv_float2,        "test288_funcfv_float2"},
+                      {test289_cstcnv_float2,        "test289_cstcnv_float2"},
+
+                      {test290_other_float2,        "test290_other_float2"},
+                      {test291_any_all_float2,      "test291_any_all_float2"},
 
 
                       };
@@ -203,8 +220,6 @@ int main(int argc, const char** argv)
     std::cout << std::endl;
     std::cout.flush();
   }
-
-  tests_all_images();
   
   return 0;
 }
