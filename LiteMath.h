@@ -1968,6 +1968,104 @@ namespace LiteMath
     float4 boxMax; // as_int(boxMax4f.w) may store size (count) of objects inside the box
   };
   
+
+  /// 3D bounding box, parallel to the coordinate planes
+  struct BBox3f
+    {
+    /// Result of ray intersection test
+    struct HitTestRes
+      {
+      /// Natural coordinates (along the ray, 0 at the origin) of ray segment
+      float t1, t2;
+      /// The wall the ray enters the box (should the origin be at -$\infty$),
+      /// 0,1 or 2 if its normal is along X,Y or Z, respectively
+      int face;
+      };
+
+    /// Intersection of the ray with the box. Inputs ray origin and inverse direction, outputs natural coordinate for hits and the index of side hit
+    inline HitTestRes Intersection(const float3& origin, const float3& inv_dir, float min_t, float max_t) const;
+
+    /// Diagonal points
+    float3 boxMin;
+    float3 boxMax;
+    };
+
+  /// Intersection of the ray with the box. 
+  /// @param[in] origin  - ray origin
+  /// @param[in] inv_dir - inverse ray direction (=1/dir)
+  /// @param[in] min_t   - low bound of allowed range of the natural coordinate 
+  ///                      (along the ray, 0 at the origin)
+  /// @param[in] max_t   - upper bound of allowed range of the natural coordinate 
+  ///                      (along the ray, 0 at the origin)
+  /// natural coordinate t.
+  /// @return Triplet (t1,t2,i) where [t1,t2] are the natural coordinates of ray 
+  ///         segment inside the box, clipped by allowed range, and 'i' is the index
+  ///         of the "entry wall": 0,1,2 if its normal is along X,Y,Z or -1 if the
+  ///         ray did NOT hit the box.
+  BBox3f::HitTestRes BBox3f::Intersection(const float3& origin, const float3& inv_dir, float min_t, float max_t) const
+  {
+    float tmin, tmax;
+
+    const float min_x = inv_dir[0] < 0 ? boxMax[0] : boxMin[0];
+    const float min_y = inv_dir[1] < 0 ? boxMax[1] : boxMin[1];
+    const float min_z = inv_dir[2] < 0 ? boxMax[2] : boxMin[2];
+    const float max_x = inv_dir[0] < 0 ? boxMin[0] : boxMax[0];
+    const float max_y = inv_dir[1] < 0 ? boxMin[1] : boxMax[1];
+    const float max_z = inv_dir[2] < 0 ? boxMin[2] : boxMax[2];
+
+    // X
+    const float tmin_x = (min_x - origin[0]) * inv_dir[0];
+    // MaxMult robust BVH traversal(up to 4 ulp).
+    // 1.0000000000000004 for double precision.
+    const float tmax_x = (max_x - origin[0]) * inv_dir[0] * 1.00000024f;
+
+    // Y
+    const float tmin_y = (min_y - origin[1]) * inv_dir[1];
+    const float tmax_y = (max_y - origin[1]) * inv_dir[1] * 1.00000024f;
+
+    // Z
+    const float tmin_z = (min_z - origin[2]) * inv_dir[2];
+    const float tmax_z = (max_z - origin[2]) * inv_dir[2] * 1.00000024f;
+
+    tmax = std::min(tmax_z, std::min(tmax_y, std::min(tmax_x, max_t)));
+
+
+    //  tmin = std::max(tmin_z, std::max(tmin_y, std::max(tmin_x, min_t)));
+    int idx = -1;
+    if (tmin_x > tmin_y)
+      {
+      if (tmin_z > tmin_x)
+        {
+        idx = 2;
+        tmin = std::max(tmin_z, min_t);
+        }
+      else
+        {
+        idx = 0;
+        tmin = std::max(tmin_x, min_t);
+        }
+      }
+    else
+      {
+      if (tmin_z > tmin_y)
+        {
+        idx = 2;
+        tmin = std::max(tmin_z, min_t);
+        }
+      else
+        {
+        idx = 1;
+        tmin = std::max(tmin_y, min_t);
+        }
+      }
+
+    HitTestRes res;
+    res.t1 = tmin;
+    res.t2 = tmax;
+    res.face = idx;
+    return res;
+    }
+  
   struct Ray4f 
   {
     inline Ray4f(){}
