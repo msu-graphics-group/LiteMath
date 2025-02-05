@@ -67,8 +67,8 @@ namespace LiteImage
   template<typename Type>
   struct Image2D
   {
-    Image2D() : m_width(0), m_height(0) {}
-    Image2D(unsigned int w, unsigned int h, const Type* a_data) : m_width(w), m_height(h) 
+    Image2D() : m_width(0), m_height(0), m_fw(0.0f), m_fh(0.0f) {}
+    Image2D(unsigned int w, unsigned int h, const Type* a_data) : m_width(w), m_height(h), m_fw(float(w)), m_fh(float(h))
     {
       resize(w, h);
       memcpy(m_data.data(), a_data, w*h*sizeof(Type));
@@ -150,8 +150,8 @@ namespace LiteImage
   
   protected: 
   
-    unsigned int m_width, m_height;
-    float        m_fw,    m_fh;
+    unsigned int m_width = 0, m_height = 0;
+    float        m_fw = 0.0f,    m_fh = 0.0f;
     std::vector<Type> m_data; 
     bool m_srgb = false;
   
