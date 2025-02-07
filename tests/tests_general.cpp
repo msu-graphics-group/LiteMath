@@ -28,8 +28,8 @@ bool test000_scalar_funcs()
   float y12 = abs(x);           // return the absolute value of x
   float y13 = abs(z);           // return the absolute value of x
 
-  float y14 = clamp(x,0.0,1.0); // constrain x to lie between 0.0 and 1.0
-  float y15 = clamp(z,0.0,1.0); // constrain x to lie between 0.0 and 1.0
+  float y14 = clamp(x,0.0f,1.0f); // constrain x to lie between 0.0 and 1.0
+  float y15 = clamp(z,0.0f,1.0f); // constrain x to lie between 0.0 and 1.0
   
   float y16 = min(x,z);    // return the lesser of x and z
   float y17 = max(x,z);    // return the greater of x and z 
@@ -371,6 +371,53 @@ bool test011_mattranspose()
   error += length(p2 - float3(0,0,1));
   error += length(p3 - float3(-1,0,0));
   error += length(p4 - float3(1,0,0));
+
+  return error < 1e-6f;
+}
+
+
+bool test012_mat_double3x3()
+{
+  double3x3 m(1.0, 2.0, 3.0,
+              3.0, 2.0, 1.0,
+              2.0, 1.0, 3.0);
+
+  double3x3 m2 = transpose(m);
+
+  double3x3 m3 = inverse3x3(m);
+  double3x3 check_inv(-0.41666667, 0.25000000, 0.33333333,
+                       0.58333333, 0.25000000, -0.66666667,
+                       0.083333333, -0.25000000, 0.33333333);
+
+  double3x3 mrotX = rotate3x3X(M_PI*0.5);
+  double3x3 mrotY = rotate3x3Y(M_PI*0.5);
+  double3x3 mrotZ = rotate3x3Z(M_PI*0.5);
+
+  double3x3 mrotI = inverse3x3(mrotX);
+  double3x3 check = mrotI*mrotX;
+  double3x3 identity;
+  
+  double3 p1(0,1,0);
+  double3 p2 = mrotX*p1;
+  double3 p3 = mrotZ*p1;
+  double3 p4 = mul(mrotY, mrotX*p1);
+ 
+  double error = 0.0;
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      error += fabs( m(i,j) - m2(j,i));
+  
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      error += fabs( check[i][j] - identity[i][j]);
+
+  for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+      error += fabs( m3[i][j] - check_inv[i][j]);
+  
+  error += length(p2 - double3(0,0,1));
+  error += length(p3 - double3(-1,0,0));
+  error += length(p4 - double3(1,0,0));
 
   return error < 1e-6f;
 }

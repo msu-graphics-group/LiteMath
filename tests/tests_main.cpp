@@ -34,6 +34,7 @@ int main(int argc, const char** argv)
                       {test009_refract,       "test009_refract"},
                       {test010_faceforward,   "test010_faceforward"},
                       {test011_mattranspose,  "test011_mattranspose"},
+                      {test012_mat_double3x3,  "test012_mat_double3x3"},
 
 
                       {test100_basev_uint4,         "test100_basev_uint4"},

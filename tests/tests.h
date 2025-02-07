@@ -12,6 +12,7 @@ bool test008_normalize();
 bool test009_refract();
 bool test010_faceforward();
 bool test011_mattranspose();
+bool test012_mat_double3x3();
 
 bool test100_basev_uint4();
 bool test101_basek_uint4();

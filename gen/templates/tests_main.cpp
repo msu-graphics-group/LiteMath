@@ -34,6 +34,7 @@ int main(int argc, const char** argv)
                       {test009_refract,       "test009_refract"},
                       {test010_faceforward,   "test010_faceforward"},
                       {test011_mattranspose,  "test011_mattranspose"},
+                      {test012_mat_double3x3,  "test012_mat_double3x3"},
                       {% for Tests in AllTests %}
                       {% for Test  in Tests.Tests %}
                       {test{{Test.Number}}_basev_{{Test.Type}},         "test{{Test.Number}}_basev_{{Test.Type}}"},
