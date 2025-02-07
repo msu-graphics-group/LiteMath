@@ -930,11 +930,11 @@ namespace LiteMath
   static inline double3 mix (const double3 a, const double3 b, double t) { return a + t * (b - a); }
   static inline double3 floor(const double3 a)                { return double3{std::floor(a.x), std::floor(a.y), std::floor(a.z)}; }
   static inline double3 ceil(const double3 a)                 { return double3{std::ceil(a.x), std::ceil(a.y), std::ceil(a.z)}; }
-  static inline double3 rcp (const double3 a)                 { return double3{1.0f/a.x, 1.0f/a.y, 1.0f/a.z}; }
+  static inline double3 rcp (const double3 a)                 { return double3{1.0 / a.x, 1.0 / a.y, 1.0 / a.z}; }
   static inline double3 mod (const double3 x, const double3 y) { return x - y * floor(x/y); }
   static inline double3 fract(const double3 x)                { return x - floor(x); }
   static inline double3 sqrt(const double3 a)                 { return double3{std::sqrt(a.x), std::sqrt(a.y), std::sqrt(a.z)}; }
-  static inline double3 inversesqrt(const double3 a)          { return 1.0f/sqrt(a); }
+  static inline double3 inversesqrt(const double3 a)          { return 1.0 / sqrt(a); }
   
   static inline  double dot(const double3 a, const double3 b)  { return a.x*b.x + a.y*b.y + a.z*b.z; }
 
@@ -1286,8 +1286,8 @@ namespace LiteMath
   static inline float4 refract(const float4 incidentVec, const float4 normal, float eta)
   {
     float N_dot_I = dot(normal, incidentVec);
-    float k = float(1.f) - eta * eta * (float(1.f) - N_dot_I * N_dot_I);
-    if (k < float(0.f))
+    float k = 1.f - eta * eta * (1.f - N_dot_I * N_dot_I);
+    if (k < 0.f)
       return float4(0.f);
     else
       return eta * incidentVec - (eta * N_dot_I + std::sqrt(k)) * normal;
@@ -1339,13 +1339,13 @@ namespace LiteMath
   inline double3::double3(int3 a) : x(double(a[0])), y(double(a[1])), z(double(a[2])) {} 
 
 
-  static inline double3 reflect(const double3 dir, const double3 normal) { return normal * dot(dir, normal) * (-2.0f) + dir; }
+  static inline double3 reflect(const double3 dir, const double3 normal) { return normal * dot(dir, normal) * (-2.0) + dir; }
   static inline double3 refract(const double3 incidentVec, const double3 normal, double eta)
   {
     double N_dot_I = dot(normal, incidentVec);
-    double k = double(1.f) - eta * eta * (double(1.f) - N_dot_I * N_dot_I);
-    if (k < double(0.f))
-      return double3(0.f);
+    double k = 1.0 - eta * eta * (1.0 - N_dot_I * N_dot_I);
+    if (k < 0.0)
+      return double3(0.0);
     else
       return eta * incidentVec - (eta * N_dot_I + std::sqrt(k)) * normal;
   }
