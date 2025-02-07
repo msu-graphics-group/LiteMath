@@ -1523,6 +1523,13 @@ namespace LiteMath
   	RES[3] = V[0] * B[3] + V[1] * B[7] + V[2] * B[11] + V[3] * B[15];
   }
 
+  static inline void mat3_colmajor_mul_vec3_double(double* __restrict RES, const double* __restrict B, const double* __restrict V) 
+  {
+  	RES[0] = V[0] * B[0] + V[1] * B[3] + V[2] * B[6];
+  	RES[1] = V[0] * B[1] + V[1] * B[4] + V[2] * B[7];
+  	RES[2] = V[0] * B[2] + V[1] * B[5] + V[2] * B[8];
+  }
+
   static inline void transpose4(const float4 in_rows[4], float4 out_rows[4])
   {
     CVEX_ALIGNED(16) float rows[16];
@@ -1535,6 +1542,18 @@ namespace LiteMath
     out_rows[1] = float4{rows[1], rows[5], rows[9],  rows[13]};
     out_rows[2] = float4{rows[2], rows[6], rows[10], rows[14]};
     out_rows[3] = float4{rows[3], rows[7], rows[11], rows[15]};
+  }
+
+  static inline void transpose3_double(const double3 in_rows[3], double3 out_rows[3])
+  {
+    double rows[9];
+    store(rows+0,  in_rows[0]);
+    store(rows+3,  in_rows[1]);
+    store(rows+6,  in_rows[2]);
+  
+    out_rows[0] = double3{rows[0], rows[3], rows[6]};
+    out_rows[1] = double3{rows[1], rows[4], rows[7]};
+    out_rows[2] = double3{rows[2], rows[5], rows[8]};
   }
 
   /**
@@ -1808,6 +1827,220 @@ namespace LiteMath
     m.set_col(3, m.get_col(3)*vK);
 
     return m;
+  }
+
+   /**
+  \brief this class use colmajor memory layout for effitient vector-matrix operations
+  */
+  struct double3x3
+  {
+    inline double3x3()  { identity(); }
+
+    // col-major matrix from row-major array
+    inline explicit double3x3(const double A[9])
+    {
+      m_col[0] = double3{ A[0], A[3], A[6] };
+      m_col[1] = double3{ A[1], A[4], A[7] };
+      m_col[2] = double3{ A[2], A[5], A[8] };
+    }
+
+    inline explicit double3x3(double A0, double A1, double A2, double A3, double A4, 
+                              double A5, double A6, double A7, double A8)
+    {
+      m_col[0] = double3{ A0, A3, A6 };
+      m_col[1] = double3{ A1, A4, A7 };
+      m_col[2] = double3{ A2, A5, A8 };
+    }
+
+    inline void identity()
+    {
+      m_col[0] = double3{ 1.0, 0.0, 0.0 };
+      m_col[1] = double3{ 0.0, 1.0, 0.0 };
+      m_col[2] = double3{ 0.0, 0.0, 1.0 };
+    }
+
+    inline double3 get_col(int i) const                 { return m_col[i]; }
+    inline void    set_col(int i, const double3& a_col) { m_col[i] = a_col; }
+
+    inline double3 get_row(int i) const { return double3{ m_col[0][i], m_col[1][i], m_col[2][i] }; }
+    inline void    set_row(int i, const double3& a_col)
+    {
+      m_col[0][i] = a_col[0];
+      m_col[1][i] = a_col[1];
+      m_col[2][i] = a_col[2];
+    }
+
+    inline double3& col(int i)       { return m_col[i]; }
+    inline double3  col(int i) const { return m_col[i]; }
+
+    inline double& operator()(int row, int col)       { return m_col[col][row]; }
+    inline double  operator()(int row, int col) const { return m_col[col][row]; }
+
+    struct RowTmp 
+    {
+      double3x3* self;
+      int       row;
+      inline double& operator[](int col)       { return self->m_col[col][row]; }
+      inline double  operator[](int col) const { return self->m_col[col][row]; }
+    };
+
+    inline RowTmp operator[](int a_row) 
+    {
+      RowTmp row;
+      row.self = this;
+      row.row  = a_row;
+      return row;
+    }
+
+    double3 m_col[3];
+  };
+
+  static inline double3x3 make_double3x3_from_rows(double3 a, double3 b, double3 c)
+  {
+    double3x3 m;
+    m.set_row(0, a);
+    m.set_row(1, b);
+    m.set_row(2, c);
+    return m;
+  }
+
+  static inline double3x3 make_double3x3_from_cols(double3 a, double3 b, double3 c)
+  {
+    double3x3 m;
+    m.set_col(0, a);
+    m.set_col(1, b);
+    m.set_col(2, c);
+    return m;
+  }
+
+  static inline double3 operator*(const double3x3& m, const double3& v)
+  {
+    double3 res;
+    mat3_colmajor_mul_vec3_double((double*)&res, (const double*)&m, (const double*)&v);
+    return res;
+  }
+
+  static inline double3 mul(const double3x3& m, const double3& v)
+  {
+    double3 res;                             
+    mat3_colmajor_mul_vec3_double((double*)&res, (const double*)&m, (const double*)&v);
+    return res;
+  }
+
+  static inline double3x3 transpose(const double3x3& rhs)
+  {
+    double3x3 res;
+    transpose3_double(rhs.m_col, res.m_col);
+    return res;
+  }
+
+  static inline double determinant(const double3x3& mat)
+  {
+    const double a = mat.m_col[0].x;
+    const double b = mat.m_col[1].x;
+    const double c = mat.m_col[2].x;
+    const double d = mat.m_col[0].y;
+    const double e = mat.m_col[1].y;
+    const double f = mat.m_col[2].y;
+    const double g = mat.m_col[0].z;
+    const double h = mat.m_col[1].z;
+    const double i = mat.m_col[2].z;
+
+    return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+  }
+
+
+  static inline double3x3 inverse3x3(const double3x3& mat)
+  {
+    double det = determinant(mat);
+
+    double inv_det = 1.0 / det;
+
+    double a = mat.m_col[0].x;
+    double b = mat.m_col[1].x;
+    double c = mat.m_col[2].x;
+    double d = mat.m_col[0].y;
+    double e = mat.m_col[1].y;
+    double f = mat.m_col[2].y;
+    double g = mat.m_col[0].z;
+    double h = mat.m_col[1].z;
+    double i = mat.m_col[2].z;
+
+    double3x3 inv;
+    inv.m_col[0].x = (e * i - f * h) * inv_det;
+    inv.m_col[1].x = (c * h - b * i) * inv_det;
+    inv.m_col[2].x = (b * f - c * e) * inv_det;
+    inv.m_col[0].y = (f * g - d * i) * inv_det;
+    inv.m_col[1].y = (a * i - c * g) * inv_det;
+    inv.m_col[2].y = (c * d - a * f) * inv_det;
+    inv.m_col[0].z = (d * h - e * g) * inv_det;
+    inv.m_col[1].z = (b * g - a * h) * inv_det;
+    inv.m_col[2].z = (a * e - b * d) * inv_det;
+
+    return inv;
+  } 
+
+
+  static inline double3x3 scale3x3(double3 t)
+  {
+    double3x3 res;
+    res.set_col(0, double3{t.x, 0.0, 0.0});
+    res.set_col(1, double3{0.0, t.y, 0.0});
+    res.set_col(2, double3{0.0, 0.0,  t.z});
+    return res;
+  }
+
+  static inline double3x3 rotate3x3X(double phi)
+  {
+    double3x3 res;
+    res.set_col(0, double3{1.0,      0.0,       0.0});
+    res.set_col(1, double3{0.0, +cos(phi),  +sin(phi)});
+    res.set_col(2, double3{0.0, -sin(phi),  +cos(phi)});
+    return res;
+  }
+
+  static inline double3x3 rotate3x3Y(double phi)
+  {
+    double3x3 res;
+    res.set_col(0, double3{+cos(phi), 0.0, -sin(phi)});
+    res.set_col(1, double3{     0.0, 1.0,      0.0});
+    res.set_col(2, double3{+sin(phi), 0.0, +cos(phi)});
+    return res;
+  }
+
+  static inline double3x3 rotate3x3Z(double phi)
+  {
+    double3x3 res;
+    res.set_col(0, double3{+cos(phi), sin(phi), 0.0});
+    res.set_col(1, double3{-sin(phi), cos(phi), 0.0});
+    res.set_col(2, double3{     0.0,     0.0, 1.0});
+    return res;
+  }
+  
+  static inline double3x3 mul(double3x3 m1, double3x3 m2)
+  {
+    const double3 column1 = mul(m1, m2.col(0));
+    const double3 column2 = mul(m1, m2.col(1));
+    const double3 column3 = mul(m1, m2.col(2));
+    double3x3 res;
+    res.set_col(0, column1);
+    res.set_col(1, column2);
+    res.set_col(2, column3);
+
+    return res;
+  }
+
+  static inline double3x3 operator*(double3x3 m1, double3x3 m2)
+  {
+    const double3 column1 = mul(m1, m2.col(0));
+    const double3 column2 = mul(m1, m2.col(1));
+    const double3 column3 = mul(m1, m2.col(2));
+
+    double3x3 res;
+    res.set_col(0, column1);
+    res.set_col(1, column2);
+    res.set_col(2, column3);
+    return res;
   }
 
   // complex numbers adapted from PBRT-v4
