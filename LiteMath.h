@@ -1859,6 +1859,13 @@ namespace LiteMath
       m_col[2] = double3{ 0.0, 0.0, 1.0 };
     }
 
+    inline void zero()
+      {
+      m_col[0] = double3{ 0.0, 0.0, 0.0 };
+      m_col[1] = double3{ 0.0, 0.0, 0.0 };
+      m_col[2] = double3{ 0.0, 0.0, 0.0 };
+      }
+
     inline double3 get_col(int i) const                 { return m_col[i]; }
     inline void    set_col(int i, const double3& a_col) { m_col[i] = a_col; }
 
@@ -2042,6 +2049,40 @@ namespace LiteMath
     res.set_col(2, column3);
     return res;
   }
+
+  static inline double3x3 operator*(double scale, double3x3 m)
+    {
+    double3x3 res;
+    res.m_col[0] = m.m_col[0] * scale;
+    res.m_col[1] = m.m_col[1] * scale;
+    res.m_col[2] = m.m_col[2] * scale;
+    return res;
+    }
+  static inline double3x3 operator*(double3x3 m, double scale)
+    {
+    double3x3 res;
+    res.m_col[0] = m.m_col[0] * scale;
+    res.m_col[1] = m.m_col[1] * scale;
+    res.m_col[2] = m.m_col[2] * scale;
+    return res;
+    }
+
+  static inline double3x3 operator+(double3x3 m1, double3x3 m2)
+    {
+    double3x3 res;
+    res.m_col[0] = m1.m_col[0] + m2.m_col[0];
+    res.m_col[1] = m1.m_col[1] + m2.m_col[1];
+    res.m_col[2] = m1.m_col[2] + m2.m_col[2];
+    return res;
+    }
+  static inline double3x3 operator-(double3x3 m1, double3x3 m2)
+    {
+    double3x3 res;
+    res.m_col[0] = m1.m_col[0] - m2.m_col[0];
+    res.m_col[1] = m1.m_col[1] - m2.m_col[1];
+    res.m_col[2] = m1.m_col[2] - m2.m_col[2];
+    return res;
+    }
 
   // complex numbers adapted from PBRT-v4
   struct complex 
