@@ -1836,6 +1836,21 @@ namespace LiteMath
   {
     inline double3x3()  { identity(); }
 
+    inline double3x3(const double3x3& rhs) 
+    { 
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+    }
+
+    inline double3x3& operator=(const double3x3& rhs)
+    {
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+      return *this;
+    }
+
     // col-major matrix from row-major array
     inline explicit double3x3(const double A[9])
     {
