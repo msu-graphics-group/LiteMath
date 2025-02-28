@@ -2690,6 +2690,41 @@ namespace LiteMath
 };
 #endif
 
+namespace LiteMath
+{ 
+  static inline float atomicAdd(float& mem, float data) 
+  { 
+    float oldVal = mem;
+    #pragma omp atomic
+    mem += data;
+    return oldVal;
+  }
+
+  static inline double atomicAdd(double& mem, double data) 
+  { 
+    double oldVal = mem;
+    #pragma omp atomic
+    mem += data;
+    return oldVal;
+  }
+
+  static inline int atomicAdd(int& mem, int data) 
+  { 
+    int oldVal = mem;
+    #pragma omp atomic
+    mem += data;
+    return oldVal;
+  }
+
+  static inline uint atomicAdd(uint& mem, uint data) 
+  { 
+    uint oldVal = mem;
+    #pragma omp atomic
+    mem += data;
+    return oldVal;
+  }
+};
+
 #endif
 #endif
 
