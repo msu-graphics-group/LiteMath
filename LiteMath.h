@@ -2692,36 +2692,57 @@ namespace LiteMath
 
 namespace LiteMath
 { 
-  static inline float atomicAdd(float& mem, float data) 
+  
+  static inline void InterlockedAdd(float& mem, float data) 
   { 
-    float oldVal = mem;
     #pragma omp atomic
     mem += data;
-    return oldVal;
   }
 
-  static inline double atomicAdd(double& mem, double data) 
+  static inline void InterlockedAdd(float& mem, float data, float& a_res) 
   { 
-    double oldVal = mem;
+    a_res = mem;
     #pragma omp atomic
     mem += data;
-    return oldVal;
   }
 
-  static inline int atomicAdd(int& mem, int data) 
+  static inline void InterlockedAdd(double& mem, double data) 
   { 
-    int oldVal = mem;
     #pragma omp atomic
     mem += data;
-    return oldVal;
   }
 
-  static inline uint atomicAdd(uint& mem, uint data) 
+  static inline void InterlockedAdd(double& mem, double data, double& a_res) 
   { 
-    uint oldVal = mem;
+    a_res = mem;
     #pragma omp atomic
     mem += data;
-    return oldVal;
+  }
+
+  static inline void InterlockedAdd(int& mem, int data) 
+  { 
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(int& mem, int data, int& a_res) 
+  { 
+    a_res = mem;
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(uint& mem, uint data) 
+  { 
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(uint& mem, uint data, uint& a_res) 
+  { 
+    a_res = mem;
+    #pragma omp atomic
+    mem += data;
   }
 };
 
