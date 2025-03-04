@@ -1835,6 +1835,13 @@ namespace LiteMath
   struct double3x3
   {
     inline double3x3()  { identity(); }
+    
+    inline double3x3(const double rhs)
+    {
+      m_col[0] = double3(rhs);
+      m_col[1] = double3(rhs);
+      m_col[2] = double3(rhs); 
+    } 
 
     inline double3x3(const double3x3& rhs) 
     { 
