@@ -1836,7 +1836,7 @@ namespace LiteMath
   {
     inline double3x3()  { identity(); }
     
-    inline double3x3(const double rhs)
+    inline explicit double3x3(const double rhs)
     {
       m_col[0] = double3(rhs);
       m_col[1] = double3(rhs);
