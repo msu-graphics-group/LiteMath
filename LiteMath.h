@@ -6,6 +6,9 @@
 #ifdef ISPC
   #include "LiteMathISPC.h"
 #else  
+#ifdef CUDA_MATH
+  #include "LiteMathCU.h"
+#else  
 
 #include <cstdint>
 #include <cmath>
@@ -2753,6 +2756,7 @@ namespace LiteMath
   }
 };
 
+#endif
 #endif
 #endif
 
