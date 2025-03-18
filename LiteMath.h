@@ -1,13 +1,13 @@
 #pragma once
 
 #ifdef __OPENCL_VERSION__
-  #include "LiteMathCL.h"  // if this file is included in OpenCL shaders 
+  #include "extended/LiteMathCL.h"  // if this file is included in OpenCL shaders 
 #else
 #ifdef ISPC
-  #include "LiteMathISPC.h"
+  #include "extended/LiteMathISPC.h"
 #else  
 #ifdef CUDA_MATH
-  #include "LiteMathCU.h"
+  #include "extended/LiteMathCU.h"
 #else  
 
 #include <cstdint>
@@ -1404,6 +1404,7 @@ namespace LiteMath
   static inline uint2 make_uint2(uint x, uint y) { return uint2{x, y}; }
   static inline int2 make_int2(int x, int y) { return int2{x, y}; }
   static inline float2 make_float2(float x, float y) { return float2{x, y}; }
+
   static inline float3 to_float3(float4 f4)         { return float3(f4.x, f4.y, f4.z); }
   static inline float4 to_float4(float3 v, float w) { return float4(v.x, v.y, v.z, w); }
   static inline uint3  to_uint3 (uint4 f4)          { return uint3(f4.x, f4.y, f4.z);  }
@@ -1468,6 +1469,8 @@ namespace LiteMath
       uint32_t u32;
     };
   };
+
+  static inline uchar4 make_uchar4(unsigned char x, unsigned char y, unsigned char z, unsigned char w) { uchar4 t; t.x = x; t.y = y; t.z = z; t.w = w; return t; }
 
   static inline uchar4 operator * (const uchar4 & u, float v) { return uchar4(uchar(float(u.x) * v), uchar(float(u.y) * v),
                                                                               uchar(float(u.z) * v), uchar(float(u.w) * v)); }
