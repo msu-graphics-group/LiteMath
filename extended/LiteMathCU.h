@@ -2014,51 +2014,19 @@ inline __host__ __device__ double3x3 operator-(double3x3 m1, double3x3 m2)
   return res;
 }
 
-
 #ifdef __CUDACC__
- inline __host__ __device__ void InterlockedAdd(float& mem, float data) 
-  { 
-    atomicAdd(mem, data);
-  }
+  inline __host__ __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
+  inline __host__ __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
 
-  inline __host__ __device__ void InterlockedAdd(float& mem, float data, float& a_res) 
-  { 
-    a_res = mem;
-    atomicAdd(mem, data);
-  }
+  #if __CUDA_ARCH__ >= 600
+  inline __host__ __device__ void InterlockedAdd(double& mem, double data)                {         atomicAdd(&mem, data); }
+  inline __host__ __device__ void InterlockedAdd(double& mem, double data, double& a_res) { a_res = atomicAdd(&mem, data); }
+  #endif
 
-  inline __host__ __device__ void InterlockedAdd(double& mem, double data) 
-  { 
-    atomicAdd(mem, data);
-  }
-
-  inline __host__ __device__ void InterlockedAdd(double& mem, double data, double& a_res) 
-  { 
-    a_res = mem;
-    atomicAdd(mem, data);
-  }
-
-  inline __host__ __device__ void InterlockedAdd(int& mem, int data) 
-  { 
-    atomicAdd(mem, data);
-  }
-
-  inline __host__ __device__ void InterlockedAdd(int& mem, int data, int& a_res) 
-  { 
-    a_res = mem;
-    atomicAdd(mem, data);
-  }
-
-  inline __host__ __device__ void InterlockedAdd(uint& mem, uint data) 
-  { 
-    atomicAdd(mem, data);
-  }
-
-  inline __host__ __device__ void InterlockedAdd(uint& mem, uint data, uint& a_res) 
-  { 
-    a_res = mem;
-    atomicAdd(mem, data);
-  }
+  inline __host__ __device__ void InterlockedAdd(int& mem, int data)                {         atomicAdd(&mem, data); }
+  inline __host__ __device__ void InterlockedAdd(int& mem, int data, int& a_res)    { a_res = atomicAdd(&mem, data); }
+  inline __host__ __device__ void InterlockedAdd(uint& mem, uint data)              {         atomicAdd(&mem, data); }
+  inline __host__ __device__ void InterlockedAdd(uint& mem, uint data, uint& a_res) { a_res = atomicAdd(&mem, data); }
 #else
   static inline void InterlockedAdd(float& mem, float data) 
   { 
