@@ -13,7 +13,8 @@
 #endif
 
 namespace LiteImage 
-{
+{ 
+  #ifndef CUDA_MATH
   using LiteMath::float2;
   using LiteMath::float3;
   using LiteMath::float4;
@@ -26,6 +27,10 @@ namespace LiteImage
   using LiteMath::ushort4;
   using LiteMath::uchar4;
   using LiteMath::clamp;
+  using LiteMath::dot;
+  #else
+  static inline float  dot (float a, float b) { return a*b;  } 
+  #endif
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +56,7 @@ namespace LiteImage
     AddressMode addressU      = AddressMode::WRAP;
     AddressMode addressV      = AddressMode::WRAP;
     AddressMode addressW      = AddressMode::WRAP;
-    float4      borderColor   = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float4      borderColor   = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
     Filter      filter        = Filter::NEAREST;
     uint32_t    maxAnisotropy = 1;
     uint32_t    maxLOD        = 32;
@@ -216,7 +221,7 @@ namespace LiteImage
   template<typename Type> bool          SaveImage(const char* a_fileName, const Image2D<Type>& a_image, float a_gamma = 2.2f);
   template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
   
-  template<typename Type> float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
+  template<typename Type> float extDotProd(Type a, Type b) { return dot(a,b); }
   template<> inline       float extDotProd<uint32_t>(uint32_t a, uint32_t b) 
   { 
     unsigned r1 = (a & 0x000000FF);
