@@ -10,7 +10,9 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
+#ifndef CUDA_MATH
 using LiteMath::float2;
 using LiteMath::float3;
 using LiteMath::float4;
@@ -23,6 +25,7 @@ using LiteMath::uint2;
 using LiteMath::ushort4;
 using LiteMath::uchar4;
 using LiteMath::clamp;
+#endif
 
 //static inline uint pitch(uint x, uint y, uint pitch) { return y * pitch + x; }  
 
@@ -30,7 +33,7 @@ static inline float4 read_array_uchar4(const uchar4* a_data, int offset)
 {
   const float mult = 0.003921568f; // (1.0f/255.0f);
   const uchar4 c0  = a_data[offset];
-  return mult*float4((float)c0.x, (float)c0.y, (float)c0.z, (float)c0.w);
+  return mult*make_float4((float)c0.x, (float)c0.y, (float)c0.z, (float)c0.w);
 }
 
 static inline float4 read_array_uchar4(const uint32_t* a_data, int offset)
@@ -87,7 +90,7 @@ static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteI
 	const int offset2 = py_w1*w + px_w0;
 	const int offset3 = py_w1*w + px_w1;
 
-	return int4(offset0, offset1, offset2, offset3);
+	return make_int4(offset0, offset1, offset2, offset3);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -134,7 +137,7 @@ float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, f
       const float outb = f1.z * w1 + f2.z * w2 + f3.z * w3 + f4.z * w4;
       const float outa = f1.w * w1 + f2.w * w2 + f3.w * w3 + f4.w * w4;
   
-      res = float4(outr, outg, outb, outa);
+      res = make_float4(outr, outg, outb, outa);
     }
     break;
 
@@ -246,7 +249,7 @@ float4 LiteImage::Image2D<float>::sample(const LiteImage::Sampler& a_sampler, fl
     break;
   };
   
-  return float4(res, res, res, res);
+  return make_float4(res, res, res, res);
 }
 
 // // https://www.shadertoy.com/view/WlG3zG
@@ -262,7 +265,7 @@ static inline float sRGBToLinear(float s) // https://entropymine.com/imageworsen
     return std::pow((s+0.055f)*0.947867299f, 2.4f);
 }
 
-static inline float4 sRGBToLinear4f(float4 s) { return float4(sRGBToLinear(s.x), sRGBToLinear(s.y), sRGBToLinear(s.z), sRGBToLinear(s.w)); }
+static inline float4 sRGBToLinear4f(float4 s) { return make_float4(sRGBToLinear(s.x), sRGBToLinear(s.y), sRGBToLinear(s.z), sRGBToLinear(s.w)); }
 
 template<> 
 float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, float2 a_uv) const
@@ -313,7 +316,7 @@ float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, f
       const float outb = f1.z * w1 + f2.z * w2 + f3.z * w3 + f4.z * w4;
       const float outa = f1.w * w1 + f2.w * w2 + f3.w * w3 + f4.w * w4;
   
-      res = float4(outr, outg, outb, outa);
+      res = make_float4(outr, outg, outb, outa);
     }
     break;
 
@@ -403,7 +406,7 @@ float4 LiteImage::Image2D<uint32_t>::sample(const LiteImage::Sampler& a_sampler,
       const float outb = f1.z * w1 + f2.z * w2 + f3.z * w3 + f4.z * w4;
       const float outa = f1.w * w1 + f2.w * w2 + f3.w * w3 + f4.w * w4;
   
-      res = float4(outr, outg, outb, outa);
+      res = make_float4(outr, outg, outb, outa);
     }
     break;
 
@@ -608,7 +611,7 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
       return false;
     fout << "P3" << std::endl << a_image.width() << " " << a_image.height() << " 255" << std::endl;
     for (auto c : a_image.vector()) 
-      fout << tonemap(c[0], gammaInv) << " " << tonemap(c[1], gammaInv) << " " << tonemap(c[2], gammaInv) << " ";
+      fout << tonemap(c.x, gammaInv) << " " << tonemap(c.y, gammaInv) << " " << tonemap(c.z, gammaInv) << " ";
     fout.close();
     return true;
   }
@@ -637,7 +640,7 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
       for(unsigned x=0; x<a_image.width(); x++)
       {
         auto c = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = IntColorUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
+        flipedYData[offset2+x] = IntColorUint32(tonemap(c.x, gammaInv), tonemap(c.y, gammaInv), tonemap(c.z, gammaInv));
       }
     }
 
@@ -682,7 +685,7 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
       return false;
     fout << "P3" << std::endl << a_image.width() << " " << a_image.height() << " 255" << std::endl;
     for (auto c : a_image.vector()) 
-      fout << tonemap(c[0], gammaInv) << " " << tonemap(c[1], gammaInv) << " " << tonemap(c[2], gammaInv) << " ";
+      fout << tonemap(c.x, gammaInv) << " " << tonemap(c.y, gammaInv) << " " << tonemap(c.z, gammaInv) << " ";
     fout.close();
     return true;
   }
@@ -711,7 +714,7 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
       for(unsigned x=0; x<a_image.width(); x++)
       {
         auto c = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = IntColorUint32(tonemap(c[0], gammaInv), tonemap(c[1], gammaInv), tonemap(c[2], gammaInv));
+        flipedYData[offset2+x] = IntColorUint32(tonemap(c.x, gammaInv), tonemap(c.y, gammaInv), tonemap(c.z, gammaInv));
       }
     }
 
@@ -906,9 +909,9 @@ bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image
       return false;
     fout << "P3" << std::endl << a_image.width() << " " << a_image.height() << " 255" << std::endl;
     for (auto c : a_image.vector()) {
-      auto r = c[0];
-      auto g = c[1];
-      auto b = c[2];
+      auto r = c.x;
+      auto g = c.y;
+      auto b = c.z;
       fout << int(r) << " " << int(g) << " " << int(b) << " ";
     }
     fout.close();
@@ -935,7 +938,7 @@ bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image
       for(unsigned x=0; x<a_image.width(); x++)
       {
         const auto c           = a_image.data()[offset1 + x];
-        flipedYData[offset2+x] = IntColorUint32(int(c[0]), int(c[1]), int(c[2]));
+        flipedYData[offset2+x] = IntColorUint32(int(c.x), int(c.y), int(c.z));
       }
     }
 
@@ -1013,9 +1016,10 @@ LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, 
     {
       int color[3] = {0,0,0};
       fin >> color[0] >> color[1] >> color[2];
-      float4 colf(std::pow(float(color[0])*invDiv, a_gamma), 
-                  std::pow(float(color[1])*invDiv, a_gamma), 
-                  std::pow(float(color[2])*invDiv, a_gamma), 0.0f);
+      float4 colf = make_float4(std::pow(float(color[0])*invDiv, a_gamma), 
+                                std::pow(float(color[1])*invDiv, a_gamma), 
+                                std::pow(float(color[2])*invDiv, a_gamma), 
+                                0.0f);
       img.data()[i] = colf;
       i++;
     }
@@ -1043,9 +1047,10 @@ LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, 
         unsigned r = (c & 0x000000FF);
         unsigned g = (c & 0x0000FF00) >> 8;
         unsigned b = (c & 0x00FF0000) >> 16;
-        float4 colf(std::pow(float(r)*invDiv, a_gamma), 
-                    std::pow(float(g)*invDiv, a_gamma), 
-                    std::pow(float(b)*invDiv, a_gamma), 0.0f);
+        float4 colf = make_float4(std::pow(float(r)*invDiv, a_gamma), 
+                                  std::pow(float(g)*invDiv, a_gamma), 
+                                  std::pow(float(b)*invDiv, a_gamma), 
+                                  0.0f);
         img.data()[offset1+x] = colf;
       }
     }
@@ -1154,9 +1159,9 @@ LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, 
     {
       int color[3] = {0,0,0};
       fin >> color[0] >> color[1] >> color[2];
-      float3 colf(std::pow(float(color[0])*invDiv, a_gamma), 
-                  std::pow(float(color[1])*invDiv, a_gamma), 
-                  std::pow(float(color[2])*invDiv, a_gamma));
+      float3 colf = make_float3(std::pow(float(color[0])*invDiv, a_gamma), 
+                                std::pow(float(color[1])*invDiv, a_gamma), 
+                                std::pow(float(color[2])*invDiv, a_gamma));
       img.data()[i] = colf;
       i++;
     }
@@ -1184,9 +1189,9 @@ LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, 
         unsigned r = (c & 0x000000FF);
         unsigned g = (c & 0x0000FF00) >> 8;
         unsigned b = (c & 0x00FF0000) >> 16;
-        float3 colf(std::pow(float(r)*invDiv, a_gamma), 
-                    std::pow(float(g)*invDiv, a_gamma), 
-                    std::pow(float(b)*invDiv, a_gamma));
+        float3 colf = make_float3(std::pow(float(r)*invDiv, a_gamma), 
+                                  std::pow(float(g)*invDiv, a_gamma), 
+                                  std::pow(float(b)*invDiv, a_gamma));
         img.data()[offset1+x] = colf;
       }
     }
@@ -1280,7 +1285,7 @@ LiteImage::Image2D<float> LiteImage::LoadImage<float>(const char* a_fileName, fl
   size_t imSize = size_t(rgbImage.width()*rgbImage.height());
   for(size_t i=0;i<imSize;i++) {
     float3 color = rgbImage.data()[i];
-    result.data()[i] = 0.3333334f*(color[0] + color[1] + color[2]);
+    result.data()[i] = 0.3333334f*(color.x + color.y + color.z);
   }
   return result;
 }
@@ -1459,7 +1464,7 @@ LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, 
     {
       unsigned color[3] = {0,0,0};
       fin >> color[0] >> color[1] >> color[2];
-      img.data()[i] = uchar4( (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], 0);
+      img.data()[i] = make_uchar4( (unsigned char)color[0], (unsigned char)color[1], (unsigned char)color[2], 0);
       i++;
     }
     fin.close();
