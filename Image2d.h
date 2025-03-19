@@ -28,6 +28,12 @@ namespace LiteImage
   using LiteMath::uchar4;
   using LiteMath::clamp;
   using LiteMath::dot;
+  using LiteMath::make_float2;
+  using LiteMath::make_float3;
+  using LiteMath::make_float4;
+  using LiteMath::make_int4;
+  using LiteMath::make_uint4;
+  using LiteMath::make_uchar4;
   #else
   static inline float  dot (float a, float b) { return a*b;  } 
   #endif

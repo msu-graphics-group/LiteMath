@@ -25,6 +25,12 @@ using LiteMath::uint2;
 using LiteMath::ushort4;
 using LiteMath::uchar4;
 using LiteMath::clamp;
+using LiteMath::make_float2;
+using LiteMath::make_float3;
+using LiteMath::make_float4;
+using LiteMath::make_int4;
+using LiteMath::make_uint4;
+using LiteMath::make_uchar4;
 #endif
 
 //static inline uint pitch(uint x, uint y, uint pitch) { return y * pitch + x; }  
