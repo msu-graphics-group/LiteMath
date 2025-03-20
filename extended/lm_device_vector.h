@@ -4,10 +4,12 @@
 
 namespace LiteMathExtended
 {
-  template<typename T>
+  template<typename T, typename a_size_type = uint32_t>
   class device_vector 
   {
   public:
+
+    using size_type = a_size_type;
 
     template<typename It>
     void assign(It first, It last)
@@ -29,8 +31,8 @@ namespace LiteMathExtended
     
     inline __host__ __device__ const T* data() const { return m_data; }
     inline __host__ __device__ T* data()             { return m_data; }
-    inline __host__ __device__ uint32_t size()     const { return m_size; }
-    inline __host__ __device__ uint32_t capacity() const { return m_capacity; }
+    inline __host__ __device__ size_type size()     const { return m_size; }
+    inline __host__ __device__ size_type capacity() const { return m_capacity; }
 
     //device_vector(const device_vector& other);
     //device_vector(device_vector&& other);
@@ -77,33 +79,14 @@ namespace LiteMathExtended
     //iterator erase_unordered(iterator where);
     //iterator erase_unordered(iterator first, iterator last);
     
-    T*       m_data;
-    uint32_t m_size;
-    uint32_t m_capacity;
+    T* m_data;
+    size_type m_size;
+    size_type m_capacity;
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  
-  //template<typename T>
-  //inline device_vector<T>::device_vector()
-  //{
-  //  m_size     = 0;
-  //  m_capacity = 0;
-  //  m_data     = nullptr;
-  //}
-  //
-  //template<typename T>
-  //inline device_vector<T>::~device_vector()
-  //{
-  //  if(m_data != nullptr) {
-  //    cudaFree(m_data); 
-  //    m_data     = nullptr;
-  //    m_size     = 0;
-  //    m_capacity = 0;
-  //  }
-  //}
 
 };
