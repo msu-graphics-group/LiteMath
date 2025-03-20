@@ -1,6 +1,6 @@
 #pragma once
 #include <cuda_runtime.h>
-//#include <vector>
+#include <cstdint>
 
 namespace LiteMathExtended
 {
@@ -8,8 +8,6 @@ namespace LiteMathExtended
   class device_vector 
   {
   public:
-    device_vector();
-    virtual ~device_vector();
 
     template<typename It>
     void assign(It first, It last)
@@ -31,8 +29,8 @@ namespace LiteMathExtended
     
     inline __host__ __device__ const T* data() const { return m_data; }
     inline __host__ __device__ T* data()             { return m_data; }
-    inline __host__ __device__ size_t size()     const { return m_size; }
-    inline __host__ __device__ size_t capacity() const { return m_capacity; }
+    inline __host__ __device__ uint32_t size()     const { return m_size; }
+    inline __host__ __device__ uint32_t capacity() const { return m_capacity; }
 
     //device_vector(const device_vector& other);
     //device_vector(device_vector&& other);
@@ -79,10 +77,9 @@ namespace LiteMathExtended
     //iterator erase_unordered(iterator where);
     //iterator erase_unordered(iterator first, iterator last);
     
-  protected:
-    T*     m_data;
-    size_t m_size;
-    size_t m_capacity;
+    T*       m_data;
+    uint32_t m_size;
+    uint32_t m_capacity;
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,23 +87,23 @@ namespace LiteMathExtended
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-  template<typename T>
-  inline device_vector<T>::device_vector()
-  {
-    m_size     = 0;
-    m_capacity = 0;
-    m_data     = nullptr;
-  }
-
-  template<typename T>
-  inline device_vector<T>::~device_vector()
-  {
-    if(m_data != nullptr) {
-      cudaFree(m_data); 
-      m_data     = nullptr;
-      m_size     = 0;
-      m_capacity = 0;
-    }
-  }
+  //template<typename T>
+  //inline device_vector<T>::device_vector()
+  //{
+  //  m_size     = 0;
+  //  m_capacity = 0;
+  //  m_data     = nullptr;
+  //}
+  //
+  //template<typename T>
+  //inline device_vector<T>::~device_vector()
+  //{
+  //  if(m_data != nullptr) {
+  //    cudaFree(m_data); 
+  //    m_data     = nullptr;
+  //    m_size     = 0;
+  //    m_capacity = 0;
+  //  }
+  //}
 
 };
