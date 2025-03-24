@@ -10,6 +10,14 @@ namespace LiteMathExtended
   public:
 
     using size_type = a_size_type;
+    
+    inline __host__ __device__ const T* data() const { return m_data; }
+    inline __host__ __device__ T* data()             { return m_data; }
+    inline __host__ __device__ size_type size()     const { return m_size; }
+    inline __host__ __device__ size_type capacity() const { return m_capacity; }
+    
+    inline __host__ __device__ T& operator[](size_t idx)       { return m_data[idx]; }
+    inline __host__ __device__ T  operator[](size_t idx) const { return m_data[idx]; }
 
     template<typename It>
     void assign(It first, It last)
@@ -29,13 +37,21 @@ namespace LiteMathExtended
       cudaMemcpy(m_data, dataHost, actualSize*sizeof(T), cudaMemcpyHostToDevice);
     }
     
-    inline __host__ __device__ const T* data() const { return m_data; }
-    inline __host__ __device__ T* data()             { return m_data; }
-    inline __host__ __device__ size_type size()     const { return m_size; }
-    inline __host__ __device__ size_type capacity() const { return m_capacity; }
-    
-    inline __host__ __device__ T& operator[](size_t idx)       { return m_data[idx]; }
-    inline __host__ __device__ T  operator[](size_t idx) const { return m_data[idx]; }
+    inline __host__ __device__ void resize(size_t a_size) { m_size = a_size; }
+
+    void shrink_to_fit()
+    {
+      if(m_size == 0)
+      {
+        cudaFree(m_data); 
+        m_data = nullptr;
+        m_capacity = 0;
+      }
+      else // todo: implement
+      {
+
+      }  
+    }
 
     //device_vector(const device_vector& other);
     //device_vector(device_vector&& other);
@@ -54,7 +70,6 @@ namespace LiteMathExtended
     //T& front();
     //const T& back() const;
     //T& back();
-    //void resize(size_t size);
     //void resize(size_t size, const T& value);
     //void clear();
     //void reserve(size_t capacity);
@@ -63,8 +78,7 @@ namespace LiteMathExtended
     //void emplace_back();
     //template<typename Param>
     //void emplace_back(const Param& param);
-    //void shrink_to_fit();
-    //void swap(vector& other);
+    
     //typedef T value_type;
     //typedef T* iterator;
     //iterator begin();
