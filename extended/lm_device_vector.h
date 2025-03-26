@@ -53,6 +53,24 @@ namespace LiteMathExtended
       }  
     }
 
+    inline __host__ __device__ void push_back(const T& t)
+    {
+      #ifdef __CUDA_ARCH__
+      auto oldSize = atomicAdd(&m_size, 1);
+      if(oldSize < m_capacity)
+        m_data[oldSize] = t;
+      #else
+      if(m_size < m_capacity)
+      {
+        #pragma omp critical
+        {
+          m_data[m_size] = t;
+          m_size++;
+        }
+      }
+      #endif
+    }
+
     //device_vector(const device_vector& other);
     //device_vector(device_vector&& other);
     //device_vector(size_t size);
@@ -73,7 +91,6 @@ namespace LiteMathExtended
     //void resize(size_t size, const T& value);
     //void clear();
     //void reserve(size_t capacity);
-    //void push_back(const T& t);
     //void pop_back();
     //void emplace_back();
     //template<typename Param>
