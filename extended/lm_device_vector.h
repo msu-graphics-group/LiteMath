@@ -32,9 +32,12 @@ namespace LiteMathExtended
         m_size     = actualSize;
         m_capacity = actualSize;
       }
-
-      const T* dataHost = &(*first);
-      cudaMemcpy(m_data, dataHost, actualSize*sizeof(T), cudaMemcpyHostToDevice);
+      
+      if(actualSize != 0)
+      {
+        const T* dataHost = &(*first);
+        cudaMemcpy(m_data, dataHost, actualSize*sizeof(T), cudaMemcpyHostToDevice);
+      }
     }
     
     inline __host__ __device__ void resize(size_t a_size) { m_size = a_size; }
@@ -113,9 +116,15 @@ namespace LiteMathExtended
     //iterator erase_unordered(iterator where);
     //iterator erase_unordered(iterator first, iterator last);
     
+    #ifdef __CUDA_ARCH__
     T* m_data;
     size_type m_size;
     size_type m_capacity;
+    #else
+    T* m_data            = nullptr;
+    size_type m_size     = 0;
+    size_type m_capacity = 0;
+    #endif
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
