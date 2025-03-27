@@ -23,7 +23,7 @@ namespace LiteMathExtended
     void assign(It first, It last)
     {
       size_t actualSize = last - first;
-      if(m_size != actualSize) 
+      if(m_size > m_capacity) 
       {
         if(m_data != nullptr)
           cudaFree(m_data); 
@@ -38,9 +38,22 @@ namespace LiteMathExtended
         const T* dataHost = &(*first);
         cudaMemcpy(m_data, dataHost, actualSize*sizeof(T), cudaMemcpyHostToDevice);
       }
+
+      m_size = actualSize;
     }
     
     inline __host__ __device__ void resize(size_t a_size) { m_size = a_size; }
+    inline __host__            void reserve(size_t capacity)
+    {
+      if(m_data != nullptr)
+        cudaFree(m_data); 
+
+      if(m_capacity < capacity)
+      {
+        cudaMalloc((void**)&m_data, capacity*sizeof(T));
+        m_capacity = size_type(capacity);
+      }
+    }
 
     void shrink_to_fit()
     {
@@ -93,7 +106,6 @@ namespace LiteMathExtended
     //T& back();
     //void resize(size_t size, const T& value);
     //void clear();
-    //void reserve(size_t capacity);
     //void pop_back();
     //void emplace_back();
     //template<typename Param>
