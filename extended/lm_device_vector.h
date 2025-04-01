@@ -45,11 +45,10 @@ namespace LiteMathExtended
     inline __host__ __device__ void resize(size_t a_size) { m_size = a_size; }
     inline __host__            void reserve(size_t capacity)
     {
-      if(m_data != nullptr)
-        cudaFree(m_data); 
-
       if(m_capacity < capacity)
       {
+        if(m_data != nullptr)
+          cudaFree(m_data); 
         cudaMalloc((void**)&m_data, capacity*sizeof(T));
         m_capacity = size_type(capacity);
       }
