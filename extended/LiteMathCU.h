@@ -10,6 +10,7 @@ typedef unsigned short ushort;
 
 #ifndef __CUDACC__
 #include <math.h>
+#include <omp.h>
 
 #define __global
 
@@ -1577,150 +1578,6 @@ inline __host__ __device__ double4 normalize(double4 v)
     return v * invLen;
 }
 
-// ////////////////////////////////////////////////////////////////////////////////
-// // floor
-// ////////////////////////////////////////////////////////////////////////////////
-
-// inline __host__ __device__ float2 floorf(float2 v)
-// {
-//     return make_float2(std::floor(v.x), std::floor(v.y));
-// }
-// inline __host__ __device__ float3 floorf(float3 v)
-// {
-//     return make_float3(std::floor(v.x), std::floor(v.y), std::floor(v.z));
-// }
-// inline __host__ __device__ float4 floorf(float4 v)
-// {
-//     return make_float4(std::floor(v.x), std::floor(v.y), std::floor(v.z), std::floor(v.w));
-// }
-
-
-// inline __host__ __device__ double2 floor(double2 v)
-// {
-//     return make_double2(floor(v.x), floor(v.y));
-// }
-// inline __host__ __device__ double3 floor(double3 v)
-// {
-//     return make_double3(floor(v.x), floor(v.y), floor(v.z));
-// }
-// inline __host__ __device__ double4 floor(double4 v)
-// {
-//     return make_double4(floor(v.x), floor(v.y), floor(v.z), floor(v.w));
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // frac - returns the fractional portion of a scalar or each vector component
-// ////////////////////////////////////////////////////////////////////////////////
-
-// inline __host__ __device__ float fracf(float v)
-// {
-//     return v - floor(v);
-// }
-// inline __host__ __device__ float2 fracf(float2 v)
-// {
-//     return make_float2(fracf(v.x), fracf(v.y));
-// }
-// inline __host__ __device__ float3 fracf(float3 v)
-// {
-//     return make_float3(fracf(v.x), fracf(v.y), fracf(v.z));
-// }
-// inline __host__ __device__ float4 fracf(float4 v)
-// {
-//     return make_float4(fracf(v.x), fracf(v.y), fracf(v.z), fracf(v.w));
-// }
-
-
-// inline __host__ __device__ double frac(double v)
-// {
-//     return v - floor(v);
-// }
-// inline __host__ __device__ double2 frac(double2 v)
-// {
-//     return make_double2(frac(v.x), frac(v.y));
-// }
-// inline __host__ __device__ double3 frac(double3 v)
-// {
-//     return make_double3(frac(v.x), frac(v.y), frac(v.z));
-// }
-// inline __host__ __device__ double4 frac(double4 v)
-// {
-//     return make_double4(frac(v.x), frac(v.y), frac(v.z), frac(v.w));
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // fmod
-// ////////////////////////////////////////////////////////////////////////////////
-
-// inline __host__ __device__ float2 fmodf(float2 a, float2 b)
-// {
-//     return make_float2(fmodf(a.x, b.x), fmodf(a.y, b.y));
-// }
-// inline __host__ __device__ float3 fmodf(float3 a, float3 b)
-// {
-//     return make_float3(fmodf(a.x, b.x), fmodf(a.y, b.y), fmodf(a.z, b.z));
-// }
-// inline __host__ __device__ float4 fmodf(float4 a, float4 b)
-// {
-//     return make_float4(fmodf(a.x, b.x), fmodf(a.y, b.y), fmodf(a.z, b.z), fmodf(a.w, b.w));
-// }
-
-
-// inline __host__ __device__ double2 fmod(double2 a, double2 b)
-// {
-//     return make_double2(fmod(a.x, b.x), fmod(a.y, b.y));
-// }
-// inline __host__ __device__ double3 fmod(double3 a, double3 b)
-// {
-//     return make_double3(fmod(a.x, b.x), fmod(a.y, b.y), fmod(a.z, b.z));
-// }
-// inline __host__ __device__ double4 fmod(double4 a, double4 b)
-// {
-//     return make_double4(fmod(a.x, b.x), fmod(a.y, b.y), fmod(a.z, b.z), fmod(a.w, b.w));
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // absolute value
-// ////////////////////////////////////////////////////////////////////////////////
-
-// inline __host__ __device__ float2 fabs(float2 v)
-// {
-//     return make_float2(fabs(v.x), fabs(v.y));
-// }
-// inline __host__ __device__ float3 fabs(float3 v)
-// {
-//     return make_float3(fabs(v.x), fabs(v.y), fabs(v.z));
-// }
-// inline __host__ __device__ float4 fabs(float4 v)
-// {
-//     return make_float4(fabs(v.x), fabs(v.y), fabs(v.z), fabs(v.w));
-// }
-
-// inline __host__ __device__ double2 fab(double2 v)
-// {
-//     return make_double2(fabs(v.x), fabs(v.y));
-// }
-// inline __host__ __device__ double3 fabs(double3 v)
-// {
-//     return make_double3(fabs(v.x), fabs(v.y), fabs(v.z));
-// }
-// inline __host__ __device__ double4 fabs(double4 v)
-// {
-//     return make_double4(fabs(v.x), fabs(v.y), fabs(v.z), fabs(v.w));
-// }
-
-// inline __host__ __device__ int2 abs(int2 v)
-// {
-//     return make_int2(abs(v.x), abs(v.y));
-// }
-// inline __host__ __device__ int3 abs(int3 v)
-// {
-//     return make_int3(abs(v.x), abs(v.y), abs(v.z));
-// }
-// inline __host__ __device__ int4 abs(int4 v)
-// {
-//     return make_int4(abs(v.x), abs(v.y), abs(v.z), abs(v.w));
-// }
-
 ////////////////////////////////////////////////////////////////////////////////
 // reflect
 // - returns reflection of incident ray I around surface normal N
@@ -2079,6 +1936,65 @@ inline __host__ __device__ double3x3 operator-(double3x3 m1, double3x3 m2)
     a_res = mem;
     #pragma omp atomic
     mem += data;
+  }
+
+  template<typename IndexType>
+  static IndexType align(IndexType a_size, IndexType a_alignment)
+  {
+    if (a_size % a_alignment == 0)
+      return a_size;
+    else
+    {
+      IndexType sizeCut = a_size - (a_size % a_alignment);
+      return sizeCut + a_alignment;
+    }
+  }
+
+  template<typename T>
+  inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
+  {
+    const size_t cacheLineSize = 128; 
+    const size_t alignSize     = cacheLineSize/sizeof(double);
+    const size_t vecSizeAlign  = align(a_targetSize, alignSize);
+    const size_t maxThreads    = omp_get_max_threads(); 
+    a_vec.reserve(vecSizeAlign*maxThreads);
+    a_vec.resize(a_targetSize);
+    for(size_t i=0;i<a_vec.capacity();i++)
+      a_vec.data()[i] = 0;  
+    return vecSizeAlign; // can use later with 'ReduceAdd' 
+  }
+
+  template<typename T>
+  inline void ReduceAddComplete(std::vector<T>& a_vec)
+  {
+    const size_t maxThreads = omp_get_max_threads();
+    const size_t szAligned  = a_vec.capacity() / maxThreads;
+    for(size_t threadId = 1; threadId < maxThreads; threadId++) 
+    {
+      T* threadData = a_vec.data() + threadId*szAligned;
+      for(size_t i=0; i<a_vec.size(); i++)
+        a_vec[i] += threadData[i];
+    }
+  }
+
+  template<typename T, typename IndexType> 
+  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
+  {
+    if(!std::isfinite(val))
+      return;
+    const size_t maxThreads = omp_get_num_threads(); // here not max_threads
+    const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
+    const size_t threadId   = omp_get_thread_num();
+    const size_t threadOffs = szAligned*threadId;
+    a_vec.data()[threadOffs + offset] += val;
+  }
+
+  template<typename T, typename IndexType> 
+  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
+  {
+    if(!std::isfinite(val))
+      return;
+    a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
   }
 #endif
 
