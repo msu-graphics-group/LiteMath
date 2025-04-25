@@ -11,6 +11,7 @@ typedef unsigned short ushort;
 #ifndef __CUDACC__
 #include <math.h>
 #include <omp.h>
+#include <vector>
 
 #define __global
 
@@ -1877,8 +1878,8 @@ inline __host__ __device__ double3x3 operator-(double3x3 m1, double3x3 m2)
   inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
 
   //#if __CUDA_ARCH__ >= 600
-  inline __device__ void InterlockedAdd(double& mem, double data)                {         atomicAdd(&mem, data); }
-  inline __device__ void InterlockedAdd(double& mem, double data, double& a_res) { a_res = atomicAdd(&mem, data); }
+  //inline __device__ void InterlockedAdd(double& mem, double data)                {         atomicAdd(&mem, data); }
+  //inline __device__ void InterlockedAdd(double& mem, double data, double& a_res) { a_res = atomicAdd(&mem, data); }
   //#endif
 
   inline __device__ void InterlockedAdd(int& mem, int data)                {         atomicAdd(&mem, data); }
