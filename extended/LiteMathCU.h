@@ -1893,6 +1893,285 @@ static inline __host__ __device__ double3x3 outerProduct(const double3& a, const
   return m;
 }
 
+struct float3x3
+{
+  __host__ __device__ float3x3()  { identity(); }
+  
+  __host__ __device__ float3x3(const float rhs)
+  {
+    m_col[0] = make_float3(rhs, rhs, rhs);
+    m_col[1] = make_float3(rhs, rhs, rhs);
+    m_col[2] = make_float3(rhs, rhs, rhs); 
+  } 
+
+  __host__ __device__ float3x3(const float3x3& rhs) 
+  { 
+    m_col[0] = rhs.m_col[0];
+    m_col[1] = rhs.m_col[1];
+    m_col[2] = rhs.m_col[2]; 
+  }
+
+  __host__ __device__ float3x3& operator=(const float3x3& rhs)
+  {
+    m_col[0] = rhs.m_col[0];
+    m_col[1] = rhs.m_col[1];
+    m_col[2] = rhs.m_col[2]; 
+    return *this;
+  }
+
+  // col-major matrix from row-major array
+  __host__ __device__ float3x3(const float A[9])
+  {
+    m_col[0] = float3{ A[0], A[3], A[6] };
+    m_col[1] = float3{ A[1], A[4], A[7] };
+    m_col[2] = float3{ A[2], A[5], A[8] };
+  }
+
+  __host__ __device__ float3x3(float A0, float A1, float A2, float A3, float A4, 
+                               float A5, float A6, float A7, float A8)
+  {
+    m_col[0] = float3{ A0, A3, A6 };
+    m_col[1] = float3{ A1, A4, A7 };
+    m_col[2] = float3{ A2, A5, A8 };
+  }
+
+  __host__ __device__ void identity()
+  {
+    m_col[0] = float3{ 1.0, 0.0, 0.0 };
+    m_col[1] = float3{ 0.0, 1.0, 0.0 };
+    m_col[2] = float3{ 0.0, 0.0, 1.0 };
+  }
+
+  __host__ __device__ void zero()
+  {
+    m_col[0] = float3{ 0.0, 0.0, 0.0 };
+    m_col[1] = float3{ 0.0, 0.0, 0.0 };
+    m_col[2] = float3{ 0.0, 0.0, 0.0 };
+  }
+
+  __host__ __device__ float3 get_col(int i) const                { return m_col[i]; }
+  __host__ __device__ void   set_col(int i, const float3& a_col) { m_col[i] = a_col; }
+
+
+  __host__ __device__ float3& col(int i)       { return m_col[i]; }
+  __host__ __device__ float3  col(int i) const { return m_col[i]; }
+
+  float3 m_col[3];
+};
+
+typedef struct float3x3 float3x3;
+
+inline __host__ __device__ float3x3 make_float3x3_from_cols(float3 a, float3 b, float3 c)
+{
+  float3x3 m;
+  m.set_col(0, a);
+  m.set_col(1, b);
+  m.set_col(2, c);
+  return m;
+}
+
+inline __host__ __device__ void mat3_colmajor_mul_vec3(float* __restrict RES, const float* __restrict B, const float* __restrict V) 
+{
+  RES[0] = V[0] * B[0] + V[1] * B[3] + V[2] * B[6];
+  RES[1] = V[0] * B[1] + V[1] * B[4] + V[2] * B[7];
+  RES[2] = V[0] * B[2] + V[1] * B[5] + V[2] * B[8];
+}
+
+inline __host__ __device__ float3 operator*(const float3x3& m, const float3& v)
+{
+  float3 res;
+  mat3_colmajor_mul_vec3((float*)&res, (const float*)&m, (const float*)&v);
+  return res;
+}
+
+inline __host__ __device__ float3 mul(const float3x3& m, const float3& v)
+{
+  float3 res;                             
+  mat3_colmajor_mul_vec3((float*)&res, (const float*)&m, (const float*)&v);
+  return res;
+}
+
+inline __host__ __device__ float3x3 transpose(const float3x3& rhs)
+{
+  float3x3 res;
+
+  res.m_col[0].x = rhs.m_col[0].x;
+  res.m_col[0].y = rhs.m_col[1].x;
+  res.m_col[0].z = rhs.m_col[2].x;
+
+  res.m_col[1].x = rhs.m_col[0].y;
+  res.m_col[1].y = rhs.m_col[1].y;
+  res.m_col[1].z = rhs.m_col[2].y;
+
+  res.m_col[2].x = rhs.m_col[0].z;
+  res.m_col[2].y = rhs.m_col[1].z;
+  res.m_col[2].z = rhs.m_col[2].z;
+  
+  return res;
+}
+
+inline __host__ __device__ float determinant(const float3x3& mat)
+{
+  const float a = mat.m_col[0].x;
+  const float b = mat.m_col[1].x;
+  const float c = mat.m_col[2].x;
+  const float d = mat.m_col[0].y;
+  const float e = mat.m_col[1].y;
+  const float f = mat.m_col[2].y;
+  const float g = mat.m_col[0].z;
+  const float h = mat.m_col[1].z;
+  const float i = mat.m_col[2].z;
+  return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+}
+
+inline __host__ __device__ float3x3 inverse3x3(const float3x3& mat)
+{
+  float det = determinant(mat);
+  float inv_det = 1.0f / det;
+
+  float a = mat.m_col[0].x;
+  float b = mat.m_col[1].x;
+  float c = mat.m_col[2].x;
+  float d = mat.m_col[0].y;
+  float e = mat.m_col[1].y;
+  float f = mat.m_col[2].y;
+  float g = mat.m_col[0].z;
+  float h = mat.m_col[1].z;
+  float i = mat.m_col[2].z;
+
+  float3x3 inv;
+  inv.m_col[0].x = (e * i - f * h) * inv_det;
+  inv.m_col[1].x = (c * h - b * i) * inv_det;
+  inv.m_col[2].x = (b * f - c * e) * inv_det;
+  inv.m_col[0].y = (f * g - d * i) * inv_det;
+  inv.m_col[1].y = (a * i - c * g) * inv_det;
+  inv.m_col[2].y = (c * d - a * f) * inv_det;
+  inv.m_col[0].z = (d * h - e * g) * inv_det;
+  inv.m_col[1].z = (b * g - a * h) * inv_det;
+  inv.m_col[2].z = (a * e - b * d) * inv_det;
+
+  return inv;
+} 
+
+inline __host__ __device__ float3x3 scale3x3(float3 t)
+{
+  float3x3 res;
+  res.set_col(0, float3{t.x, 0.0, 0.0});
+  res.set_col(1, float3{0.0, t.y, 0.0});
+  res.set_col(2, float3{0.0, 0.0,  t.z});
+  return res;
+}
+
+inline __host__ __device__ float3x3 rotate3x3X(float phi)
+{
+  float3x3 res;
+  res.set_col(0, float3{1.0,      0.0,       0.0});
+  res.set_col(1, float3{0.0, +cos(phi),  +sin(phi)});
+  res.set_col(2, float3{0.0, -sin(phi),  +cos(phi)});
+  return res;
+}
+
+inline __host__ __device__ float3x3 rotate3x3Y(float phi)
+{
+    float3x3 res;
+  res.set_col(0, float3{+cos(phi), 0.0, -sin(phi)});
+  res.set_col(1, float3{     0.0, 1.0,      0.0});
+  res.set_col(2, float3{+sin(phi), 0.0, +cos(phi)});
+  return res;
+}
+
+inline __host__ __device__ float3x3 rotate3x3Z(float phi)
+{
+  float3x3 res;
+  res.set_col(0, float3{+cos(phi), sin(phi), 0.0});
+  res.set_col(1, float3{-sin(phi), cos(phi), 0.0});
+  res.set_col(2, float3{     0.0,     0.0, 1.0});
+  return res;
+}
+
+inline __host__ __device__ float3x3 mul(float3x3 m1, float3x3 m2)
+{
+  const float3 column1 = mul(m1, m2.col(0));
+  const float3 column2 = mul(m1, m2.col(1));
+  const float3 column3 = mul(m1, m2.col(2));
+
+  float3x3 res;
+  res.set_col(0, column1);
+  res.set_col(1, column2);
+  res.set_col(2, column3);
+
+  return res;
+}
+
+inline __host__ __device__ float3x3 operator*(float3x3 m1, float3x3 m2)
+{
+  const float3 column1 = mul(m1, m2.col(0));
+  const float3 column2 = mul(m1, m2.col(1));
+  const float3 column3 = mul(m1, m2.col(2));
+
+  float3x3 res;
+  res.set_col(0, column1);
+  res.set_col(1, column2);
+  res.set_col(2, column3);
+  return res;
+}
+
+inline __host__ __device__ float3x3 operator*(float scale, float3x3 m)
+{
+  float3x3 res;
+  res.m_col[0] = m.m_col[0] * scale;
+  res.m_col[1] = m.m_col[1] * scale;
+  res.m_col[2] = m.m_col[2] * scale;
+  return res;
+}
+
+inline __host__ __device__ float3x3 operator*(float3x3 m, float scale)
+{
+  float3x3 res;
+  res.m_col[0] = m.m_col[0] * scale;
+  res.m_col[1] = m.m_col[1] * scale;
+  res.m_col[2] = m.m_col[2] * scale;
+  return res;
+}
+
+inline __host__ __device__ float3x3 operator+(float3x3 m1, float3x3 m2)
+{
+  float3x3 res;
+  res.m_col[0] = m1.m_col[0] + m2.m_col[0];
+  res.m_col[1] = m1.m_col[1] + m2.m_col[1];
+  res.m_col[2] = m1.m_col[2] + m2.m_col[2];
+  return res;
+}
+
+inline __host__ __device__ float3x3 operator-(float3x3 m1, float3x3 m2)
+{
+  float3x3 res;
+  res.m_col[0] = m1.m_col[0] - m2.m_col[0];
+  res.m_col[1] = m1.m_col[1] - m2.m_col[1];
+  res.m_col[2] = m1.m_col[2] - m2.m_col[2];
+  return res;
+}
+
+/// Outer product of two 3-dimensional vectors |a><b|
+static inline __host__ __device__ float3x3 outerProduct(const float3& a, const float3& b)
+{
+  float3x3 m;
+  
+  m.m_col[0].x = a.x * b.x;
+  m.m_col[1].x = a.x * b.y;
+  m.m_col[2].x = a.x * b.z;
+
+  m.m_col[0].y = a.y * b.x;
+  m.m_col[1].y = a.y * b.y;
+  m.m_col[2].y = a.y * b.z;
+
+  m.m_col[0].z = a.z * b.x;
+  m.m_col[1].z = a.z * b.y;
+  m.m_col[2].z = a.z * b.z;
+      
+  return m;
+}
+
 #ifdef __CUDACC__
   inline __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
   inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
