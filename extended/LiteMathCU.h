@@ -1688,24 +1688,21 @@ inline __host__ __device__ double3x3 make_double3x3_from_cols(double3 a, double3
   return m;
 }
 
-inline __host__ __device__ void mat3_colmajor_mul_vec3_double(double* __restrict RES, const double* __restrict B, const double* __restrict V) 
-{
-  RES[0] = V[0] * B[0] + V[1] * B[3] + V[2] * B[6];
-  RES[1] = V[0] * B[1] + V[1] * B[4] + V[2] * B[7];
-  RES[2] = V[0] * B[2] + V[1] * B[5] + V[2] * B[8];
-}
-
 inline __host__ __device__ double3 operator*(const double3x3& m, const double3& v)
 {
   double3 res;
-  mat3_colmajor_mul_vec3_double((double*)&res, (const double*)&m, (const double*)&v);
+  res.x = v.x * m.m_col[0].x + v.y * m.m_col[1].x + v.z * m.m_col[2].x;
+  res.y = v.x * m.m_col[0].y + v.y * m.m_col[1].y + v.z * m.m_col[2].y;
+  res.z = v.x * m.m_col[0].z + v.y * m.m_col[1].z + v.z * m.m_col[2].z;
   return res;
 }
 
 inline __host__ __device__ double3 mul(const double3x3& m, const double3& v)
 {
   double3 res;                             
-  mat3_colmajor_mul_vec3_double((double*)&res, (const double*)&m, (const double*)&v);
+  res.x = v.x * m.m_col[0].x + v.y * m.m_col[1].x + v.z * m.m_col[2].x;
+  res.y = v.x * m.m_col[0].y + v.y * m.m_col[1].y + v.z * m.m_col[2].y;
+  res.z = v.x * m.m_col[0].z + v.y * m.m_col[1].z + v.z * m.m_col[2].z;
   return res;
 }
 
@@ -1970,24 +1967,21 @@ inline __host__ __device__ float3x3 make_float3x3_from_cols(float3 a, float3 b, 
   return m;
 }
 
-inline __host__ __device__ void mat3_colmajor_mul_vec3(float* __restrict RES, const float* __restrict B, const float* __restrict V) 
-{
-  RES[0] = V[0] * B[0] + V[1] * B[3] + V[2] * B[6];
-  RES[1] = V[0] * B[1] + V[1] * B[4] + V[2] * B[7];
-  RES[2] = V[0] * B[2] + V[1] * B[5] + V[2] * B[8];
-}
-
 inline __host__ __device__ float3 operator*(const float3x3& m, const float3& v)
 {
   float3 res;
-  mat3_colmajor_mul_vec3((float*)&res, (const float*)&m, (const float*)&v);
+  res.x = v.x * m.m_col[0].x + v.y * m.m_col[1].x + v.z * m.m_col[2].x;
+  res.y = v.x * m.m_col[0].y + v.y * m.m_col[1].y + v.z * m.m_col[2].y;
+  res.z = v.x * m.m_col[0].z + v.y * m.m_col[1].z + v.z * m.m_col[2].z;
   return res;
 }
 
 inline __host__ __device__ float3 mul(const float3x3& m, const float3& v)
 {
   float3 res;                             
-  mat3_colmajor_mul_vec3((float*)&res, (const float*)&m, (const float*)&v);
+  res.x = v.x * m.m_col[0].x + v.y * m.m_col[1].x + v.z * m.m_col[2].x;
+  res.y = v.x * m.m_col[0].y + v.y * m.m_col[1].y + v.z * m.m_col[2].y;
+  res.z = v.x * m.m_col[0].z + v.y * m.m_col[1].z + v.z * m.m_col[2].z;
   return res;
 }
 
