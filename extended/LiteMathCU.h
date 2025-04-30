@@ -1874,7 +1874,7 @@ inline __host__ __device__ double3x3 operator-(double3x3 m1, double3x3 m2)
 }
 
 /// Outer product of two 3-dimensional vectors |a><b|
-static inline double3x3 outerProduct(const double3& a, const double3& b)
+static inline __host__ __device__ double3x3 outerProduct(const double3& a, const double3& b)
 {
   double3x3 m;
   
