@@ -1873,6 +1873,26 @@ inline __host__ __device__ double3x3 operator-(double3x3 m1, double3x3 m2)
   return res;
 }
 
+/// Outer product of two 3-dimensional vectors |a><b|
+static inline double3x3 outerProduct(const double3& a, const double3& b)
+{
+  double3x3 m;
+  
+  m.m_col[0].x = a.x * b.x;
+  m.m_col[1].x = a.x * b.y;
+  m.m_col[2].x = a.x * b.z;
+
+  m.m_col[0].y = a.y * b.x;
+  m.m_col[1].y = a.y * b.y;
+  m.m_col[2].y = a.y * b.z;
+
+  m.m_col[0].z = a.z * b.x;
+  m.m_col[1].z = a.z * b.y;
+  m.m_col[2].z = a.z * b.z;
+      
+  return m;
+}
+
 #ifdef __CUDACC__
   inline __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
   inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
