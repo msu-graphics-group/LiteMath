@@ -208,6 +208,7 @@ namespace LiteMath
   static inline {{Test.Type}} operator - ({{Test.TypeC}} a, {{Test.TypeS}} b) { return {{Test.Type}}{{OPN}} {% for Coord in Test.XYZW %}a.{{Coord}} - b{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }
   static inline {{Test.Type}} operator + ({{Test.TypeS}} a, {{Test.TypeC}} b) { return {{Test.Type}}{{OPN}} {% for Coord in Test.XYZW %}a + b.{{Coord}}{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }
   static inline {{Test.Type}} operator - ({{Test.TypeS}} a, {{Test.TypeC}} b) { return {{Test.Type}}{{OPN}} {% for Coord in Test.XYZW %}a - b.{{Coord}}{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }
+  static inline {{Test.Type}} operator - ({{Test.TypeC}} a)                   { return {{Test.Type}}{{OPN}} {% for Coord in Test.XYZW %}-a.{{Coord}}{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }
 
   static inline {{Test.Type}}& operator *= ({{Test.Type}}& a, {{Test.TypeC}} b) { {% for Coord in Test.XYZW %}a.{{Coord}} *= b.{{Coord}}; {% endfor %} return a; }
   static inline {{Test.Type}}& operator /= ({{Test.Type}}& a, {{Test.TypeC}} b) { {% for Coord in Test.XYZW %}a.{{Coord}} /= b.{{Coord}}; {% endfor %} return a; }

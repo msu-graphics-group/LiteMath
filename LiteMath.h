@@ -209,6 +209,7 @@ namespace LiteMath
   static inline uint4 operator - (const uint4 a, uint b) { return uint4{a.x - b, a.y - b, a.z - b, a.w - b}; }
   static inline uint4 operator + (uint a, const uint4 b) { return uint4{a + b.x, a + b.y, a + b.z, a + b.w}; }
   static inline uint4 operator - (uint a, const uint4 b) { return uint4{a - b.x, a - b.y, a - b.z, a - b.w}; }
+  static inline uint4 operator - (const uint4 a)                   { return uint4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline uint4& operator *= (uint4& a, const uint4 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; a.w *= b.w;  return a; }
   static inline uint4& operator /= (uint4& a, const uint4 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; a.w /= b.w;  return a; }
@@ -321,6 +322,7 @@ namespace LiteMath
   static inline int4 operator - (const int4 a, int b) { return int4{a.x - b, a.y - b, a.z - b, a.w - b}; }
   static inline int4 operator + (int a, const int4 b) { return int4{a + b.x, a + b.y, a + b.z, a + b.w}; }
   static inline int4 operator - (int a, const int4 b) { return int4{a - b.x, a - b.y, a - b.z, a - b.w}; }
+  static inline int4 operator - (const int4 a)                   { return int4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline int4& operator *= (int4& a, const int4 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; a.w *= b.w;  return a; }
   static inline int4& operator /= (int4& a, const int4 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; a.w /= b.w;  return a; }
@@ -436,6 +438,7 @@ namespace LiteMath
   static inline float4 operator - (const float4 a, float b) { return float4{a.x - b, a.y - b, a.z - b, a.w - b}; }
   static inline float4 operator + (float a, const float4 b) { return float4{a + b.x, a + b.y, a + b.z, a + b.w}; }
   static inline float4 operator - (float a, const float4 b) { return float4{a - b.x, a - b.y, a - b.z, a - b.w}; }
+  static inline float4 operator - (const float4 a)                   { return float4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline float4& operator *= (float4& a, const float4 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; a.w *= b.w;  return a; }
   static inline float4& operator /= (float4& a, const float4 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; a.w /= b.w;  return a; }
@@ -567,6 +570,7 @@ namespace LiteMath
   static inline double4 operator - (const double4 a, double b) { return double4{a.x - b, a.y - b, a.z - b, a.w - b}; }
   static inline double4 operator + (double a, const double4 b) { return double4{a + b.x, a + b.y, a + b.z, a + b.w}; }
   static inline double4 operator - (double a, const double4 b) { return double4{a - b.x, a - b.y, a - b.z, a - b.w}; }
+  static inline double4 operator - (const double4 a)                   { return double4{-a.x, -a.y, -a.z, -a.w}; }
 
   static inline double4& operator *= (double4& a, const double4 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; a.w *= b.w;  return a; }
   static inline double4& operator /= (double4& a, const double4 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; a.w /= b.w;  return a; }
@@ -702,6 +706,7 @@ namespace LiteMath
   static inline uint3 operator - (const uint3 a, uint b) { return uint3{a.x - b, a.y - b, a.z - b}; }
   static inline uint3 operator + (uint a, const uint3 b) { return uint3{a + b.x, a + b.y, a + b.z}; }
   static inline uint3 operator - (uint a, const uint3 b) { return uint3{a - b.x, a - b.y, a - b.z}; }
+  static inline uint3 operator - (const uint3 a)                   { return uint3{-a.x, -a.y, -a.z}; }
 
   static inline uint3& operator *= (uint3& a, const uint3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
   static inline uint3& operator /= (uint3& a, const uint3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
@@ -809,6 +814,7 @@ namespace LiteMath
   static inline int3 operator - (const int3 a, int b) { return int3{a.x - b, a.y - b, a.z - b}; }
   static inline int3 operator + (int a, const int3 b) { return int3{a + b.x, a + b.y, a + b.z}; }
   static inline int3 operator - (int a, const int3 b) { return int3{a - b.x, a - b.y, a - b.z}; }
+  static inline int3 operator - (const int3 a)                   { return int3{-a.x, -a.y, -a.z}; }
 
   static inline int3& operator *= (int3& a, const int3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
   static inline int3& operator /= (int3& a, const int3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
@@ -919,6 +925,7 @@ namespace LiteMath
   static inline float3 operator - (const float3 a, float b) { return float3{a.x - b, a.y - b, a.z - b}; }
   static inline float3 operator + (float a, const float3 b) { return float3{a + b.x, a + b.y, a + b.z}; }
   static inline float3 operator - (float a, const float3 b) { return float3{a - b.x, a - b.y, a - b.z}; }
+  static inline float3 operator - (const float3 a)                   { return float3{-a.x, -a.y, -a.z}; }
 
   static inline float3& operator *= (float3& a, const float3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
   static inline float3& operator /= (float3& a, const float3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
@@ -1032,6 +1039,7 @@ namespace LiteMath
   static inline double3 operator - (const double3 a, double b) { return double3{a.x - b, a.y - b, a.z - b}; }
   static inline double3 operator + (double a, const double3 b) { return double3{a + b.x, a + b.y, a + b.z}; }
   static inline double3 operator - (double a, const double3 b) { return double3{a - b.x, a - b.y, a - b.z}; }
+  static inline double3 operator - (const double3 a)                   { return double3{-a.x, -a.y, -a.z}; }
 
   static inline double3& operator *= (double3& a, const double3 b) { a.x *= b.x; a.y *= b.y; a.z *= b.z;  return a; }
   static inline double3& operator /= (double3& a, const double3 b) { a.x /= b.x; a.y /= b.y; a.z /= b.z;  return a; }
@@ -1141,6 +1149,7 @@ namespace LiteMath
   static inline uint2 operator - (const uint2 a, uint b) { return uint2{a.x - b, a.y - b}; }
   static inline uint2 operator + (uint a, const uint2 b) { return uint2{a + b.x, a + b.y}; }
   static inline uint2 operator - (uint a, const uint2 b) { return uint2{a - b.x, a - b.y}; }
+  static inline uint2 operator - (const uint2 a)                   { return uint2{-a.x, -a.y}; }
 
   static inline uint2& operator *= (uint2& a, const uint2 b) { a.x *= b.x; a.y *= b.y;  return a; }
   static inline uint2& operator /= (uint2& a, const uint2 b) { a.x /= b.x; a.y /= b.y;  return a; }
@@ -1232,6 +1241,7 @@ namespace LiteMath
   static inline int2 operator - (const int2 a, int b) { return int2{a.x - b, a.y - b}; }
   static inline int2 operator + (int a, const int2 b) { return int2{a + b.x, a + b.y}; }
   static inline int2 operator - (int a, const int2 b) { return int2{a - b.x, a - b.y}; }
+  static inline int2 operator - (const int2 a)        { return int2{-a.x, -a.y}; }
 
   static inline int2& operator *= (int2& a, const int2 b) { a.x *= b.x; a.y *= b.y;  return a; }
   static inline int2& operator /= (int2& a, const int2 b) { a.x /= b.x; a.y /= b.y;  return a; }
@@ -1326,6 +1336,7 @@ namespace LiteMath
   static inline float2 operator - (const float2 a, float b) { return float2{a.x - b, a.y - b}; }
   static inline float2 operator + (float a, const float2 b) { return float2{a + b.x, a + b.y}; }
   static inline float2 operator - (float a, const float2 b) { return float2{a - b.x, a - b.y}; }
+  static inline float2 operator - (const float2 a)                   { return float2{-a.x, -a.y}; }
 
   static inline float2& operator *= (float2& a, const float2 b) { a.x *= b.x; a.y *= b.y;  return a; }
   static inline float2& operator /= (float2& a, const float2 b) { a.x /= b.x; a.y /= b.y;  return a; }
@@ -1423,6 +1434,7 @@ namespace LiteMath
   static inline double2 operator - (const double2 a, double b) { return double2{a.x - b, a.y - b}; }
   static inline double2 operator + (double a, const double2 b) { return double2{a + b.x, a + b.y}; }
   static inline double2 operator - (double a, const double2 b) { return double2{a - b.x, a - b.y}; }
+  static inline double2 operator - (const double2 a)                   { return double2{-a.x, -a.y}; }
 
   static inline double2& operator *= (double2& a, const double2 b) { a.x *= b.x; a.y *= b.y;  return a; }
   static inline double2& operator /= (double2& a, const double2 b) { a.x /= b.x; a.y /= b.y;  return a; }
