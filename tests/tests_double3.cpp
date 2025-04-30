@@ -18,24 +18,24 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test220_basev_float3()
+bool test240_basev_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float3 Cx2( float(3),  float(-4),  float(4));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double3 Cx2( double(3),  double(-4),  double(4));
 
   const auto Cx3 = Cx1 - Cx2;
   const auto Cx4 = (Cx1 + Cx2)*Cx1;
   const auto Cx5 = (Cx2 - Cx1)/Cx1;
 
-  float result1[3];
-  float result2[3];
-  float result3[3];
+  double result1[3];
+  double result2[3];
+  double result3[3];
 
   store_u(result1, Cx3);
   store_u(result2, Cx4);
   store_u(result3, Cx5);
   
-  float expr1[3], expr2[3], expr3[3];
+  double expr1[3], expr2[3], expr3[3];
   bool passed = true;
   for(int i=0;i<3;i++)
   {
@@ -59,21 +59,21 @@ bool test220_basev_float3()
   return passed;
 }
 
-bool test221_basek_float3()
+bool test241_basek_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float Cx2 = float(3);
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double Cx2 = double(3);
 
-  const float3 Cx3 = Cx2*(Cx2 + Cx1) - float(2);
-  const float3 Cx4 = float(1) + (Cx1 + Cx2)*Cx2;
+  const double3 Cx3 = Cx2*(Cx2 + Cx1) - double(2);
+  const double3 Cx4 = double(1) + (Cx1 + Cx2)*Cx2;
   
-  const float3 Cx5 = float(3) - Cx2/(Cx2 - Cx1);
-  const float3 Cx6 = (Cx2 + Cx1)/Cx2 + float(5)/Cx1;
+  const double3 Cx5 = double(3) - Cx2/(Cx2 - Cx1);
+  const double3 Cx6 = (Cx2 + Cx1)/Cx2 + double(5)/Cx1;
 
-  CVEX_ALIGNED(16) float result1[4]; 
-  CVEX_ALIGNED(16) float result2[4];
-  CVEX_ALIGNED(16) float result3[4];
-  CVEX_ALIGNED(16) float result4[4];
+  CVEX_ALIGNED(16) double result1[4]; 
+  CVEX_ALIGNED(16) double result2[4];
+  CVEX_ALIGNED(16) double result3[4];
+  CVEX_ALIGNED(16) double result4[4];
 
   store(result1, Cx3);
   store(result2, Cx4);
@@ -83,10 +83,10 @@ bool test221_basek_float3()
   bool passed = true;
   for(int i=0;i<3;i++)
   {
-    const float expr1 = Cx2*(Cx2 + Cx1[i]) - float(2);
-    const float expr2 = float(1) + (Cx1[i] + Cx2)*Cx2;
-    const float expr3 = float(3) - Cx2/(Cx2 - Cx1[i]);
-    const float expr4 = (Cx2 + Cx1[i])/Cx2 + float(5)/Cx1[i];
+    const double expr1 = Cx2*(Cx2 + Cx1[i]) - double(2);
+    const double expr2 = double(1) + (Cx1[i] + Cx2)*Cx2;
+    const double expr3 = double(3) - Cx2/(Cx2 - Cx1[i]);
+    const double expr4 = (Cx2 + Cx1[i])/Cx2 + double(5)/Cx1[i];
     
 
     if(fabs(result1[i] - expr1) > 1e-6f || fabs(result2[i] - expr2) > 1e-6f || fabs(result3[i] - expr3) > 1e-6f || fabs(result4[i] - expr4) > 1e-6f )
@@ -97,10 +97,10 @@ bool test221_basek_float3()
   return passed;
 }
 
-bool test222_unaryv_float3()
+bool test242_unaryv_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float3 Cx2( float(3),  float(-4),  float(4));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double3 Cx2( double(3),  double(-4),  double(4));
 
   auto Cx3 = Cx1;
   auto Cx4 = Cx1;
@@ -112,17 +112,17 @@ bool test222_unaryv_float3()
   Cx5 *= Cx2;
   Cx6 /= Cx2;
 
-  float result1[3];
-  float result2[3];
-  float result3[3];
-  float result4[3];
+  double result1[3];
+  double result2[3];
+  double result3[3];
+  double result4[3];
 
   store_u(result1, Cx3);
   store_u(result2, Cx4);
   store_u(result3, Cx5);
   store_u(result4, Cx6);
   
-  float expr1[3], expr2[3], expr3[3], expr4[3];
+  double expr1[3], expr2[3], expr3[3], expr4[3];
   bool passed = true;
   for(int i=0;i<3;i++)
   {
@@ -148,10 +148,10 @@ bool test222_unaryv_float3()
   return passed;
 }
 
-bool test222_unaryk_float3()
+bool test242_unaryk_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float Cx2 = float(3);
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double Cx2 = double(3);
 
   auto Cx3 = Cx1;
   auto Cx4 = Cx1;
@@ -163,17 +163,17 @@ bool test222_unaryk_float3()
   Cx5 *= Cx2;
   Cx6 /= Cx2;
 
-  float result1[3];
-  float result2[3];
-  float result3[3];
-  float result4[3];
+  double result1[3];
+  double result2[3];
+  double result3[3];
+  double result4[3];
 
   store_u(result1, Cx3);
   store_u(result2, Cx4);
   store_u(result3, Cx5);
   store_u(result4, Cx6);
   
-  float expr1[3], expr2[3], expr3[3], expr4[3];
+  double expr1[3], expr2[3], expr3[3], expr4[3];
   bool passed = true;
   for(int i=0;i<3;i++)
   {
@@ -199,10 +199,10 @@ bool test222_unaryk_float3()
   return passed;
 }
 
-bool test223_cmpv_float3()
+bool test243_cmpv_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float3 Cx2( float(3),  float(-4),  float(4));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double3 Cx2( double(3),  double(-4),  double(4));
 
   auto Cx3 = (Cx1 < Cx2 );
   auto Cx4 = (Cx1 > Cx2 );
@@ -220,8 +220,8 @@ bool test223_cmpv_float3()
   uint32_t result4[3];
   uint32_t result5[3];
   uint32_t result6[3];
-  float result7[3];
-  float result8[3];
+  double result7[3];
+  double result8[3];
 
   store_u(result1, Cx3);
   store_u(result2, Cx4);
@@ -233,7 +233,7 @@ bool test223_cmpv_float3()
   store_u(result8, Cx10);
   
   uint32_t expr1[3], expr2[3], expr3[3], expr4[3], expr5[3], expr6[3];
-  float expr7[3],  expr8[3];
+  double expr7[3],  expr8[3];
   bool passed = true;
   for(int i=0;i<3;i++)
   {
@@ -266,22 +266,22 @@ bool test223_cmpv_float3()
   return passed;
 }
 
-bool test224_shuffle_float3()
+bool test244_shuffle_double3()
 { 
-  const float3 Cx1( float(-1),  float(2),  float(-3));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
 
 
-  const float3 Cr1 = shuffle_zyx(Cx1);
-  const float3 Cr2 = shuffle_zxy(Cx1);
-  const float3 Cr3 = shuffle_yzx(Cx1);
-  const float3 Cr4 = shuffle_yxz(Cx1);
-  const float3 Cr5 = shuffle_xzy(Cx1);
+  const double3 Cr1 = shuffle_zyx(Cx1);
+  const double3 Cr2 = shuffle_zxy(Cx1);
+  const double3 Cr3 = shuffle_yzx(Cx1);
+  const double3 Cr4 = shuffle_yxz(Cx1);
+  const double3 Cr5 = shuffle_xzy(Cx1);
 
-  CVEX_ALIGNED(16) float result1[4];
-  CVEX_ALIGNED(16) float result2[4];
-  CVEX_ALIGNED(16) float result3[4];
-  CVEX_ALIGNED(16) float result4[4];
-  CVEX_ALIGNED(16) float result5[4];
+  CVEX_ALIGNED(16) double result1[4];
+  CVEX_ALIGNED(16) double result2[4];
+  CVEX_ALIGNED(16) double result3[4];
+  CVEX_ALIGNED(16) double result4[4];
+  CVEX_ALIGNED(16) double result5[4];
 
   store(result1, Cr1);
   store(result2, Cr2);
@@ -308,21 +308,21 @@ bool test224_shuffle_float3()
 
 }
 
-bool test225_exsplat_float3()
+bool test245_exsplat_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
 
-  const float3 Cr0 = splat_0(Cx1);
-  const float3 Cr1 = splat_1(Cx1);
-  const float3 Cr2 = splat_2(Cx1);
+  const double3 Cr0 = splat_0(Cx1);
+  const double3 Cr1 = splat_1(Cx1);
+  const double3 Cr2 = splat_2(Cx1);
 
-  const float s0 = extract_0(Cx1);
-  const float s1 = extract_1(Cx1);
-  const float s2 = extract_2(Cx1);
+  const double s0 = extract_0(Cx1);
+  const double s1 = extract_1(Cx1);
+  const double s2 = extract_2(Cx1);
 
-  float result0[3];
-  float result1[3];
-  float result2[3];
+  double result0[3];
+  double result1[3];
+  double result2[3];
 
   store_u(result0, Cr0);
   store_u(result1, Cr1);
@@ -349,26 +349,26 @@ bool test225_exsplat_float3()
   return passed;
 }
 
-bool test227_funcv_float3()
+bool test247_funcv_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float3 Cx2( float(3),  float(-4),  float(4));
-  const float3 Cx9( float(2),  float(2),  float(2));
-  const float3 Cx0( float(0),  float(0),  float(0));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double3 Cx2( double(3),  double(-4),  double(4));
+  const double3 Cx9( double(2),  double(2),  double(2));
+  const double3 Cx0( double(0),  double(0),  double(0));
 
   
   auto Cx3 = sign(Cx1);
   auto Cx4 = abs(Cx1);
 
-  auto Cx5 = clamp(Cx1, float(2), float(3) );
+  auto Cx5 = clamp(Cx1, double(2), double(3) );
   auto Cx6 = min(Cx1, Cx2);
   auto Cx7 = max(Cx1, Cx2);
   auto Cx8 = clamp(Cx1, Cx0, Cx9);
 
-  float Cm = hmin(Cx1);
-  float CM = hmax(Cx1);
-  float horMinRef = Cx1[0];
-  float horMaxRef = Cx1[0];
+  double Cm = hmin(Cx1);
+  double CM = hmax(Cx1);
+  double horMinRef = Cx1[0];
+  double horMaxRef = Cx1[0];
   
 
   
@@ -388,7 +388,7 @@ bool test227_funcv_float3()
     if(Cx4[i] != abs(Cx1[i]))
       passed = false;
 
-    if(Cx5[i] != clamp(Cx1[i], float(2), float(3) ))
+    if(Cx5[i] != clamp(Cx1[i], double(2), double(3) ))
       passed = false;
     if(Cx6[i] != min(Cx1[i], Cx2[i]))
       passed = false;
@@ -410,10 +410,10 @@ bool test227_funcv_float3()
 
 
 
-bool test228_funcfv_float3()
+bool test248_funcfv_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
-  const float3 Cx2( float(3),  float(-4),  float(4));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
+  const double3 Cx2( double(3),  double(-4),  double(4));
   
   auto Cx3 = mod(Cx1, Cx2);
   auto Cx4 = fract(Cx1);
@@ -434,10 +434,10 @@ bool test228_funcfv_float3()
 
   auto Cx18 = rcp(Cx1);
 
-  float ref[19][3];
-  float res[19][3];
-  memset(ref, 0, 19*sizeof(float)*3);
-  memset(res, 0, 19*sizeof(float)*3);
+  double ref[19][3];
+  double res[19][3];
+  memset(ref, 0, 19*sizeof(double)*3);
+  memset(res, 0, 19*sizeof(double)*3);
 
   store_u(res[3],  Cx3);
   store_u(res[4],  Cx4);
@@ -463,7 +463,7 @@ bool test228_funcfv_float3()
     ref[7][i] = sign(Cx1[i]);
     ref[8][i] = abs(Cx1[i]);
 
-    ref[9][i]  = clamp(Cx1[i], float(-2), float(2) );
+    ref[9][i]  = clamp(Cx1[i], double(-2), double(2) );
     ref[10][i] = min(Cx1[i], Cx2[i]);
     ref[11][i] = max(Cx1[i], Cx2[i]);
 
@@ -502,9 +502,9 @@ bool test228_funcfv_float3()
   return passed;
 }
 
-bool test229_cstcnv_float3()
+bool test249_cstcnv_double3()
 {
-  const float3 Cx1( float(-1),  float(2),  float(-3));
+  const double3 Cx1( double(-1),  double(2),  double(-3));
   
   const int3  Cr1 = to_int32(Cx1);
   const uint3 Cr2 = to_uint32(Cx1);
@@ -550,16 +550,16 @@ bool test229_cstcnv_float3()
 
 
 
-bool test230_other_float3() // dummy test
+bool test250_other_double3() // dummy test
 {
-  const float CxData[3] = {  float(-1),  float(2),  float(-3)};
-  const float3  Cx1(CxData);
-  const float3  Cx2(float3(1));
+  const double CxData[3] = {  double(-1),  double(2),  double(-3)};
+  const double3  Cx1(CxData);
+  const double3  Cx2(double3(1));
  
-  const float3  Cx3 = Cx1 + Cx2;
-  float result1[3];
-  float result2[3];
-  float result3[3];
+  const double3  Cx3 = Cx1 + Cx2;
+  double result1[3];
+  double result2[3];
+  double result3[3];
   store_u(result1, Cx1);
   store_u(result2, Cx2);
   store_u(result3, Cx3);
@@ -568,7 +568,7 @@ bool test230_other_float3() // dummy test
   for (int i=0; i<3; i++)
   {
 
-    if (std::abs(result1[i] + float(1) - result3[i]) > 1e-10f || std::abs(result2[i] - float(1) > 1e-10f) )
+    if (std::abs(result1[i] + double(1) - result3[i]) > 1e-10f || std::abs(result2[i] - double(1) > 1e-10f) )
 
     {
       passed = false;
@@ -577,17 +577,17 @@ bool test230_other_float3() // dummy test
   }
 
 
-  const float  dat5 = dot  (Cx1, Cx2);
+  const double  dat5 = dot  (Cx1, Cx2);
 
-  const float3   crs3 = cross(Cx1, Cx2);
-  const float crs_ref[3] = { Cx1[1]*Cx2[2] - Cx1[2]*Cx2[1], 
+  const double3   crs3 = cross(Cx1, Cx2);
+  const double crs_ref[3] = { Cx1[1]*Cx2[2] - Cx1[2]*Cx2[1], 
                                       Cx1[2]*Cx2[0] - Cx1[0]*Cx2[2], 
                                       Cx1[0]*Cx2[1] - Cx1[1]*Cx2[0] };
 
 
 
   {
-    float sum = float(0);
+    double sum = double(0);
     for(int i=0;i<3;i++)
       sum += Cx1[i]*Cx2[i];
     passed = passed && (std::abs(sum - dat5) < 1e-6f);
@@ -601,13 +601,13 @@ bool test230_other_float3() // dummy test
   return passed;
 }
 
-bool test231_any_all_float3() // dummy test
+bool test251_any_all_double3() // dummy test
 {
-  const float CxData[3] = {  float(1),  float(2),  float(3)};
-  const float3  Cx1(CxData);
-  const float3  Cx2(float3(1));
+  const double CxData[3] = {  double(1),  double(2),  double(3)};
+  const double3  Cx1(CxData);
+  const double3  Cx2(double3(1));
  
-  const float3  Cx3 = Cx1 + Cx2;
+  const double3  Cx3 = Cx1 + Cx2;
   
 
   auto cmp1 = (Cx1 < Cx3);

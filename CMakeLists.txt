@@ -28,7 +28,9 @@ add_executable(math_tests tests/tests_main.cpp
                           tests/tests_float4.cpp
                           tests/tests_float3.cpp
                           tests/tests_float2.cpp
+                          tests/tests_double2.cpp
                           tests/tests_double3.cpp
+                          tests/tests_double4.cpp
                           tests/tests_uint4.cpp
                           tests/tests_uint3.cpp
                           tests/tests_uint2.cpp

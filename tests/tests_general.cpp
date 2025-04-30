@@ -375,7 +375,6 @@ bool test011_mattranspose()
   return error < 1e-6f;
 }
 
-
 bool test012_mat_double3x3()
 {
   double3x3 m(1.0, 2.0, 3.0,

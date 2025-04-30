@@ -35,7 +35,7 @@ std::vector<std::string> TypesToConvert(const std::string& a_typeNameS)
 int main(int argc, const char** argv)
 {
   nlohmann::json data;
-  data["AllTests"] = std::vector<std::string>();
+  data["AllTests"] = std::vector<nlohmann::json>();
   int currNumber   = 100;
   
   std::vector<std::string> XYZW4 = std::vector<std::string>({"x","y","z","w"});
@@ -118,6 +118,32 @@ int main(int argc, const char** argv)
    
     dataLocal["Tests"].push_back(test);
     ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_float4.cpp", dataLocal);
+    currNumber += 20;
+
+    data["AllTests"].push_back(dataLocal);
+  }
+
+  {
+    nlohmann::json dataLocal;
+    dataLocal["Tests"] = std::vector<std::string>();
+
+    nlohmann::json test;
+    test["Number"]  = currNumber;
+    test["Type"]    = "double4";
+    test["TypeS"]   = "double";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
+    test["TypeC"]   = ByConstRefOrValue(test["Type"]);
+    test["VecLen"]  = 4;
+    test["XYZW"]    = XYZW4;
+    test["ValuesA"] = std::vector<int>({1, 2, -3, 4});
+    test["ValuesB"] = std::vector<int>({5, -5, 6, 4});
+    test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF, 0xF0F00000, 0x00000000});
+    test["ValuesD"] = std::vector<int>({1, 2, 3, 4});
+    test["IsFloat"]  = true;
+    test["IsSigned"] = true;  
+   
+    dataLocal["Tests"].push_back(test);
+    ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_double4.cpp", dataLocal);
     currNumber += 20;
 
     data["AllTests"].push_back(dataLocal);
@@ -304,6 +330,32 @@ int main(int argc, const char** argv)
 
     data["AllTests"].push_back(dataLocal);
   }
+
+  {
+    nlohmann::json dataLocal;
+    dataLocal["Tests"] = std::vector<std::string>();
+
+    nlohmann::json test;
+    test["Number"]  = currNumber;
+    test["Type"]    = "double2";
+    test["TypeS"]   = "double";
+    test["TypesCV"] = TypesToConvert(test["TypeS"]);
+    test["TypeC"]   = ByConstRefOrValue(test["Type"]);
+    test["VecLen"]  = 2;
+    test["XYZW"]    = XYZW2;
+    test["ValuesA"] = std::vector<int>({-1, 2});
+    test["ValuesB"] = std::vector<int>({3, -4});
+    test["ValuesC"] = std::vector<uint32_t>({0xFFFFFFFF, 0xFFFFFFFF});
+    test["ValuesD"] = std::vector<int>({1, 2});
+    test["IsFloat"]  = true;
+    test["IsSigned"] = true;  
+  
+    dataLocal["Tests"].push_back(test);
+    ApplyJsonToTemplate("templates/tests_arith.cpp", "../tests/tests_double2.cpp", dataLocal);
+    currNumber += 20;
+
+    data["AllTests"].push_back(dataLocal);
+  }
    
   /*
   { 
@@ -383,6 +435,29 @@ int main(int argc, const char** argv)
 
   data["OPN"]      = openExpr;
   data["CLS"]      = closeExpr;
+
+  data["MatTypes"] = std::vector<nlohmann::json>();
+  {
+    nlohmann::json local;
+    local["Name"]   = "float";
+    local["Suffix"] = "";
+    local["Align"]  = "16";
+    data["MatTypes"].push_back(local);
+  }
+  {
+    nlohmann::json local;
+    local["Name"]   = "double";
+    local["Suffix"] = "d";
+    local["Align"]  = "32";
+    data["MatTypes"].push_back(local);
+  }
+  //{
+  //  json local;
+  //  local["Name"]   = "quadfp";
+  //  local["Suffix"] = "q";
+  //  local["Align"]  = "64";
+  //  data["MatTypes"].push_back(local);
+  //}
 
   ApplyJsonToTemplate("templates/tests.h",        "../tests/tests.h", data);
   ApplyJsonToTemplate("templates/tests_main.cpp", "../tests/tests_main.cpp", data);

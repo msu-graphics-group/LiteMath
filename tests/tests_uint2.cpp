@@ -18,7 +18,7 @@ static void PrintRR(const char* name1, const char* name2, T res[], T ref[], int 
   std::cout << std::endl;
 }
 
-bool test240_basev_uint2()
+bool test260_basev_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint2 Cx2( uint(5),  uint(4294967291));
@@ -59,7 +59,7 @@ bool test240_basev_uint2()
   return passed;
 }
 
-bool test241_basek_uint2()
+bool test261_basek_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint Cx2 = uint(5);
@@ -97,7 +97,7 @@ bool test241_basek_uint2()
   return passed;
 }
 
-bool test242_unaryv_uint2()
+bool test262_unaryv_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint2 Cx2( uint(5),  uint(4294967291));
@@ -148,7 +148,7 @@ bool test242_unaryv_uint2()
   return passed;
 }
 
-bool test242_unaryk_uint2()
+bool test262_unaryk_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint Cx2 = uint(5);
@@ -199,7 +199,7 @@ bool test242_unaryk_uint2()
   return passed;
 }
 
-bool test243_cmpv_uint2()
+bool test263_cmpv_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint2 Cx2( uint(5),  uint(4294967291));
@@ -266,7 +266,7 @@ bool test243_cmpv_uint2()
   return passed;
 }
 
-bool test244_shuffle_uint2()
+bool test264_shuffle_uint2()
 { 
   const uint2 Cx1( uint(1),  uint(2));
 
@@ -275,7 +275,7 @@ bool test244_shuffle_uint2()
 
 }
 
-bool test245_exsplat_uint2()
+bool test265_exsplat_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
 
@@ -308,7 +308,7 @@ bool test245_exsplat_uint2()
   return passed;
 }
 
-bool test247_funcv_uint2()
+bool test267_funcv_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint2 Cx2( uint(5),  uint(4294967291));
@@ -361,7 +361,7 @@ bool test247_funcv_uint2()
 
 
 
-bool test248_logicv_uint2()
+bool test268_logicv_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   const uint2 Cx2( uint(5),  uint(4294967291));
@@ -403,7 +403,7 @@ bool test248_logicv_uint2()
   return passed;
 }
 
-bool test249_cstcnv_uint2()
+bool test269_cstcnv_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));
   
@@ -435,7 +435,7 @@ bool test249_cstcnv_uint2()
 
 
 
-bool test250_other_uint2() // dummy test
+bool test270_other_uint2() // dummy test
 {
   const uint CxData[2] = {  uint(1),  uint(2)};
   const uint2  Cx1(CxData);
@@ -478,7 +478,7 @@ bool test250_other_uint2() // dummy test
   return passed;
 }
 
-bool test251_any_all_uint2() // dummy test
+bool test271_any_all_uint2() // dummy test
 {
   const uint CxData[2] = {  uint(1),  uint(2)};
   const uint2  Cx1(CxData);

@@ -1,10 +1,13 @@
 #pragma once
 
 #ifdef __OPENCL_VERSION__
-  #include "LiteMathCL.h"  // if this file is included in OpenCL shaders 
+  #include "extended/LiteMathCL.h"  // if this file is included in OpenCL shaders 
 #else
 #ifdef ISPC
-  #include "LiteMathISPC.h"
+  #include "extended/LiteMathISPC.h"
+#else  
+#ifdef CUDA_MATH
+  #include "extended/LiteMathCU.h"
 #else  
 
 #include <cstdint>
@@ -13,6 +16,11 @@
 #include <cstring>          // for memcpy
 #include <algorithm>        // for std::min/std::max 
 #include <initializer_list> //
+
+#ifndef MAXFLOAT
+  #include <cfloat>
+  #define MAXFLOAT FLT_MAX
+#endif
 
 #ifdef M_PI
 #undef M_PI // same if we have such macro some-where else ...
@@ -89,6 +97,18 @@ namespace LiteMath
   static inline int   as_int32(float x)  { return as_int(x);    }
   static inline uint  as_uint32(float x) { return as_uint(x); }
   static inline float as_float32(int x)  { return as_float(x);  }
+
+  #ifdef _MSC_VER
+  static inline unsigned short     bitCount16(unsigned short x)     { return __popcnt16(x); }
+  static inline unsigned int       bitCount32(unsigned int x)       { return __popcnt(x); }
+  static inline unsigned int       bitCount  (unsigned int x)       { return __popcnt(x); }
+  static inline unsigned long long bitCount64(unsigned long long x) { return __popcnt64(x); }
+  #else
+  static inline unsigned short     bitCount16(unsigned short x)     { return __builtin_popcount((unsigned int)(x)); }
+  static inline unsigned int       bitCount32(unsigned int x)       { return __builtin_popcount(x); }
+  static inline unsigned int       bitCount  (unsigned int x)       { return __builtin_popcount(x); }
+  static inline unsigned long long bitCount64(unsigned long long x) { return __builtin_popcountll(x); }
+  #endif
 
   static inline double clamp(double u, double a, double b) { return std::min(std::max(a, u), b); }
   static inline float clamp(float u, float a, float b) { return std::min(std::max(a, u), b); }
@@ -345,13 +365,14 @@ namespace LiteMath
   static inline {{Test.Type}} make_{{Test.Type}}({% for Coord in Test.XYZW %}{{Test.TypeS}} {{Coord}}{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}) { return {{Test.Type}}{{OPN}}{% for Coord in Test.XYZW %}{{Coord}}{% if loop.index1 != Test.VecLen %}, {% endif %}{% endfor %}{{CLS}}; }
 ## endfor
 ## endfor
-  static inline float3 to_float3(float4 f4)         { return float3(f4.x, f4.y, f4.z); }
-  static inline float4 to_float4(float3 v, float w) { return float4(v.x, v.y, v.z, w); }
-  static inline uint3  to_uint3 (uint4 f4)          { return uint3(f4.x, f4.y, f4.z);  }
-  static inline uint4  to_uint4 (uint3 v, uint w)   { return uint4(v.x, v.y, v.z, w);  }
-  static inline int3   to_int3  (int4 f4)           { return int3(f4.x, f4.y, f4.z);   }
-  static inline int4   to_int4  (int3 v, int w)     { return int4(v.x, v.y, v.z, w);   }
-
+  static inline float3  to_float3(float4 f4)           { return float3(f4.x, f4.y, f4.z); }
+  static inline float4  to_float4(float3 v, float w)   { return float4(v.x, v.y, v.z, w); }
+  static inline double3 to_double3(double4 f4)         { return double3(f4.x, f4.y, f4.z); }
+  static inline double4 to_double4(double3 v, float w) { return double4(v.x, v.y, v.z, w); }
+  static inline uint3   to_uint3 (uint4 f4)            { return uint3(f4.x, f4.y, f4.z);  }
+  static inline uint4   to_uint4 (uint3 v, uint w)     { return uint4(v.x, v.y, v.z, w);  }
+  static inline int3    to_int3  (int4 f4)             { return int3(f4.x, f4.y, f4.z);   }
+  static inline int4    to_int4  (int3 v, int w)       { return int4(v.x, v.y, v.z, w);   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -438,8 +459,10 @@ namespace LiteMath
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
+  {% for FType in MatTypes %}
 
-  static inline void mat4_rowmajor_mul_mat4(float* __restrict M, const float* __restrict A, const float* __restrict B) // modern gcc compiler succesfuly vectorize such implementation!
+  static inline void mat4_rowmajor_mul_mat4({{FType.Name}}* __restrict M, const {{FType.Name}}* __restrict A, const {{FType.Name}}* __restrict B) // modern gcc compiler succesfuly vectorize such implementation!
   {
   	M[ 0] = A[ 0] * B[ 0] + A[ 1] * B[ 4] + A[ 2] * B[ 8] + A[ 3] * B[12];
   	M[ 1] = A[ 0] * B[ 1] + A[ 1] * B[ 5] + A[ 2] * B[ 9] + A[ 3] * B[13];
@@ -459,7 +482,7 @@ namespace LiteMath
   	M[15] = A[12] * B[ 3] + A[13] * B[ 7] + A[14] * B[11] + A[15] * B[15];
   }
 
-  static inline void mat4_colmajor_mul_vec4(float* __restrict RES, const float* __restrict B, const float* __restrict V) // modern gcc compiler succesfuly vectorize such implementation!
+  static inline void mat4_colmajor_mul_vec4({{FType.Name}}* __restrict RES, const {{FType.Name}}* __restrict B, const {{FType.Name}}* __restrict V) // modern gcc compiler succesfuly vectorize such implementation!
   {
   	RES[0] = V[0] * B[0] + V[1] * B[4] + V[2] * B[ 8] + V[3] * B[12];
   	RES[1] = V[0] * B[1] + V[1] * B[5] + V[2] * B[ 9] + V[3] * B[13];
@@ -467,59 +490,78 @@ namespace LiteMath
   	RES[3] = V[0] * B[3] + V[1] * B[7] + V[2] * B[11] + V[3] * B[15];
   }
 
-  static inline void transpose4(const float4 in_rows[4], float4 out_rows[4])
+  static inline void mat3_colmajor_mul_vec3({{FType.Name}}* __restrict RES, const {{FType.Name}}* __restrict B, const {{FType.Name}}* __restrict V) 
   {
-    CVEX_ALIGNED(16) float rows[16];
+  	RES[0] = V[0] * B[0] + V[1] * B[3] + V[2] * B[6];
+  	RES[1] = V[0] * B[1] + V[1] * B[4] + V[2] * B[7];
+  	RES[2] = V[0] * B[2] + V[1] * B[5] + V[2] * B[8];
+  }
+
+  static inline void transpose4(const {{FType.Name}}4 in_rows[4], {{FType.Name}}4 out_rows[4])
+  {
+    CVEX_ALIGNED({{FType.Align}}) {{FType.Name}} rows[16];
     store(rows+0,  in_rows[0]);
     store(rows+4,  in_rows[1]);
     store(rows+8,  in_rows[2]);
     store(rows+12, in_rows[3]);
   
-    out_rows[0] = float4{rows[0], rows[4], rows[8],  rows[12]};
-    out_rows[1] = float4{rows[1], rows[5], rows[9],  rows[13]};
-    out_rows[2] = float4{rows[2], rows[6], rows[10], rows[14]};
-    out_rows[3] = float4{rows[3], rows[7], rows[11], rows[15]};
+    out_rows[0] = {{FType.Name}}4{rows[0], rows[4], rows[8],  rows[12]};
+    out_rows[1] = {{FType.Name}}4{rows[1], rows[5], rows[9],  rows[13]};
+    out_rows[2] = {{FType.Name}}4{rows[2], rows[6], rows[10], rows[14]};
+    out_rows[3] = {{FType.Name}}4{rows[3], rows[7], rows[11], rows[15]};
+  }
+
+  static inline void transpose3(const {{FType.Name}}3 in_rows[3], {{FType.Name}}3 out_rows[3])
+  {
+    {{FType.Name}} rows[9];
+    store(rows+0,  in_rows[0]);
+    store(rows+3,  in_rows[1]);
+    store(rows+6,  in_rows[2]);
+  
+    out_rows[0] = {{FType.Name}}3{rows[0], rows[3], rows[6]};
+    out_rows[1] = {{FType.Name}}3{rows[1], rows[4], rows[7]};
+    out_rows[2] = {{FType.Name}}3{rows[2], rows[5], rows[8]};
   }
 
   /**
   \brief this class use colmajor memory layout for effitient vector-matrix operations
   */
-  struct float4x4
+  struct  {{FType.Name}}4x4
   {
-    inline float4x4()  { identity(); }
+    inline {{FType.Name}}4x4()  { identity(); }
 
-    inline explicit float4x4(const float A[16])
+    inline explicit {{FType.Name}}4x4(const {{FType.Name}} A[16])
     {
-      m_col[0] = float4{ A[0], A[4], A[8],  A[12] };
-      m_col[1] = float4{ A[1], A[5], A[9],  A[13] };
-      m_col[2] = float4{ A[2], A[6], A[10], A[14] };
-      m_col[3] = float4{ A[3], A[7], A[11], A[15] };
+      m_col[0] =  {{FType.Name}}4{ A[0], A[4], A[8],  A[12] };
+      m_col[1] =  {{FType.Name}}4{ A[1], A[5], A[9],  A[13] };
+      m_col[2] =  {{FType.Name}}4{ A[2], A[6], A[10], A[14] };
+      m_col[3] =  {{FType.Name}}4{ A[3], A[7], A[11], A[15] };
     }
 
-    inline explicit float4x4(float A0, float A1, float A2, float A3,
-                             float A4, float A5, float A6, float A7,
-                             float A8, float A9, float A10, float A11,
-                             float A12, float A13, float A14, float A15)
+    inline explicit {{FType.Name}}4x4({{FType.Name}} A0,  {{FType.Name}} A1,  {{FType.Name}} A2, {{FType.Name}} A3,
+                                      {{FType.Name}} A4,  {{FType.Name}} A5,  {{FType.Name}} A6,  {{FType.Name}} A7,
+                                      {{FType.Name}} A8,  {{FType.Name}} A9,  {{FType.Name}} A10, {{FType.Name}} A11,
+                                      {{FType.Name}} A12, {{FType.Name}} A13, {{FType.Name}} A14, {{FType.Name}} A15)
     {
-      m_col[0] = float4{ A0, A4, A8,  A12 };
-      m_col[1] = float4{ A1, A5, A9,  A13 };
-      m_col[2] = float4{ A2, A6, A10, A14 };
-      m_col[3] = float4{ A3, A7, A11, A15 };
+      m_col[0] = {{FType.Name}}4{ A0, A4, A8,  A12 };
+      m_col[1] = {{FType.Name}}4{ A1, A5, A9,  A13 };
+      m_col[2] = {{FType.Name}}4{ A2, A6, A10, A14 };
+      m_col[3] = {{FType.Name}}4{ A3, A7, A11, A15 };
     }
 
     inline void identity()
     {
-      m_col[0] = float4{ 1.0f, 0.0f, 0.0f, 0.0f };
-      m_col[1] = float4{ 0.0f, 1.0f, 0.0f, 0.0f };
-      m_col[2] = float4{ 0.0f, 0.0f, 1.0f, 0.0f };
-      m_col[3] = float4{ 0.0f, 0.0f, 0.0f, 1.0f };
+      m_col[0] = {{FType.Name}}4{ 1.0f, 0.0f, 0.0f, 0.0f };
+      m_col[1] = {{FType.Name}}4{ 0.0f, 1.0f, 0.0f, 0.0f };
+      m_col[2] = {{FType.Name}}4{ 0.0f, 0.0f, 1.0f, 0.0f };
+      m_col[3] = {{FType.Name}}4{ 0.0f, 0.0f, 0.0f, 1.0f };
     }
 
-    inline float4 get_col(int i) const                { return m_col[i]; }
-    inline void   set_col(int i, const float4& a_col) { m_col[i] = a_col; }
+    inline  {{FType.Name}}4 get_col(int i) const { return m_col[i]; }
+    inline void set_col(int i, const  {{FType.Name}}4& a_col) { m_col[i] = a_col; }
 
-    inline float4 get_row(int i) const { return float4{ m_col[0][i], m_col[1][i], m_col[2][i], m_col[3][i] }; }
-    inline void   set_row(int i, const float4& a_col)
+    inline  {{FType.Name}}4 get_row(int i) const { return {{FType.Name}}4{ m_col[0][i], m_col[1][i], m_col[2][i], m_col[3][i] }; }
+    inline void set_row(int i, const {{FType.Name}}4& a_col)
     {
       m_col[0][i] = a_col[0];
       m_col[1][i] = a_col[1];
@@ -527,18 +569,18 @@ namespace LiteMath
       m_col[3][i] = a_col[3];
     }
 
-    inline float4& col(int i)       { return m_col[i]; }
-    inline float4  col(int i) const { return m_col[i]; }
+    inline {{FType.Name}}4& col(int i)       { return m_col[i]; }
+    inline {{FType.Name}}4  col(int i) const { return m_col[i]; }
 
-    inline float& operator()(int row, int col)       { return m_col[col][row]; }
-    inline float  operator()(int row, int col) const { return m_col[col][row]; }
+    inline  {{FType.Name}}& operator()(int row, int col)       { return m_col[col][row]; }
+    inline  {{FType.Name}}  operator()(int row, int col) const { return m_col[col][row]; }
 
     struct RowTmp 
     {
-      float4x4* self;
+      {{FType.Name}}4x4* self;
       int       row;
-      inline float& operator[](int col)       { return self->m_col[col][row]; }
-      inline float  operator[](int col) const { return self->m_col[col][row]; }
+      inline  {{FType.Name}}& operator[](int col)       { return self->m_col[col][row]; }
+      inline  {{FType.Name}}  operator[](int col) const { return self->m_col[col][row]; }
     };
 
     inline RowTmp operator[](int a_row) 
@@ -549,129 +591,129 @@ namespace LiteMath
       return row;
     }
 
-    float4 m_col[4];
+    {{FType.Name}}4 m_col[4];
   };
 
-  static inline float4 operator*(const float4x4& m, const float4& v)
+  static inline {{FType.Name}}4 operator*(const  {{FType.Name}}4x4& m, const {{FType.Name}}4& v)
   {
-    float4 res;
+    {{FType.Name}}4 res;
     mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v);
     return res;
   }
 
-  static inline float4 mul4x4x4(const float4x4& m, const float4& v) { return m*v; }
+  static inline {{FType.Name}}4 mul4x4x4(const {{FType.Name}}4x4& m, const {{FType.Name}}4& v) { return m*v; }
 
-  static inline float4 mul(const float4x4& m, const float4& v)
+  static inline {{FType.Name}}4 mul(const {{FType.Name}}4x4& m, const {{FType.Name}}4& v)
   {
-    float4 res;
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v);
+    {{FType.Name}}4 res;
+    mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v);
     return res;
   }
 
-  static inline float3 operator*(const float4x4& m, const float3& v)
+  static inline {{FType.Name}}3 operator*(const {{FType.Name}}4x4& m, const {{FType.Name}}3& v)
   {
-    float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
-    float4 res;                             
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
-    return to_float3(res);
+    {{FType.Name}}4 v2 = {{FType.Name}}4{v.x, v.y, v.z, 1.0f}; 
+    {{FType.Name}}4 res;                             
+    mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v2);
+    return to_{{FType.Name}}3(res);
   }
 
-  static inline float3 mul(const float4x4& m, const float3& v)
+  static inline {{FType.Name}}3 mul(const {{FType.Name}}4x4& m, const {{FType.Name}}3& v)
   {
-    float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
-    float4 res;                             
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
-    return to_float3(res);
+    {{FType.Name}}4 v2 = {{FType.Name}}4{v.x, v.y, v.z, 1.0f}; 
+    {{FType.Name}}4 res;                             
+    mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v2);
+    return to_{{FType.Name}}3(res);
   }
 
-  static inline float4x4 transpose(const float4x4& rhs)
+  static inline {{FType.Name}}4x4 transpose(const {{FType.Name}}4x4& rhs)
   {
-    float4x4 res;
+    {{FType.Name}}4x4 res;
     transpose4(rhs.m_col, res.m_col);
     return res;
   }
 
-  static inline float4x4 translate4x4(float3 t)
+  static inline {{FType.Name}}4x4 translate4x4({{FType.Name}}3 t)
   {
-    float4x4 res;
-    res.set_col(3, float4{t.x,  t.y,  t.z, 1.0f });
+    {{FType.Name}}4x4 res;
+    res.set_col(3, {{FType.Name}}4{t.x,  t.y,  t.z, 1.0f });
     return res;
   }
 
-  static inline float4x4 scale4x4(float3 t)
+  static inline {{FType.Name}}4x4 scale4x4({{FType.Name}}3 t)
   {
-    float4x4 res;
-    res.set_col(0, float4{t.x, 0.0f, 0.0f,  0.0f});
-    res.set_col(1, float4{0.0f, t.y, 0.0f,  0.0f});
-    res.set_col(2, float4{0.0f, 0.0f,  t.z, 0.0f});
-    res.set_col(3, float4{0.0f, 0.0f, 0.0f, 1.0f});
+    {{FType.Name}}4x4 res;
+    res.set_col(0, {{FType.Name}}4{t.x, 0.0f, 0.0f,  0.0f});
+    res.set_col(1, {{FType.Name}}4{0.0f, t.y, 0.0f,  0.0f});
+    res.set_col(2, {{FType.Name}}4{0.0f, 0.0f,  t.z, 0.0f});
+    res.set_col(3, {{FType.Name}}4{0.0f, 0.0f, 0.0f, 1.0f});
     return res;
   }
 
-  static inline float4x4 rotate4x4X(float phi)
+  static inline {{FType.Name}}4x4 rotate4x4X({{FType.Name}} phi)
   {
-    float4x4 res;
-    res.set_col(0, float4{1.0f,      0.0f,       0.0f, 0.0f  });
-    res.set_col(1, float4{0.0f, +cosf(phi),  +sinf(phi), 0.0f});
-    res.set_col(2, float4{0.0f, -sinf(phi),  +cosf(phi), 0.0f});
-    res.set_col(3, float4{0.0f,      0.0f,       0.0f, 1.0f  });
+    {{FType.Name}}4x4 res;
+    res.set_col(0, {{FType.Name}}4{1.0f,      0.0f,       0.0f, 0.0f  });
+    res.set_col(1, {{FType.Name}}4{0.0f, +cosf(phi),  +sinf(phi), 0.0f});
+    res.set_col(2, {{FType.Name}}4{0.0f, -sinf(phi),  +cosf(phi), 0.0f});
+    res.set_col(3, {{FType.Name}}4{0.0f,      0.0f,       0.0f, 1.0f  });
     return res;
   }
 
-  static inline float4x4 rotate4x4Y(float phi)
+  static inline {{FType.Name}}4x4 rotate4x4Y({{FType.Name}} phi)
   {
-    float4x4 res;
-    res.set_col(0, float4{+cosf(phi), 0.0f, -sinf(phi), 0.0f});
-    res.set_col(1, float4{     0.0f, 1.0f,      0.0f, 0.0f  });
-    res.set_col(2, float4{+sinf(phi), 0.0f, +cosf(phi), 0.0f});
-    res.set_col(3, float4{     0.0f, 0.0f,      0.0f, 1.0f  });
+    {{FType.Name}}4x4 res;
+    res.set_col(0, {{FType.Name}}4{+cosf(phi), 0.0f, -sinf(phi), 0.0f});
+    res.set_col(1, {{FType.Name}}4{     0.0f, 1.0f,      0.0f, 0.0f  });
+    res.set_col(2, {{FType.Name}}4{+sinf(phi), 0.0f, +cosf(phi), 0.0f});
+    res.set_col(3, {{FType.Name}}4{     0.0f, 0.0f,      0.0f, 1.0f  });
     return res;
   }
 
-  static inline float4x4 rotate4x4Z(float phi)
+  static inline {{FType.Name}}4x4 rotate4x4Z({{FType.Name}} phi)
   {
-    float4x4 res;
-    res.set_col(0, float4{+cosf(phi), sinf(phi), 0.0f, 0.0f});
-    res.set_col(1, float4{-sinf(phi), cosf(phi), 0.0f, 0.0f});
-    res.set_col(2, float4{     0.0f,     0.0f, 1.0f, 0.0f  });
-    res.set_col(3, float4{     0.0f,     0.0f, 0.0f, 1.0f  });
+    {{FType.Name}}4x4 res;
+    res.set_col(0, {{FType.Name}}4{+cosf(phi), sinf(phi), 0.0f, 0.0f});
+    res.set_col(1, {{FType.Name}}4{-sinf(phi), cosf(phi), 0.0f, 0.0f});
+    res.set_col(2, {{FType.Name}}4{     0.0f,     0.0f, 1.0f, 0.0f  });
+    res.set_col(3, {{FType.Name}}4{     0.0f,     0.0f, 0.0f, 1.0f  });
     return res;
   }
   
-  static inline float4x4 mul(float4x4 m1, float4x4 m2)
+  static inline {{FType.Name}}4x4 mul({{FType.Name}}4x4 m1, {{FType.Name}}4x4 m2)
   {
-    const float4 column1 = mul(m1, m2.col(0));
-    const float4 column2 = mul(m1, m2.col(1));
-    const float4 column3 = mul(m1, m2.col(2));
-    const float4 column4 = mul(m1, m2.col(3));
-    float4x4 res;
-    res.set_col(0, column1);
-    res.set_col(1, column2);
-    res.set_col(2, column3);
-    res.set_col(3, column4);
-
-    return res;
-  }
-
-  static inline float4x4 operator*(float4x4 m1, float4x4 m2)
-  {
-    const float4 column1 = mul(m1, m2.col(0));
-    const float4 column2 = mul(m1, m2.col(1));
-    const float4 column3 = mul(m1, m2.col(2));
-    const float4 column4 = mul(m1, m2.col(3));
-
-    float4x4 res;
+    const {{FType.Name}}4 column1 = mul(m1, m2.col(0));
+    const {{FType.Name}}4 column2 = mul(m1, m2.col(1));
+    const {{FType.Name}}4 column3 = mul(m1, m2.col(2));
+    const {{FType.Name}}4 column4 = mul(m1, m2.col(3));
+    
+    {{FType.Name}}4x4 res;
     res.set_col(0, column1);
     res.set_col(1, column2);
     res.set_col(2, column3);
     res.set_col(3, column4);
     return res;
   }
-  
-  static inline float4x4 inverse4x4(float4x4 m1)
+
+  static inline {{FType.Name}}4x4 operator*({{FType.Name}}4x4 m1, {{FType.Name}}4x4 m2)
   {
-    CVEX_ALIGNED(16) float tmp[12]; // temp array for pairs
-    float4x4 m;
+    const {{FType.Name}}4 column1 = mul(m1, m2.col(0));
+    const {{FType.Name}}4 column2 = mul(m1, m2.col(1));
+    const {{FType.Name}}4 column3 = mul(m1, m2.col(2));
+    const {{FType.Name}}4 column4 = mul(m1, m2.col(3));
+
+    {{FType.Name}}4x4 res;
+    res.set_col(0, column1);
+    res.set_col(1, column2);
+    res.set_col(2, column3);
+    res.set_col(3, column4);
+    return res;
+  }
+  
+  static inline {{FType.Name}}4x4 inverse4x4({{FType.Name}}4x4 m1)
+  {
+    CVEX_ALIGNED({{FType.Align}}) {{FType.Name}} tmp[12]; // temp array for pairs
+    {{FType.Name}}4x4 m;
 
     // calculate pairs for first 8 elements (cofactors)
     //
@@ -743,8 +785,8 @@ namespace LiteMath
 
     // calculate matrix inverse
     //
-    const float k = 1.0f / (m1(0,0) * m(0,0) + m1(0,1) * m(1,0) + m1(0,2) * m(2,0) + m1(0,3) * m(3,0));
-    const float4 vK{k,k,k,k};
+    const {{FType.Name}} k = 1.0f / (m1(0,0) * m(0,0) + m1(0,1) * m(1,0) + m1(0,2) * m(2,0) + m1(0,3) * m(3,0));
+    const {{FType.Name}}4 vK{k,k,k,k};
 
     m.set_col(0, m.get_col(0)*vK);
     m.set_col(1, m.get_col(1)*vK);
@@ -753,6 +795,370 @@ namespace LiteMath
 
     return m;
   }
+
+  static inline {{FType.Name}}4x4 operator+({{FType.Name}}4x4 m1, {{FType.Name}}4x4 m2)
+  {
+    {{FType.Name}}4x4 res;
+    res.m_col[0] = m1.m_col[0] + m2.m_col[0];
+    res.m_col[1] = m1.m_col[1] + m2.m_col[1];
+    res.m_col[2] = m1.m_col[2] + m2.m_col[2];
+    res.m_col[3] = m1.m_col[3] + m2.m_col[3];
+    return res;
+  }
+
+  static inline {{FType.Name}}4x4 operator-({{FType.Name}}4x4 m1, {{FType.Name}}4x4 m2)
+  {
+    {{FType.Name}}4x4 res;
+    res.m_col[0] = m1.m_col[0] - m2.m_col[0];
+    res.m_col[1] = m1.m_col[1] - m2.m_col[1];
+    res.m_col[2] = m1.m_col[2] - m2.m_col[2];
+    res.m_col[3] = m1.m_col[3] - m2.m_col[3];
+    return res;
+  }
+
+  static inline {{FType.Name}}4x4 outerProduct({{FType.Name}}4 a, {{FType.Name}}4 b) 
+  {
+    {{FType.Name}}4x4 m;
+    for (int i = 0; i < 4; i++)
+      for (int j = 0; j < 4; j++)
+        m[i][j] = a[i] * b[j];
+    return m;
+  }
+
+  /**
+  \brief this class use colmajor memory layout for effitient vector-matrix operations
+  */
+  struct {{FType.Name}}3x3
+  {
+    inline {{FType.Name}}3x3()  { identity(); }
+    
+    inline explicit {{FType.Name}}3x3(const {{FType.Name}} rhs)
+    {
+      m_col[0] = {{FType.Name}}3(rhs);
+      m_col[1] = {{FType.Name}}3(rhs);
+      m_col[2] = {{FType.Name}}3(rhs); 
+    } 
+
+    inline {{FType.Name}}3x3(const {{FType.Name}}3x3& rhs) 
+    { 
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+    }
+
+    inline {{FType.Name}}3x3& operator=(const {{FType.Name}}3x3& rhs)
+    {
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+      return *this;
+    }
+
+    // col-major matrix from row-major array
+    inline explicit {{FType.Name}}3x3(const {{FType.Name}} A[9])
+    {
+      m_col[0] = {{FType.Name}}3{ A[0], A[3], A[6] };
+      m_col[1] = {{FType.Name}}3{ A[1], A[4], A[7] };
+      m_col[2] = {{FType.Name}}3{ A[2], A[5], A[8] };
+    }
+
+    inline explicit {{FType.Name}}3x3({{FType.Name}} A0, {{FType.Name}} A1, {{FType.Name}} A2, {{FType.Name}} A3, {{FType.Name}} A4, 
+                                      {{FType.Name}} A5, {{FType.Name}} A6, {{FType.Name}} A7, {{FType.Name}} A8)
+    {
+      m_col[0] = {{FType.Name}}3{ A0, A3, A6 };
+      m_col[1] = {{FType.Name}}3{ A1, A4, A7 };
+      m_col[2] = {{FType.Name}}3{ A2, A5, A8 };
+    }
+
+    inline void identity()
+    {
+      m_col[0] = {{FType.Name}}3{ 1.0, 0.0, 0.0 };
+      m_col[1] = {{FType.Name}}3{ 0.0, 1.0, 0.0 };
+      m_col[2] = {{FType.Name}}3{ 0.0, 0.0, 1.0 };
+    }
+
+    inline void zero()
+    {
+      m_col[0] = {{FType.Name}}3{ 0.0, 0.0, 0.0 };
+      m_col[1] = {{FType.Name}}3{ 0.0, 0.0, 0.0 };
+      m_col[2] = {{FType.Name}}3{ 0.0, 0.0, 0.0 };
+    }
+
+    inline {{FType.Name}}3 get_col(int i) const { return m_col[i]; }
+    inline void set_col(int i, const {{FType.Name}}3& a_col) { m_col[i] = a_col; }
+
+    inline {{FType.Name}}3 get_row(int i) const { return {{FType.Name}}3{ m_col[0][i], m_col[1][i], m_col[2][i] }; }
+    inline void set_row(int i, const {{FType.Name}}3& a_col)
+    {
+      m_col[0][i] = a_col[0];
+      m_col[1][i] = a_col[1];
+      m_col[2][i] = a_col[2];
+    }
+
+    inline {{FType.Name}}3& col(int i)       { return m_col[i]; }
+    inline {{FType.Name}}3  col(int i) const { return m_col[i]; }
+
+    inline {{FType.Name}}& operator()(int row, int col)       { return m_col[col][row]; }
+    inline {{FType.Name}}  operator()(int row, int col) const { return m_col[col][row]; }
+
+    struct RowTmp 
+    {
+      {{FType.Name}}3x3* self;
+      int row;
+      inline {{FType.Name}}& operator[](int col)       { return self->m_col[col][row]; }
+      inline {{FType.Name}}  operator[](int col) const { return self->m_col[col][row]; }
+    };
+
+    inline RowTmp operator[](int a_row) 
+    {
+      RowTmp row;
+      row.self = this;
+      row.row  = a_row;
+      return row;
+    }
+
+    {{FType.Name}}3 m_col[3];
+  };
+
+  static inline {{FType.Name}}3x3 make_double3x3_from_rows({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)
+  {
+    {{FType.Name}}3x3 m;
+    m.set_row(0, a);
+    m.set_row(1, b);
+    m.set_row(2, c);
+    return m;
+  }
+
+  static inline {{FType.Name}}3x3 make_double3x3_from_cols({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)
+  {
+    {{FType.Name}}3x3 m;
+    m.set_col(0, a);
+    m.set_col(1, b);
+    m.set_col(2, c);
+    return m;
+  }
+
+  static inline {{FType.Name}}3 operator*(const {{FType.Name}}3x3& m, const {{FType.Name}}3& v)
+  {
+    {{FType.Name}}3 res;
+    mat3_colmajor_mul_vec3(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v);
+    return res;
+  }
+
+  static inline {{FType.Name}}3 mul(const {{FType.Name}}3x3& m, const {{FType.Name}}3& v)
+  {
+    {{FType.Name}}3 res;                             
+    mat3_colmajor_mul_vec3(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v);
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 transpose(const {{FType.Name}}3x3& rhs)
+  {
+    {{FType.Name}}3x3 res;
+    transpose3(rhs.m_col, res.m_col);
+    return res;
+  }
+
+  static inline {{FType.Name}} determinant(const {{FType.Name}}3x3& mat)
+  {
+    const {{FType.Name}} a = mat.m_col[0].x;
+    const {{FType.Name}} b = mat.m_col[1].x;
+    const {{FType.Name}} c = mat.m_col[2].x;
+    const {{FType.Name}} d = mat.m_col[0].y;
+    const {{FType.Name}} e = mat.m_col[1].y;
+    const {{FType.Name}} f = mat.m_col[2].y;
+    const {{FType.Name}} g = mat.m_col[0].z;
+    const {{FType.Name}} h = mat.m_col[1].z;
+    const {{FType.Name}} i = mat.m_col[2].z;
+    return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+  }
+
+  static inline {{FType.Name}}3x3 inverse3x3(const {{FType.Name}}3x3& mat)
+  {
+    {{FType.Name}} det = determinant(mat);
+    {{FType.Name}} inv_det = 1.0 / det;
+    {{FType.Name}} a = mat.m_col[0].x;
+    {{FType.Name}} b = mat.m_col[1].x;
+    {{FType.Name}} c = mat.m_col[2].x;
+    {{FType.Name}} d = mat.m_col[0].y;
+    {{FType.Name}} e = mat.m_col[1].y;
+    {{FType.Name}} f = mat.m_col[2].y;
+    {{FType.Name}} g = mat.m_col[0].z;
+    {{FType.Name}} h = mat.m_col[1].z;
+    {{FType.Name}} i = mat.m_col[2].z;
+
+    {{FType.Name}}3x3 inv;
+    inv.m_col[0].x = (e * i - f * h) * inv_det;
+    inv.m_col[1].x = (c * h - b * i) * inv_det;
+    inv.m_col[2].x = (b * f - c * e) * inv_det;
+    inv.m_col[0].y = (f * g - d * i) * inv_det;
+    inv.m_col[1].y = (a * i - c * g) * inv_det;
+    inv.m_col[2].y = (c * d - a * f) * inv_det;
+    inv.m_col[0].z = (d * h - e * g) * inv_det;
+    inv.m_col[1].z = (b * g - a * h) * inv_det;
+    inv.m_col[2].z = (a * e - b * d) * inv_det;
+
+    return inv;
+  } 
+
+  static inline {{FType.Name}}3x3 scale3x3({{FType.Name}}3 t)
+  {
+    {{FType.Name}}3x3 res;
+    res.set_col(0, {{FType.Name}}3{t.x, 0.0, 0.0});
+    res.set_col(1, {{FType.Name}}3{0.0, t.y, 0.0});
+    res.set_col(2, {{FType.Name}}3{0.0, 0.0,  t.z});
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 rotate3x3X({{FType.Name}} phi)
+  {
+    {{FType.Name}}3x3 res;
+    res.set_col(0, {{FType.Name}}3{1.0,      0.0,       0.0});
+    res.set_col(1, {{FType.Name}}3{0.0, +std::cos(phi),  +std::sin(phi)});
+    res.set_col(2, {{FType.Name}}3{0.0, -std::sin(phi),  +std::cos(phi)});
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 rotate3x3Y({{FType.Name}} phi)
+  {
+    {{FType.Name}}3x3 res;
+    res.set_col(0, {{FType.Name}}3{+std::cos(phi), 0.0, -std::sin(phi)});
+    res.set_col(1, {{FType.Name}}3{     0.0, 1.0,      0.0});
+    res.set_col(2, {{FType.Name}}3{+std::sin(phi), 0.0, +std::cos(phi)});
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 rotate3x3Z({{FType.Name}} phi)
+  {
+    {{FType.Name}}3x3 res;
+    res.set_col(0, {{FType.Name}}3{+std::cos(phi), std::sin(phi), 0.0});
+    res.set_col(1, {{FType.Name}}3{-std::sin(phi), std::cos(phi), 0.0});
+    res.set_col(2, {{FType.Name}}3{     0.0,     0.0, 1.0});
+    return res;
+  }
+  
+  static inline {{FType.Name}}3x3 mul({{FType.Name}}3x3 m1, {{FType.Name}}3x3 m2)
+  {
+    const {{FType.Name}}3 column1 = mul(m1, m2.col(0));
+    const {{FType.Name}}3 column2 = mul(m1, m2.col(1));
+    const {{FType.Name}}3 column3 = mul(m1, m2.col(2));
+    {{FType.Name}}3x3 res;
+    res.set_col(0, column1);
+    res.set_col(1, column2);
+    res.set_col(2, column3);
+
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 operator*({{FType.Name}}3x3 m1, {{FType.Name}}3x3 m2)
+  {
+    const {{FType.Name}}3 column1 = mul(m1, m2.col(0));
+    const {{FType.Name}}3 column2 = mul(m1, m2.col(1));
+    const {{FType.Name}}3 column3 = mul(m1, m2.col(2));
+
+    {{FType.Name}}3x3 res;
+    res.set_col(0, column1);
+    res.set_col(1, column2);
+    res.set_col(2, column3);
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 operator*({{FType.Name}} scale, {{FType.Name}}3x3 m)
+  {
+    {{FType.Name}}3x3 res;
+    res.m_col[0] = m.m_col[0] * scale;
+    res.m_col[1] = m.m_col[1] * scale;
+    res.m_col[2] = m.m_col[2] * scale;
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 operator*({{FType.Name}}3x3 m, {{FType.Name}} scale)
+  {
+    {{FType.Name}}3x3 res;
+    res.m_col[0] = m.m_col[0] * scale;
+    res.m_col[1] = m.m_col[1] * scale;
+    res.m_col[2] = m.m_col[2] * scale;
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 operator+({{FType.Name}}3x3 m1, {{FType.Name}}3x3 m2)
+  {
+    {{FType.Name}}3x3 res;
+    res.m_col[0] = m1.m_col[0] + m2.m_col[0];
+    res.m_col[1] = m1.m_col[1] + m2.m_col[1];
+    res.m_col[2] = m1.m_col[2] + m2.m_col[2];
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 operator-({{FType.Name}}3x3 m1, {{FType.Name}}3x3 m2)
+  {
+    {{FType.Name}}3x3 res;
+    res.m_col[0] = m1.m_col[0] - m2.m_col[0];
+    res.m_col[1] = m1.m_col[1] - m2.m_col[1];
+    res.m_col[2] = m1.m_col[2] - m2.m_col[2];
+    return res;
+  }
+
+  static inline {{FType.Name}}3x3 outerProduct({{FType.Name}}3 a, {{FType.Name}}3 b) 
+  {
+    {{FType.Name}}3x3 m;
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        m[i][j] = a[i] * b[j];
+    return m;
+  }
+  
+  ///////////////////////////////////////////////////////////////////
+  //////////////////// complex {{FType.Name}} ///////////////////////
+  ///////////////////////////////////////////////////////////////////
+
+  // complex numbers adapted from PBRT-v4
+  struct complex{{FType.Suffix}} 
+  {
+    inline complex{{FType.Suffix}}() : re(0), im(0) {}
+    inline complex{{FType.Suffix}}({{FType.Name}} re_) : re(re_), im(0) {}
+    inline complex{{FType.Suffix}}({{FType.Name}} re_, {{FType.Name}} im_) : re(re_), im(im_) {}
+
+    inline complex{{FType.Suffix}} operator-()          const { return {-re, -im}; }
+    inline complex{{FType.Suffix}} operator+(complex{{FType.Suffix}} z) const { return {re + z.re, im + z.im}; }
+    inline complex{{FType.Suffix}} operator-(complex{{FType.Suffix}} z) const { return {re - z.re, im - z.im}; }
+    inline complex{{FType.Suffix}} operator*(complex{{FType.Suffix}} z) const { return {re * z.re - im * z.im, re * z.im + im * z.re}; }
+
+    inline complex{{FType.Suffix}} operator/(complex{{FType.Suffix}} z) const 
+    {
+      {{FType.Name}} scale = 1 / (z.re * z.re + z.im * z.im);
+      return {scale * (re * z.re + im * z.im), scale * (im * z.re - re * z.im)};
+    }
+
+    inline friend complex{{FType.Suffix}} operator+({{FType.Name}} value, complex{{FType.Suffix}} z) { return complex{{FType.Suffix}}(value) + z; }
+    inline friend complex{{FType.Suffix}} operator-({{FType.Name}} value, complex{{FType.Suffix}} z) { return complex{{FType.Suffix}}(value) - z; }
+    inline friend complex{{FType.Suffix}} operator*({{FType.Name}} value, complex{{FType.Suffix}} z) { return complex{{FType.Suffix}}(value) * z; }
+    inline friend complex{{FType.Suffix}} operator/({{FType.Name}} value, complex{{FType.Suffix}} z) { return complex{{FType.Suffix}}(value) / z; }
+
+    {{FType.Name}} re, im;
+  };
+
+  inline static {{FType.Name}} real(const complex{{FType.Suffix}} &z) { return z.re; }
+  inline static {{FType.Name}} imag(const complex{{FType.Suffix}} &z) { return z.im; }
+
+  inline static {{FType.Name}} complex_norm(const complex{{FType.Suffix}} &z) { return z.re * z.re + z.im * z.im; }
+  inline static {{FType.Name}} complex_abs (const complex{{FType.Suffix}} &z) { return std::sqrt(complex_norm(z)); }
+  inline static complex{{FType.Suffix}} complex_sqrt(const complex{{FType.Suffix}} &z) 
+  {
+    {{FType.Name}} n = complex_abs(z);
+    {{FType.Name}} t1 = std::sqrt(0.5f * (n + std::abs(z.re)));
+    {{FType.Name}} t2 = 0.5f * z.im / t1;
+
+    if (n == 0)
+      return 0;
+
+    if (z.re >= 0)
+      return {t1, t2};
+    else
+      return {std::abs(t2), std::copysign(t1, z.im)};
+  }
+
+  {% endfor %}
 
   ///////////////////////////////////////////////////////////////////
   ///// Auxilary functions which are not in the core of library /////
@@ -828,76 +1234,6 @@ namespace LiteMath
   static inline float4 packUIntW(const float4& a, uint data)   { return blend(a, as_float32(uint4(data)), uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
   static inline int    extractIntW(const float4& a)            { return as_int(a.w);  }
   static inline uint   extractUIntW(const float4& a)           { return as_uint(a.w); }
-
-  struct float3x3
-  {
-    float3 row[3];
-  };
-  
-  static inline float3x3 make_float3x3(float3 a, float3 b, float3 c)
-  {
-    float3x3 m;
-    m.row[0] = a;
-    m.row[1] = b;
-    m.row[2] = c;
-    return m;
-  }
-
-  static inline float3x3 make_float3x3_by_columns(float3 a, float3 b, float3 c)
-  {
-    float3x3 m;
-    m.row[0].x = a.x;
-    m.row[1].x = a.y;
-    m.row[2].x = a.z;
-  
-    m.row[0].y = b.x;
-    m.row[1].y = b.y;
-    m.row[2].y = b.z;
-  
-    m.row[0].z = c.x;
-    m.row[1].z = c.y;
-    m.row[2].z = c.z;
-    return m;
-  }
-
-  static inline float3 mul3x3x3(float3x3 m, const float3 v)
-  {
-    float3 res;
-    res.x = m.row[0].x*v.x + m.row[0].y*v.y + m.row[0].z*v.z;
-    res.y = m.row[1].x*v.x + m.row[1].y*v.y + m.row[1].z*v.z;
-    res.z = m.row[2].x*v.x + m.row[2].y*v.y + m.row[2].z*v.z;
-    return res;
-  }
-
-  static inline float3 operator*(float3x3 m, const float3 v) { return mul3x3x3(m,v); }
-
-  static inline float3x3 inverse3x3(float3x3 a)
-  {
-    float det = a.row[0].x * (a.row[1].y * a.row[2].z - a.row[1].z * a.row[2].y) -
-                a.row[0].y * (a.row[1].x * a.row[2].z - a.row[1].z * a.row[2].x) +
-                a.row[0].z * (a.row[1].x * a.row[2].y - a.row[1].y * a.row[2].x);
-  
-    float3x3 b;
-    b.row[0].x = (a.row[1].y * a.row[2].z - a.row[1].z * a.row[2].y);
-    b.row[0].y = -(a.row[0].y * a.row[2].z - a.row[0].z * a.row[2].y);
-    b.row[0].z = (a.row[0].y * a.row[1].z - a.row[0].z * a.row[1].y);
-    b.row[1].x = -(a.row[1].x * a.row[2].z - a.row[1].z * a.row[2].x);
-    b.row[1].y = (a.row[0].x * a.row[2].z - a.row[0].z * a.row[2].x);
-    b.row[1].z = -(a.row[0].x * a.row[1].z - a.row[0].z * a.row[1].x);
-    b.row[2].x = (a.row[1].x * a.row[2].y - a.row[1].y * a.row[2].x);
-    b.row[2].y = -(a.row[0].x * a.row[2].y - a.row[0].y * a.row[2].x);
-    b.row[2].z = (a.row[0].x * a.row[1].y - a.row[0].y * a.row[1].x);
-  
-    float s = 1.0f / det;
-    b.row[0] *= s;
-    b.row[1] *= s;
-    b.row[2] *= s;
-    return b;
-  }
-
-  static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
-  static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
-
 
   /////////////////////////////////////////
   /////////////// Boxes stuff /////////////
@@ -1145,6 +1481,127 @@ namespace LiteMath
 };
 #endif
 
-#endif
-#endif
+#include <omp.h>
+//#ifndef _OPENMP
+//static int omp_get_num_threads() { return 1; }
+//static int omp_get_max_threads() { return 1; }
+//static int omp_get_thread_num()  { return 0; }
+//#endif
 
+namespace LiteMath
+{ 
+  
+  static inline void InterlockedAdd(float& mem, float data) 
+  { 
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(float& mem, float data, float& a_res) 
+  { 
+    a_res = mem;
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(double& mem, double data) 
+  { 
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(double& mem, double data, double& a_res) 
+  { 
+    a_res = mem;
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(int& mem, int data) 
+  { 
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(int& mem, int data, int& a_res) 
+  { 
+    a_res = mem;
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(uint& mem, uint data) 
+  { 
+    #pragma omp atomic
+    mem += data;
+  }
+
+  static inline void InterlockedAdd(uint& mem, uint data, uint& a_res) 
+  { 
+    a_res = mem;
+    #pragma omp atomic
+    mem += data;
+  }
+
+  template<typename IndexType>
+  static IndexType align(IndexType a_size, IndexType a_alignment)
+  {
+    if (a_size % a_alignment == 0)
+      return a_size;
+    else
+    {
+      IndexType sizeCut = a_size - (a_size % a_alignment);
+      return sizeCut + a_alignment;
+    }
+  }
+
+  template<typename T>
+  inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
+  {
+    const size_t cacheLineSize = 128; 
+    const size_t alignSize     = cacheLineSize/sizeof(double);
+    const size_t vecSizeAlign  = align(a_targetSize, alignSize);
+    const size_t maxThreads    = omp_get_max_threads(); 
+    a_vec.reserve(vecSizeAlign*maxThreads);
+    a_vec.resize(a_targetSize);
+    for(size_t i=0;i<a_vec.capacity();i++)
+      a_vec.data()[i] = 0;  
+    return vecSizeAlign; // can use later with 'ReduceAdd' 
+  }
+
+  template<typename T>
+  inline void ReduceAddComplete(std::vector<T>& a_vec)
+  {
+    const size_t maxThreads = omp_get_max_threads();
+    const size_t szAligned  = a_vec.capacity() / maxThreads;
+    for(size_t threadId = 1; threadId < maxThreads; threadId++) 
+    {
+      T* threadData = a_vec.data() + threadId*szAligned;
+      for(size_t i=0; i<a_vec.size(); i++)
+        a_vec[i] += threadData[i];
+    }
+  }
+
+  template<typename T, typename IndexType> 
+  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
+  {
+    if(!std::isfinite(val))
+      return;
+    const size_t maxThreads = size_t(omp_get_num_threads()); // here not max_threads
+    const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
+    const size_t threadId   = size_t(omp_get_thread_num());
+    a_vec.data()[szAligned*threadId + size_t(offset)] += val;
+  }
+
+  template<typename T, typename IndexType> 
+  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
+  {
+    if(!std::isfinite(val))
+      return;
+    a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
+  }
+};
+
+#endif
+#endif
+#endif

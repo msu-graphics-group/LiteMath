@@ -59,109 +59,139 @@ bool test149_cstcnv_float4();
 bool test150_other_float4();
 bool test151_any_all_float4();
 
-bool test160_basev_uint3();
-bool test161_basek_uint3();
-bool test162_unaryv_uint3();
-bool test162_unaryk_uint3();
-bool test163_cmpv_uint3();
-bool test164_shuffle_uint3();
-bool test165_exsplat_uint3();
-bool test167_funcv_uint3();
+bool test160_basev_double4();
+bool test161_basek_double4();
+bool test162_unaryv_double4();
+bool test162_unaryk_double4();
+bool test163_cmpv_double4();
+bool test164_shuffle_double4();
+bool test165_exsplat_double4();
+bool test167_funcv_double4();
 
-bool test168_logicv_uint3();
-bool test169_cstcnv_uint3();
+bool test168_funcfv_double4();
+bool test169_cstcnv_double4();
 
-bool test170_other_uint3();
-bool test171_any_all_uint3();
+bool test170_other_double4();
+bool test171_any_all_double4();
 
-bool test180_basev_int3();
-bool test181_basek_int3();
-bool test182_unaryv_int3();
-bool test182_unaryk_int3();
-bool test183_cmpv_int3();
-bool test184_shuffle_int3();
-bool test185_exsplat_int3();
-bool test187_funcv_int3();
+bool test180_basev_uint3();
+bool test181_basek_uint3();
+bool test182_unaryv_uint3();
+bool test182_unaryk_uint3();
+bool test183_cmpv_uint3();
+bool test184_shuffle_uint3();
+bool test185_exsplat_uint3();
+bool test187_funcv_uint3();
 
-bool test188_logicv_int3();
-bool test189_cstcnv_int3();
+bool test188_logicv_uint3();
+bool test189_cstcnv_uint3();
 
-bool test190_other_int3();
-bool test191_any_all_int3();
+bool test190_other_uint3();
+bool test191_any_all_uint3();
 
-bool test200_basev_float3();
-bool test201_basek_float3();
-bool test202_unaryv_float3();
-bool test202_unaryk_float3();
-bool test203_cmpv_float3();
-bool test204_shuffle_float3();
-bool test205_exsplat_float3();
-bool test207_funcv_float3();
+bool test200_basev_int3();
+bool test201_basek_int3();
+bool test202_unaryv_int3();
+bool test202_unaryk_int3();
+bool test203_cmpv_int3();
+bool test204_shuffle_int3();
+bool test205_exsplat_int3();
+bool test207_funcv_int3();
 
-bool test208_funcfv_float3();
-bool test209_cstcnv_float3();
+bool test208_logicv_int3();
+bool test209_cstcnv_int3();
 
-bool test210_other_float3();
-bool test211_any_all_float3();
+bool test210_other_int3();
+bool test211_any_all_int3();
 
-bool test220_basev_double3();
-bool test221_basek_double3();
-bool test222_unaryv_double3();
-bool test222_unaryk_double3();
-bool test223_cmpv_double3();
-bool test224_shuffle_double3();
-bool test225_exsplat_double3();
-bool test227_funcv_double3();
+bool test220_basev_float3();
+bool test221_basek_float3();
+bool test222_unaryv_float3();
+bool test222_unaryk_float3();
+bool test223_cmpv_float3();
+bool test224_shuffle_float3();
+bool test225_exsplat_float3();
+bool test227_funcv_float3();
 
-bool test228_funcfv_double3();
-bool test229_cstcnv_double3();
+bool test228_funcfv_float3();
+bool test229_cstcnv_float3();
 
-bool test230_other_double3();
-bool test231_any_all_double3();
+bool test230_other_float3();
+bool test231_any_all_float3();
 
-bool test240_basev_uint2();
-bool test241_basek_uint2();
-bool test242_unaryv_uint2();
-bool test242_unaryk_uint2();
-bool test243_cmpv_uint2();
-bool test244_shuffle_uint2();
-bool test245_exsplat_uint2();
-bool test247_funcv_uint2();
+bool test240_basev_double3();
+bool test241_basek_double3();
+bool test242_unaryv_double3();
+bool test242_unaryk_double3();
+bool test243_cmpv_double3();
+bool test244_shuffle_double3();
+bool test245_exsplat_double3();
+bool test247_funcv_double3();
 
-bool test248_logicv_uint2();
-bool test249_cstcnv_uint2();
+bool test248_funcfv_double3();
+bool test249_cstcnv_double3();
 
-bool test250_other_uint2();
-bool test251_any_all_uint2();
+bool test250_other_double3();
+bool test251_any_all_double3();
 
-bool test260_basev_int2();
-bool test261_basek_int2();
-bool test262_unaryv_int2();
-bool test262_unaryk_int2();
-bool test263_cmpv_int2();
-bool test264_shuffle_int2();
-bool test265_exsplat_int2();
-bool test267_funcv_int2();
+bool test260_basev_uint2();
+bool test261_basek_uint2();
+bool test262_unaryv_uint2();
+bool test262_unaryk_uint2();
+bool test263_cmpv_uint2();
+bool test264_shuffle_uint2();
+bool test265_exsplat_uint2();
+bool test267_funcv_uint2();
 
-bool test268_logicv_int2();
-bool test269_cstcnv_int2();
+bool test268_logicv_uint2();
+bool test269_cstcnv_uint2();
 
-bool test270_other_int2();
-bool test271_any_all_int2();
+bool test270_other_uint2();
+bool test271_any_all_uint2();
 
-bool test280_basev_float2();
-bool test281_basek_float2();
-bool test282_unaryv_float2();
-bool test282_unaryk_float2();
-bool test283_cmpv_float2();
-bool test284_shuffle_float2();
-bool test285_exsplat_float2();
-bool test287_funcv_float2();
+bool test280_basev_int2();
+bool test281_basek_int2();
+bool test282_unaryv_int2();
+bool test282_unaryk_int2();
+bool test283_cmpv_int2();
+bool test284_shuffle_int2();
+bool test285_exsplat_int2();
+bool test287_funcv_int2();
 
-bool test288_funcfv_float2();
-bool test289_cstcnv_float2();
+bool test288_logicv_int2();
+bool test289_cstcnv_int2();
 
-bool test290_other_float2();
-bool test291_any_all_float2();
+bool test290_other_int2();
+bool test291_any_all_int2();
+
+bool test300_basev_float2();
+bool test301_basek_float2();
+bool test302_unaryv_float2();
+bool test302_unaryk_float2();
+bool test303_cmpv_float2();
+bool test304_shuffle_float2();
+bool test305_exsplat_float2();
+bool test307_funcv_float2();
+
+bool test308_funcfv_float2();
+bool test309_cstcnv_float2();
+
+bool test310_other_float2();
+bool test311_any_all_float2();
+
+bool test320_basev_double2();
+bool test321_basek_double2();
+bool test322_unaryv_double2();
+bool test322_unaryk_double2();
+bool test323_cmpv_double2();
+bool test324_shuffle_double2();
+bool test325_exsplat_double2();
+bool test327_funcv_double2();
+
+bool test328_funcfv_double2();
+bool test329_cstcnv_double2();
+
+bool test330_other_double2();
+bool test331_any_all_double2();
 
 
