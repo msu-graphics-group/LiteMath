@@ -10,6 +10,7 @@
   #include "extended/LiteMathCU.h"
 #else  
 
+#include <vector>
 #include <cstdint>
 #include <cmath>
 #include <limits>           // for std::numeric_limits
