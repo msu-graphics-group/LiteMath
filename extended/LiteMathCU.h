@@ -11,66 +11,15 @@
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-#ifndef __CUDACC__
-#include <math.h>
-#include <omp.h>
-#include <vector>
-
-#define __global
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // host implementations of CUDA functions
-// ////////////////////////////////////////////////////////////////////////////////
-
-// inline float fminf(float a, float b)
-// {
-//     return a < b ? a : b;
-// }
-
-// inline float fmaxf(float a, float b)
-// {
-//     return a > b ? a : b;
-// }
-
-// inline double fmin(double a, double b)
-// {
-//     return a < b ? a : b;
-// }
-
-// inline double fmax(double a, double b)
-// {
-//     return a > b ? a : b;
-// }
-
-// inline int max(int a, int b)
-// {
-//     return a > b ? a : b;
-// }
-
-// inline int min(int a, int b)
-// {
-//     return a < b ? a : b;
-// }
-
-// inline uint max(uint a, uint b)
-// {
-//     return a > b ? a : b;
-// }
-
-// inline uint min(uint a, uint b)
-// {
-//     return a < b ? a : b;
-// }
-
-inline float rsqrtf(float x)
-{
-    return 1.0f / sqrtf(x);
-}
-
-inline double rsqrt(double x)
-{
-    return 1.0 / sqrt(x);
-}
+#if defined(__CUDACC__)
+#elif defined(__HIPCC__)
+#else
+  #include <math.h>
+  #include <omp.h>
+  #include <vector>
+  #define __global
+  inline float rsqrtf(float x) { return 1.0f / sqrtf(x); }
+  inline double rsqrt(double x) { return 1.0 / sqrt(x); }
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2169,7 +2118,20 @@ static inline __host__ __device__ float3x3 outerProduct(const float3& a, const f
   return m;
 }
 
-#ifdef __CUDACC__
+#if defined(__CUDA_ARCH__) 
+  inline __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
+  inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
+
+  //#if __CUDA_ARCH__ >= 600
+  //inline __device__ void InterlockedAdd(double& mem, double data)                {         atomicAdd(&mem, data); }
+  //inline __device__ void InterlockedAdd(double& mem, double data, double& a_res) { a_res = atomicAdd(&mem, data); }
+  //#endif
+
+  inline __device__ void InterlockedAdd(int& mem, int data)                {         atomicAdd(&mem, data); }
+  inline __device__ void InterlockedAdd(int& mem, int data, int& a_res)    { a_res = atomicAdd(&mem, data); }
+  inline __device__ void InterlockedAdd(uint& mem, uint data)              {         atomicAdd(&mem, data); }
+  inline __device__ void InterlockedAdd(uint& mem, uint data, uint& a_res) { a_res = atomicAdd(&mem, data); }
+#elif defined(__HIPCC__)
   inline __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
   inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
 
