@@ -1,7 +1,10 @@
 #pragma once
 
-// #include <vector_types.h>
-#include <cuda_runtime.h>
+#if defined(__CUDACC__)
+  #include <cuda_runtime.h>
+#elif defined(__HIPCC__)
+  #include <hip/hip_runtime.h>
+#endif
 
 // namespace LiteMath 
 // {

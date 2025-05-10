@@ -1,5 +1,9 @@
 #pragma once
-#include <cuda_runtime.h>
+#if defined(__CUDACC__)
+  #include <cuda_runtime.h>
+#elif defined(__HIPCC__)
+  #include <hip/hip_runtime.h>
+#endif
 #include <cstdint>
 
 namespace LiteMathExtended
@@ -25,10 +29,15 @@ namespace LiteMathExtended
       size_t actualSize = last - first;
       if(m_size > m_capacity) 
       {
+        #if defined(__CUDACC__)
         if(m_data != nullptr)
           cudaFree(m_data); 
-        
         cudaMalloc((void**)&m_data, actualSize*sizeof(T));
+        #elif defined(__HIPCC__)
+        if(m_data != nullptr)
+          hipFree(m_data); 
+        hipMalloc((void**)&m_data, actualSize*sizeof(T));
+        #endif
         m_size     = actualSize;
         m_capacity = actualSize;
       }
@@ -36,7 +45,11 @@ namespace LiteMathExtended
       if(actualSize != 0)
       {
         const T* dataHost = &(*first);
+        #if defined(__CUDACC__)
         cudaMemcpy(m_data, dataHost, actualSize*sizeof(T), cudaMemcpyHostToDevice);
+        #elif defined(__HIPCC__)
+        hipMemcpy(m_data, dataHost, actualSize*sizeof(T), hipMemcpyHostToDevice);
+        #endif
       }
 
       m_size = actualSize;
@@ -47,9 +60,15 @@ namespace LiteMathExtended
     {
       if(m_capacity < capacity)
       {
+        #if defined(__CUDACC__)
         if(m_data != nullptr)
           cudaFree(m_data); 
         cudaMalloc((void**)&m_data, capacity*sizeof(T));
+        #elif defined(__HIPCC__)
+        if(m_data != nullptr)
+          hipFree(m_data); 
+        hipMalloc((void**)&m_data, capacity*sizeof(T));
+        #endif
         m_capacity = size_type(capacity);
       }
     }
@@ -58,7 +77,11 @@ namespace LiteMathExtended
     {
       if(m_size == 0)
       {
+        #if defined(__CUDACC__)
         cudaFree(m_data); 
+        #elif defined(__HIPCC__)
+        hipFree(m_data); 
+        #endif
         m_data = nullptr;
         m_capacity = 0;
       }
