@@ -2253,7 +2253,7 @@ namespace LiteMath
     float3 m_col[3];
   };
 
-  static inline float3x3 make_double3x3_from_rows(float3 a, float3 b, float3 c)
+  static inline float3x3 make_float3x3(float3 a, float3 b, float3 c)
   {
     float3x3 m;
     m.set_row(0, a);
@@ -2262,7 +2262,7 @@ namespace LiteMath
     return m;
   }
 
-  static inline float3x3 make_double3x3_from_cols(float3 a, float3 b, float3 c)
+  static inline float3x3 make_float3x3_by_columns(float3 a, float3 b, float3 c)
   {
     float3x3 m;
     m.set_col(0, a);
@@ -2284,6 +2284,9 @@ namespace LiteMath
     mat3_colmajor_mul_vec3((float*)&res, (const float*)&m, (const float*)&v);
     return res;
   }
+
+  static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
+  static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
 
   static inline float3x3 transpose(const float3x3& rhs)
   {
