@@ -10,22 +10,9 @@ typedef unsigned short ushort;
 #ifndef __CUDACC__
 #include <math.h>
 #include <omp.h>
-
 #define __global
-
-// ////////////////////////////////////////////////////////////////////////////////
-// // host implementations of CUDA functions
-// ////////////////////////////////////////////////////////////////////////////////
-
-inline float rsqrtf(float x)
-{
-    return 1.0f / sqrtf(x);
-}
-
-inline double rsqrt(double x)
-{
-    return 1.0 / sqrt(x);
-}
+inline float rsqrtf(float x) { return 1.0f / sqrtf(x); }
+inline double rsqrt(double x) { return 1.0 / sqrt(x); }
 #endif
 
 //#if defined(__CUDACC__)
@@ -2226,7 +2213,7 @@ static inline __host__ __device__ float3x3 outerProduct(const float3& a, const f
   return m;
 }
 
-#if defined(__CUDA_ARCH__) 
+#ifdef __CUDACC__
   inline __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
   inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
 
@@ -2239,79 +2226,6 @@ static inline __host__ __device__ float3x3 outerProduct(const float3& a, const f
   inline __device__ void InterlockedAdd(int& mem, int data, int& a_res)    { a_res = atomicAdd(&mem, data); }
   inline __device__ void InterlockedAdd(uint& mem, uint data)              {         atomicAdd(&mem, data); }
   inline __device__ void InterlockedAdd(uint& mem, uint data, uint& a_res) { a_res = atomicAdd(&mem, data); }
-#elif defined(__HIPCC__)
-  inline __device__ void InterlockedAdd(float& mem, float data)                  {         atomicAdd(&mem, data); }
-  inline __device__ void InterlockedAdd(float& mem, float data, float& a_res)    { a_res = atomicAdd(&mem, data); }
-
-  //#if __CUDA_ARCH__ >= 600
-  //inline __device__ void InterlockedAdd(double& mem, double data)                {         atomicAdd(&mem, data); }
-  //inline __device__ void InterlockedAdd(double& mem, double data, double& a_res) { a_res = atomicAdd(&mem, data); }
-  //#endif
-
-  inline __device__ void InterlockedAdd(int& mem, int data)                {         atomicAdd(&mem, data); }
-  inline __device__ void InterlockedAdd(int& mem, int data, int& a_res)    { a_res = atomicAdd(&mem, data); }
-  inline __device__ void InterlockedAdd(uint& mem, uint data)              {         atomicAdd(&mem, data); }
-  inline __device__ void InterlockedAdd(uint& mem, uint data, uint& a_res) { a_res = atomicAdd(&mem, data); }
-
-  template<typename IndexType>
-  static IndexType align(IndexType a_size, IndexType a_alignment)
-  {
-    if (a_size % a_alignment == 0)
-      return a_size;
-    else
-    {
-      IndexType sizeCut = a_size - (a_size % a_alignment);
-      return sizeCut + a_alignment;
-    }
-  }
-
-  template<typename T>
-  inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
-  {
-    const size_t cacheLineSize = 128; 
-    const size_t alignSize     = cacheLineSize/sizeof(double);
-    const size_t vecSizeAlign  = align(a_targetSize, alignSize);
-    const size_t maxThreads    = omp_get_max_threads(); 
-    a_vec.reserve(vecSizeAlign*maxThreads);
-    a_vec.resize(a_targetSize);
-    for(size_t i=0;i<a_vec.capacity();i++)
-      a_vec.data()[i] = 0;  
-    return vecSizeAlign; // can use later with 'ReduceAdd' 
-  }
-
-  template<typename T>
-  inline void ReduceAddComplete(std::vector<T>& a_vec)
-  {
-    const size_t maxThreads = omp_get_max_threads();
-    const size_t szAligned  = a_vec.capacity() / maxThreads;
-    for(size_t threadId = 1; threadId < maxThreads; threadId++) 
-    {
-      T* threadData = a_vec.data() + threadId*szAligned;
-      for(size_t i=0; i<a_vec.size(); i++)
-        a_vec[i] += threadData[i];
-    }
-  }
-
-  template<typename T, typename IndexType> 
-  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
-  {
-    if(!std::isfinite(val))
-      return;
-    const size_t maxThreads = omp_get_num_threads(); // here not max_threads
-    const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
-    const size_t threadId   = omp_get_thread_num();
-    const size_t threadOffs = szAligned*threadId;
-    a_vec.data()[threadOffs + offset] += val;
-  }
-
-  template<typename T, typename IndexType> 
-  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
-  {
-    if(!std::isfinite(val))
-      return;
-    a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
-  }
-
 #else
   static inline void InterlockedAdd(float& mem, float data) 
   { 
@@ -2377,53 +2291,52 @@ static inline __host__ __device__ float3x3 outerProduct(const float3& a, const f
     }
   }
 
-  //template<typename T>
-  //inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
-  //{
-  //  const size_t cacheLineSize = 128; 
-  //  const size_t alignSize     = cacheLineSize/sizeof(double);
-  //  const size_t vecSizeAlign  = align(a_targetSize, alignSize);
-  //  const size_t maxThreads    = omp_get_max_threads(); 
-  //  a_vec.reserve(vecSizeAlign*maxThreads);
-  //  a_vec.resize(a_targetSize);
-  //  for(size_t i=0;i<a_vec.capacity();i++)
-  //    a_vec.data()[i] = 0;  
-  //  return vecSizeAlign; // can use later with 'ReduceAdd' 
-  //}
-  //
-  //template<typename T>
-  //inline void ReduceAddComplete(std::vector<T>& a_vec)
-  //{
-  //  const size_t maxThreads = omp_get_max_threads();
-  //  const size_t szAligned  = a_vec.capacity() / maxThreads;
-  //  for(size_t threadId = 1; threadId < maxThreads; threadId++) 
-  //  {
-  //    T* threadData = a_vec.data() + threadId*szAligned;
-  //    for(size_t i=0; i<a_vec.size(); i++)
-  //      a_vec[i] += threadData[i];
-  //  }
-  //}
+  template<typename T>
+  inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
+  {
+    const size_t cacheLineSize = 128; 
+    const size_t alignSize     = cacheLineSize/sizeof(double);
+    const size_t vecSizeAlign  = align(a_targetSize, alignSize);
+    const size_t maxThreads    = omp_get_max_threads(); 
+    a_vec.reserve(vecSizeAlign*maxThreads);
+    a_vec.resize(a_targetSize);
+    for(size_t i=0;i<a_vec.capacity();i++)
+      a_vec.data()[i] = 0;  
+    return vecSizeAlign; // can use later with 'ReduceAdd' 
+  }
 
-  //template<typename T, typename IndexType> 
-  //inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
-  //{
-  //  if(!std::isfinite(val))
-  //    return;
-  //  const size_t maxThreads = omp_get_num_threads(); // here not max_threads
-  //  const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
-  //  const size_t threadId   = omp_get_thread_num();
-  //  const size_t threadOffs = szAligned*threadId;
-  //  a_vec.data()[threadOffs + offset] += val;
-  //}
-  //
-  //template<typename T, typename IndexType> 
-  //inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
-  //{
-  //  if(!std::isfinite(val))
-  //    return;
-  //  a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
-  //}
+  template<typename T>
+  inline void ReduceAddComplete(std::vector<T>& a_vec)
+  {
+    const size_t maxThreads = omp_get_max_threads();
+    const size_t szAligned  = a_vec.capacity() / maxThreads;
+    for(size_t threadId = 1; threadId < maxThreads; threadId++) 
+    {
+      T* threadData = a_vec.data() + threadId*szAligned;
+      for(size_t i=0; i<a_vec.size(); i++)
+        a_vec[i] += threadData[i];
+    }
+  }
 
+  template<typename T, typename IndexType> 
+  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
+  {
+    if(!std::isfinite(val))
+      return;
+    const size_t maxThreads = omp_get_num_threads(); // here not max_threads
+    const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
+    const size_t threadId   = omp_get_thread_num();
+    const size_t threadOffs = szAligned*threadId;
+    a_vec.data()[threadOffs + offset] += val;
+  }
+
+  template<typename T, typename IndexType> 
+  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
+  {
+    if(!std::isfinite(val))
+      return;
+    a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
+  }
 #endif
 
 // }
