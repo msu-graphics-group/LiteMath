@@ -1,27 +1,54 @@
 #pragma once
 
-#if defined(__CUDACC__)
-  #include <cuda_runtime.h>
-#elif defined(__HIPCC__)
-  #include <hip/hip_runtime.h>
-#endif
+// #include <vector_types.h>
+#include <cuda_runtime.h>
 
-#include <vector>
-#include <omp.h>
-
-// namespace LiteMath 
-// {
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
-#if defined(__CUDACC__)
-#elif defined(__HIPCC__)
-#else
-  #include <math.h>
-  #define __global
-  inline float rsqrtf(float x) { return 1.0f / sqrtf(x); }
-  inline double rsqrt(double x) { return 1.0 / sqrt(x); }
+#include <vector>
+#ifndef __CUDACC__
+#include <math.h>
+#include <omp.h>
+
+#define __global
+
+// ////////////////////////////////////////////////////////////////////////////////
+// // host implementations of CUDA functions
+// ////////////////////////////////////////////////////////////////////////////////
+
+inline float rsqrtf(float x)
+{
+    return 1.0f / sqrtf(x);
+}
+
+inline double rsqrt(double x)
+{
+    return 1.0 / sqrt(x);
+}
 #endif
+
+//#if defined(__CUDACC__)
+//  #include <vector_types.h>
+//  #include <cuda_runtime.h>
+//#elif defined(__HIPCC__)
+//  #include <hip/hip_runtime.h>
+//#else
+//  #include <math.h>
+//  #define __global
+//  #define __host__
+//  #define __device__
+//  inline float rsqrtf(float x) { return 1.0f / sqrtf(x); }
+//  inline double rsqrt(double x) { return 1.0 / sqrt(x); }
+//#endif
+//
+//#include <vector>
+//#include <omp.h>
+//
+//// namespace LiteMath 
+//// {
+//typedef unsigned int uint;
+//typedef unsigned short ushort;
 
 ////////////////////////////////////////////////////////////////////////////////
 // negate
@@ -2350,52 +2377,53 @@ static inline __host__ __device__ float3x3 outerProduct(const float3& a, const f
     }
   }
 
-  template<typename T>
-  inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
-  {
-    const size_t cacheLineSize = 128; 
-    const size_t alignSize     = cacheLineSize/sizeof(double);
-    const size_t vecSizeAlign  = align(a_targetSize, alignSize);
-    const size_t maxThreads    = omp_get_max_threads(); 
-    a_vec.reserve(vecSizeAlign*maxThreads);
-    a_vec.resize(a_targetSize);
-    for(size_t i=0;i<a_vec.capacity();i++)
-      a_vec.data()[i] = 0;  
-    return vecSizeAlign; // can use later with 'ReduceAdd' 
-  }
+  //template<typename T>
+  //inline size_t ReduceAddInit(std::vector<T>& a_vec, size_t a_targetSize)
+  //{
+  //  const size_t cacheLineSize = 128; 
+  //  const size_t alignSize     = cacheLineSize/sizeof(double);
+  //  const size_t vecSizeAlign  = align(a_targetSize, alignSize);
+  //  const size_t maxThreads    = omp_get_max_threads(); 
+  //  a_vec.reserve(vecSizeAlign*maxThreads);
+  //  a_vec.resize(a_targetSize);
+  //  for(size_t i=0;i<a_vec.capacity();i++)
+  //    a_vec.data()[i] = 0;  
+  //  return vecSizeAlign; // can use later with 'ReduceAdd' 
+  //}
+  //
+  //template<typename T>
+  //inline void ReduceAddComplete(std::vector<T>& a_vec)
+  //{
+  //  const size_t maxThreads = omp_get_max_threads();
+  //  const size_t szAligned  = a_vec.capacity() / maxThreads;
+  //  for(size_t threadId = 1; threadId < maxThreads; threadId++) 
+  //  {
+  //    T* threadData = a_vec.data() + threadId*szAligned;
+  //    for(size_t i=0; i<a_vec.size(); i++)
+  //      a_vec[i] += threadData[i];
+  //  }
+  //}
 
-  template<typename T>
-  inline void ReduceAddComplete(std::vector<T>& a_vec)
-  {
-    const size_t maxThreads = omp_get_max_threads();
-    const size_t szAligned  = a_vec.capacity() / maxThreads;
-    for(size_t threadId = 1; threadId < maxThreads; threadId++) 
-    {
-      T* threadData = a_vec.data() + threadId*szAligned;
-      for(size_t i=0; i<a_vec.size(); i++)
-        a_vec[i] += threadData[i];
-    }
-  }
+  //template<typename T, typename IndexType> 
+  //inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
+  //{
+  //  if(!std::isfinite(val))
+  //    return;
+  //  const size_t maxThreads = omp_get_num_threads(); // here not max_threads
+  //  const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
+  //  const size_t threadId   = omp_get_thread_num();
+  //  const size_t threadOffs = szAligned*threadId;
+  //  a_vec.data()[threadOffs + offset] += val;
+  //}
+  //
+  //template<typename T, typename IndexType> 
+  //inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
+  //{
+  //  if(!std::isfinite(val))
+  //    return;
+  //  a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
+  //}
 
-  template<typename T, typename IndexType> 
-  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, T val)
-  {
-    if(!std::isfinite(val))
-      return;
-    const size_t maxThreads = omp_get_num_threads(); // here not max_threads
-    const size_t szAligned  = a_vec.capacity() / maxThreads; // todo replace div by shift if number of threads is predefined
-    const size_t threadId   = omp_get_thread_num();
-    const size_t threadOffs = szAligned*threadId;
-    a_vec.data()[threadOffs + offset] += val;
-  }
-
-  template<typename T, typename IndexType> 
-  inline void ReduceAdd(std::vector<T>& a_vec, IndexType offset, IndexType a_sizeAligned, T val) // more optimized version
-  {
-    if(!std::isfinite(val))
-      return;
-    a_vec.data()[a_sizeAligned*omp_get_thread_num() + offset] += val;
-  }
 #endif
 
 // }
