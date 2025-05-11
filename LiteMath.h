@@ -3280,6 +3280,28 @@ namespace LiteMath
     return res;
   }
 
+  static inline float4x4 ortoMatrix(const float l, const float r, const float b, const float t, const float n, const float f)
+  {
+    float4x4 res;
+    res(0,0) = 2.0f / (r - l);
+    res(0,1) = 0;
+    res(0,2) = 0;
+    res(0,3) = -(r + l) / (r - l);
+    res(1,0) = 0;
+    res(1,1) = 2.0f / (t - b);
+    res(1,2) = 0;
+    res(1,3) = -(t + b) / (t - b);
+    res(2,0) = 0;
+    res(2,1) = 0;
+    res(2,2) = -2.0f / (f - n);
+    res(2,3) = -(f + n) / (f - n);
+    res(3,0) = 0.0f;
+    res(3,1) = 0.0f;
+    res(3,2) = 0.0f;
+    res(3,3) = 1.0f;
+    return res;
+  }
+
   // http://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
   //
   static inline float4x4 OpenglToVulkanProjectionMatrixFix()
@@ -3290,6 +3312,9 @@ namespace LiteMath
     res(2,3) = 0.5f;
     return res;
   }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   static inline float4 packFloatW(const float4& a, float data) { return blend(a, float4(data),            uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
   static inline float4 packIntW(const float4& a, int data)     { return blend(a, as_float32(int4(data)),  uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
