@@ -923,8 +923,8 @@ namespace LiteMath
 
     {{FType.Name}}3 m_col[3];
   };
-
-  static inline {{FType.Name}}3x3 make_double3x3_from_rows({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)
+  
+  static inline {{FType.Name}}3x3 make_{{FType.Name}}3x3_from_rows({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)
   {
     {{FType.Name}}3x3 m;
     m.set_row(0, a);
@@ -933,13 +933,23 @@ namespace LiteMath
     return m;
   }
 
-  static inline {{FType.Name}}3x3 make_double3x3_from_cols({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)
+  static inline {{FType.Name}}3x3 make_{{FType.Name}}3x3_from_cols({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)
   {
     {{FType.Name}}3x3 m;
     m.set_col(0, a);
     m.set_col(1, b);
     m.set_col(2, c);
     return m;
+  }
+
+  static inline {{FType.Name}}3x3 make_{{FType.Name}}3x3({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c)            // deprecated
+  {
+    return make_{{FType.Name}}3x3_from_rows(a,b,c);
+  }
+
+  static inline {{FType.Name}}3x3 make_{{FType.Name}}3x3_by_columns({{FType.Name}}3 a, {{FType.Name}}3 b, {{FType.Name}}3 c) // deprecated
+  {
+    return make_{{FType.Name}}3x3_from_cols(a,b,c);
   }
 
   static inline {{FType.Name}}3 operator*(const {{FType.Name}}3x3& m, const {{FType.Name}}3& v)
@@ -1111,6 +1121,9 @@ namespace LiteMath
         m[i][j] = a[i] * b[j];
     return m;
   }
+
+  static inline {{FType.Name}}3 mul3x3({{FType.Name}}4x4 m, {{FType.Name}}3 v) { return to_{{FType.Name}}3(m*to_{{FType.Name}}4(v, 0.0f)); }
+  static inline {{FType.Name}}3 mul4x3({{FType.Name}}4x4 m, {{FType.Name}}3 v) { return to_{{FType.Name}}3(m*to_{{FType.Name}}4(v, 1.0f)); }
   
   ///////////////////////////////////////////////////////////////////
   //////////////////// complex {{FType.Name}} ///////////////////////

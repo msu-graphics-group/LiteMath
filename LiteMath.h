@@ -1241,7 +1241,7 @@ namespace LiteMath
   static inline int2 operator - (const int2 a, int b) { return int2{a.x - b, a.y - b}; }
   static inline int2 operator + (int a, const int2 b) { return int2{a + b.x, a + b.y}; }
   static inline int2 operator - (int a, const int2 b) { return int2{a - b.x, a - b.y}; }
-  static inline int2 operator - (const int2 a)        { return int2{-a.x, -a.y}; }
+  static inline int2 operator - (const int2 a)                   { return int2{-a.x, -a.y}; }
 
   static inline int2& operator *= (int2& a, const int2 b) { a.x *= b.x; a.y *= b.y;  return a; }
   static inline int2& operator /= (int2& a, const int2 b) { a.x /= b.x; a.y /= b.y;  return a; }
@@ -1791,6 +1791,9 @@ namespace LiteMath
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
+  static inline ushort4 make_ushort4(unsigned short x, unsigned short y, unsigned short z, unsigned short w) { return ushort4{x, y, z, w}; } //
+  static inline uchar4  make_uchar4(unsigned char x, unsigned char y, unsigned char z, unsigned char w)      { return uchar4{x, y, z, w};  } //
+
 
 
   static inline void mat4_rowmajor_mul_mat4(float* __restrict M, const float* __restrict A, const float* __restrict B) // modern gcc compiler succesfuly vectorize such implementation!
@@ -2250,8 +2253,8 @@ namespace LiteMath
 
     float3 m_col[3];
   };
-
-  static inline float3x3 make_double3x3_from_rows(float3 a, float3 b, float3 c)
+  
+  static inline float3x3 make_float3x3_from_rows(float3 a, float3 b, float3 c)
   {
     float3x3 m;
     m.set_row(0, a);
@@ -2260,13 +2263,23 @@ namespace LiteMath
     return m;
   }
 
-  static inline float3x3 make_double3x3_from_cols(float3 a, float3 b, float3 c)
+  static inline float3x3 make_float3x3_from_cols(float3 a, float3 b, float3 c)
   {
     float3x3 m;
     m.set_col(0, a);
     m.set_col(1, b);
     m.set_col(2, c);
     return m;
+  }
+
+  static inline float3x3 make_float3x3(float3 a, float3 b, float3 c)            // deprecated
+  {
+    return make_float3x3_from_rows(a,b,c);
+  }
+
+  static inline float3x3 make_float3x3_by_columns(float3 a, float3 b, float3 c) // deprecated
+  {
+    return make_float3x3_from_cols(a,b,c);
   }
 
   static inline float3 operator*(const float3x3& m, const float3& v)
@@ -2438,6 +2451,9 @@ namespace LiteMath
         m[i][j] = a[i] * b[j];
     return m;
   }
+
+  static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
+  static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
   
   ///////////////////////////////////////////////////////////////////
   //////////////////// complex float ///////////////////////
@@ -2948,7 +2964,7 @@ namespace LiteMath
 
     double3 m_col[3];
   };
-
+  
   static inline double3x3 make_double3x3_from_rows(double3 a, double3 b, double3 c)
   {
     double3x3 m;
@@ -2965,6 +2981,16 @@ namespace LiteMath
     m.set_col(1, b);
     m.set_col(2, c);
     return m;
+  }
+
+  static inline double3x3 make_double3x3(double3 a, double3 b, double3 c)            // deprecated
+  {
+    return make_double3x3_from_rows(a,b,c);
+  }
+
+  static inline double3x3 make_double3x3_by_columns(double3 a, double3 b, double3 c) // deprecated
+  {
+    return make_double3x3_from_cols(a,b,c);
   }
 
   static inline double3 operator*(const double3x3& m, const double3& v)
@@ -3136,6 +3162,9 @@ namespace LiteMath
         m[i][j] = a[i] * b[j];
     return m;
   }
+
+  static inline double3 mul3x3(double4x4 m, double3 v) { return to_double3(m*to_double4(v, 0.0f)); }
+  static inline double3 mul4x3(double4x4 m, double3 v) { return to_double3(m*to_double4(v, 1.0f)); }
   
   ///////////////////////////////////////////////////////////////////
   //////////////////// complex double ///////////////////////
@@ -3257,6 +3286,62 @@ namespace LiteMath
                          1.0f });
     return M;
   }
+
+  static inline float4x4 perspectiveMatrix(float fovy, float aspect, float zNear, float zFar)
+  {
+    const float ymax = zNear * tanf(fovy * 3.14159265358979323846f / 360.0f);
+    const float xmax = ymax * aspect;
+    const float left = -xmax;
+    const float right = +xmax;
+    const float bottom = -ymax;
+    const float top = +ymax;
+    const float temp = 2.0f * zNear;
+    const float temp2 = right - left;
+    const float temp3 = top - bottom;
+    const float temp4 = zFar - zNear;
+    float4x4 res;
+    res.m_col[0] = float4{ temp / temp2, 0.0f, 0.0f, 0.0f };
+    res.m_col[1] = float4{ 0.0f, temp / temp3, 0.0f, 0.0f };
+    res.m_col[2] = float4{ (right + left) / temp2,  (top + bottom) / temp3, (-zFar - zNear) / temp4, -1.0 };
+    res.m_col[3] = float4{ 0.0f, 0.0f, (-temp * zFar) / temp4, 0.0f };
+    return res;
+  }
+
+  static inline float4x4 ortoMatrix(const float l, const float r, const float b, const float t, const float n, const float f)
+  {
+    float4x4 res;
+    res(0,0) = 2.0f / (r - l);
+    res(0,1) = 0;
+    res(0,2) = 0;
+    res(0,3) = -(r + l) / (r - l);
+    res(1,0) = 0;
+    res(1,1) = 2.0f / (t - b);
+    res(1,2) = 0;
+    res(1,3) = -(t + b) / (t - b);
+    res(2,0) = 0;
+    res(2,1) = 0;
+    res(2,2) = -2.0f / (f - n);
+    res(2,3) = -(f + n) / (f - n);
+    res(3,0) = 0.0f;
+    res(3,1) = 0.0f;
+    res(3,2) = 0.0f;
+    res(3,3) = 1.0f;
+    return res;
+  }
+
+  // http://matthewwellings.com/blog/the-new-vulkan-coordinate-system/
+  //
+  static inline float4x4 OpenglToVulkanProjectionMatrixFix()
+  {
+    float4x4 res;
+    res(1,1) = -1.0f;
+    res(2,2) = 0.5f;
+    res(2,3) = 0.5f;
+    return res;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
   static inline float4 packFloatW(const float4& a, float data) { return blend(a, float4(data),            uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
   static inline float4 packIntW(const float4& a, int data)     { return blend(a, as_float32(int4(data)),  uint4{0xFFFFFFFF,0xFFFFFFFF,0xFFFFFFFF,0}); }
