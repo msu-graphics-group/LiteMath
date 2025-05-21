@@ -10,7 +10,6 @@
   #include "extended/LiteMathCU.h"
 #else  
 
-#include <vector>
 #include <cstdint>
 #include <cmath>
 #include <limits>           // for std::numeric_limits
@@ -1242,7 +1241,7 @@ namespace LiteMath
   static inline int2 operator - (const int2 a, int b) { return int2{a.x - b, a.y - b}; }
   static inline int2 operator + (int a, const int2 b) { return int2{a + b.x, a + b.y}; }
   static inline int2 operator - (int a, const int2 b) { return int2{a - b.x, a - b.y}; }
-  static inline int2 operator - (const int2 a)        { return int2{-a.x, -a.y}; }
+  static inline int2 operator - (const int2 a)                   { return int2{-a.x, -a.y}; }
 
   static inline int2& operator *= (int2& a, const int2 b) { a.x *= b.x; a.y *= b.y;  return a; }
   static inline int2& operator /= (int2& a, const int2 b) { a.x /= b.x; a.y /= b.y;  return a; }
@@ -1795,6 +1794,8 @@ namespace LiteMath
   static inline ushort4 make_ushort4(unsigned short x, unsigned short y, unsigned short z, unsigned short w) { return ushort4{x, y, z, w}; } //
   static inline uchar4  make_uchar4(unsigned char x, unsigned char y, unsigned char z, unsigned char w)      { return uchar4{x, y, z, w};  } //
 
+
+
   static inline void mat4_rowmajor_mul_mat4(float* __restrict M, const float* __restrict A, const float* __restrict B) // modern gcc compiler succesfuly vectorize such implementation!
   {
   	M[ 0] = A[ 0] * B[ 0] + A[ 1] * B[ 4] + A[ 2] * B[ 8] + A[ 3] * B[12];
@@ -2252,8 +2253,8 @@ namespace LiteMath
 
     float3 m_col[3];
   };
-
-  static inline float3x3 make_float3x3(float3 a, float3 b, float3 c)
+  
+  static inline float3x3 make_float3x3_from_rows(float3 a, float3 b, float3 c)
   {
     float3x3 m;
     m.set_row(0, a);
@@ -2262,13 +2263,23 @@ namespace LiteMath
     return m;
   }
 
-  static inline float3x3 make_float3x3_by_columns(float3 a, float3 b, float3 c)
+  static inline float3x3 make_float3x3_from_cols(float3 a, float3 b, float3 c)
   {
     float3x3 m;
     m.set_col(0, a);
     m.set_col(1, b);
     m.set_col(2, c);
     return m;
+  }
+
+  static inline float3x3 make_float3x3(float3 a, float3 b, float3 c)            // deprecated
+  {
+    return make_float3x3_from_rows(a,b,c);
+  }
+
+  static inline float3x3 make_float3x3_by_columns(float3 a, float3 b, float3 c) // deprecated
+  {
+    return make_float3x3_from_cols(a,b,c);
   }
 
   static inline float3 operator*(const float3x3& m, const float3& v)
@@ -2284,9 +2295,6 @@ namespace LiteMath
     mat3_colmajor_mul_vec3((float*)&res, (const float*)&m, (const float*)&v);
     return res;
   }
-
-  static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
-  static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
 
   static inline float3x3 transpose(const float3x3& rhs)
   {
@@ -2443,6 +2451,9 @@ namespace LiteMath
         m[i][j] = a[i] * b[j];
     return m;
   }
+
+  static inline float3 mul3x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 0.0f)); }
+  static inline float3 mul4x3(float4x4 m, float3 v) { return to_float3(m*to_float4(v, 1.0f)); }
   
   ///////////////////////////////////////////////////////////////////
   //////////////////// complex float ///////////////////////
@@ -2953,7 +2964,7 @@ namespace LiteMath
 
     double3 m_col[3];
   };
-
+  
   static inline double3x3 make_double3x3_from_rows(double3 a, double3 b, double3 c)
   {
     double3x3 m;
@@ -2970,6 +2981,16 @@ namespace LiteMath
     m.set_col(1, b);
     m.set_col(2, c);
     return m;
+  }
+
+  static inline double3x3 make_double3x3(double3 a, double3 b, double3 c)            // deprecated
+  {
+    return make_double3x3_from_rows(a,b,c);
+  }
+
+  static inline double3x3 make_double3x3_by_columns(double3 a, double3 b, double3 c) // deprecated
+  {
+    return make_double3x3_from_cols(a,b,c);
   }
 
   static inline double3 operator*(const double3x3& m, const double3& v)
@@ -3141,6 +3162,9 @@ namespace LiteMath
         m[i][j] = a[i] * b[j];
     return m;
   }
+
+  static inline double3 mul3x3(double4x4 m, double3 v) { return to_double3(m*to_double4(v, 0.0f)); }
+  static inline double3 mul4x3(double4x4 m, double3 v) { return to_double3(m*to_double4(v, 1.0f)); }
   
   ///////////////////////////////////////////////////////////////////
   //////////////////// complex double ///////////////////////
