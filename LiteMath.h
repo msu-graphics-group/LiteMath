@@ -16,6 +16,7 @@
 #include <cstring>          // for memcpy
 #include <algorithm>        // for std::min/std::max 
 #include <initializer_list> //
+#include <vector>
 
 #ifndef MAXFLOAT
   #include <cfloat>
