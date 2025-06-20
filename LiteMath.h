@@ -3510,9 +3510,7 @@ namespace LiteMath
     return Box4f(res_min, res_max);
   }
 
-};
-
- /// 3D bounding box, parallel to the coordinate planes
+   /// 3D bounding box, parallel to the coordinate planes
  struct BBox3f
  {
     /// Result of ray intersection test
@@ -3608,6 +3606,8 @@ namespace LiteMath
     res.face = idx;
     return res;
   }
+
+};
 
 #ifdef HALFFLOAT
 #include "half.hpp"
