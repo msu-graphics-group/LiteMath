@@ -1873,10 +1873,10 @@ namespace LiteMath
       m_col[3] =  float4{ A[3], A[7], A[11], A[15] };
     }
 
-    inline explicit float4x4(float A0,  float A1,  float A2,  float A3,
-                             float A4,  float A5,  float A6,  float A7,
-                             float A8,  float A9,  float A10, float A11,
-                             float A12, float A13, float A14, float A15)
+    inline explicit float4x4(float A0,  float A1,  float A2, float A3,
+                                      float A4,  float A5,  float A6,  float A7,
+                                      float A8,  float A9,  float A10, float A11,
+                                      float A12, float A13, float A14, float A15)
     {
       m_col[0] = float4{ A0, A4, A8,  A12 };
       m_col[1] = float4{ A1, A5, A9,  A13 };
@@ -2604,6 +2604,15 @@ namespace LiteMath
       m_col[3] = double4{ A3, A7, A11, A15 };
     }
 
+    inline double4x4& operator=(const double4x4& rhs)
+    {
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+      m_col[3] = rhs.m_col[3]; 
+      return *this;
+    }
+
     inline void identity()
     {
       m_col[0] = double4{ 1.0f, 0.0f, 0.0f, 0.0f };
@@ -2652,7 +2661,7 @@ namespace LiteMath
   static inline double4 operator*(const  double4x4& m, const double4& v)
   {
     double4 res;
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v);
+    mat4_colmajor_mul_vec4((double*)&res, (const double*)&m, (const double*)&v);
     return res;
   }
 
@@ -3518,10 +3527,10 @@ namespace LiteMath
     }
     return Box4f(res_min, res_max);
   }
-
+  
    /// 3D bounding box, parallel to the coordinate planes
- struct BBox3f
- {
+  struct BBox3f
+  {
     /// Result of ray intersection test
     struct HitTestRes
       {
@@ -3615,7 +3624,7 @@ namespace LiteMath
     res.face = idx;
     return res;
   }
-
+  
 };
 
 #ifdef HALFFLOAT
