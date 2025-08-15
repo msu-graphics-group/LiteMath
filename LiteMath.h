@@ -1884,6 +1884,15 @@ namespace LiteMath
       m_col[3] = float4{ A3, A7, A11, A15 };
     }
 
+    inline float4x4& operator=(const float4x4& rhs)
+    {
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+      m_col[3] = rhs.m_col[3]; 
+      return *this;
+    }
+
     inline void identity()
     {
       m_col[0] = float4{ 1.0f, 0.0f, 0.0f, 0.0f };
@@ -2593,6 +2602,15 @@ namespace LiteMath
       m_col[1] = double4{ A1, A5, A9,  A13 };
       m_col[2] = double4{ A2, A6, A10, A14 };
       m_col[3] = double4{ A3, A7, A11, A15 };
+    }
+
+    inline double4x4& operator=(const double4x4& rhs)
+    {
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+      m_col[3] = rhs.m_col[3]; 
+      return *this;
     }
 
     inline void identity()

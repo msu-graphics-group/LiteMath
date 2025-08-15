@@ -554,6 +554,15 @@ namespace LiteMath
       m_col[3] = {{FType.Name}}4{ A3, A7, A11, A15 };
     }
 
+    inline {{FType.Name}}4x4& operator=(const {{FType.Name}}4x4& rhs)
+    {
+      m_col[0] = rhs.m_col[0];
+      m_col[1] = rhs.m_col[1];
+      m_col[2] = rhs.m_col[2]; 
+      m_col[3] = rhs.m_col[3]; 
+      return *this;
+    }
+
     inline void identity()
     {
       m_col[0] = {{FType.Name}}4{ 1.0f, 0.0f, 0.0f, 0.0f };
