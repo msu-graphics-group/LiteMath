@@ -16,6 +16,7 @@
 #include <cstring>          // for memcpy
 #include <algorithm>        // for std::min/std::max 
 #include <initializer_list> //
+#include <vector>
 
 #ifndef MAXFLOAT
   #include <cfloat>
@@ -601,7 +602,7 @@ namespace LiteMath
   static inline {{FType.Name}}4 operator*(const  {{FType.Name}}4x4& m, const {{FType.Name}}4& v)
   {
     {{FType.Name}}4 res;
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v);
+    mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v);
     return res;
   }
 
