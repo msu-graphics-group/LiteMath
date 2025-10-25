@@ -1938,6 +1938,26 @@ namespace LiteMath
     float4 m_col[4];
   };
 
+  static inline float4x4 make_float4x4_from_rows(float4 a, float4 b, float4 c, float4 d)
+  {
+    float4x4 m;
+    m.set_row(0, a);
+    m.set_row(1, b);
+    m.set_row(2, c);
+    m.set_row(3, d);
+    return m;
+  }
+
+  static inline float4x4 make_float4x4_from_cols(float4 a, float4 b, float4 c, float4 d)
+  {
+    float4x4 m;
+    m.set_col(0, a);
+    m.set_col(1, b);
+    m.set_col(2, c);
+    m.set_col(3, d);
+    return m;
+  }
+
   static inline float4 operator*(const  float4x4& m, const float4& v)
   {
     float4 res;
@@ -2657,6 +2677,26 @@ namespace LiteMath
 
     double4 m_col[4];
   };
+
+  static inline double4x4 make_double4x4_from_rows(double4 a, double4 b, double4 c, double4 d)
+  {
+    double4x4 m;
+    m.set_row(0, a);
+    m.set_row(1, b);
+    m.set_row(2, c);
+    m.set_row(3, d);
+    return m;
+  }
+
+  static inline double4x4 make_double4x4_from_cols(double4 a, double4 b, double4 c, double4 d)
+  {
+    double4x4 m;
+    m.set_col(0, a);
+    m.set_col(1, b);
+    m.set_col(2, c);
+    m.set_col(3, d);
+    return m;
+  }
 
   static inline double4 operator*(const  double4x4& m, const double4& v)
   {

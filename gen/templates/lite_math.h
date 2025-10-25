@@ -608,6 +608,26 @@ namespace LiteMath
     {{FType.Name}}4 m_col[4];
   };
 
+  static inline {{FType.Name}}4x4 make_{{FType.Name}}4x4_from_rows({{FType.Name}}4 a, {{FType.Name}}4 b, {{FType.Name}}4 c, {{FType.Name}}4 d)
+  {
+    {{FType.Name}}4x4 m;
+    m.set_row(0, a);
+    m.set_row(1, b);
+    m.set_row(2, c);
+    m.set_row(3, d);
+    return m;
+  }
+
+  static inline {{FType.Name}}4x4 make_{{FType.Name}}4x4_from_cols({{FType.Name}}4 a, {{FType.Name}}4 b, {{FType.Name}}4 c, {{FType.Name}}4 d)
+  {
+    {{FType.Name}}4x4 m;
+    m.set_col(0, a);
+    m.set_col(1, b);
+    m.set_col(2, c);
+    m.set_col(3, d);
+    return m;
+  }
+
   static inline {{FType.Name}}4 operator*(const  {{FType.Name}}4x4& m, const {{FType.Name}}4& v)
   {
     {{FType.Name}}4 res;
