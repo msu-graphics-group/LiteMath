@@ -32,7 +32,7 @@
 #endif
 
 #ifdef max
-#undef min // if we on windows, need thid due to macro definitions in windows.h; same if we have such macro some-where else.
+#undef max // if we on windows, need thid due to macro definitions in windows.h; same if we have such macro some-where else.
 #endif
 
 #if defined(_MSC_VER)
