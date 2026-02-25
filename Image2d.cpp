@@ -564,7 +564,7 @@ std::vector<unsigned int> LiteImage::LoadBMP(const char* filename, int* pW, int*
 
   for(int i = 0; i < height; i++)
   {
-    auto check = fread(data, sizeof(unsigned char), row_padded, f);
+    int check = int(fread(data, sizeof(unsigned char), row_padded, f));
     if(check != row_padded)
       break;
     for(int j = 0; j < width; j++)

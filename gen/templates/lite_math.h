@@ -2,6 +2,9 @@
 
 #ifdef __OPENCL_VERSION__
   #include "extended/LiteMathCL.h"  // if this file is included in OpenCL shaders 
+  #ifndef __APPLE__
+  #define __global
+  #endif
 #else
 #ifdef ISPC
   #include "extended/LiteMathISPC.h"
@@ -41,16 +44,6 @@
 //#if defined(__GNUC__)
 #define CVEX_ALIGNED(x) __attribute__ ((aligned(x)))
 //#endif
-#endif
-
-#ifndef __APPLE__
-#define __global
-#endif
-
-#ifdef KERNEL_SLICER
-#define KSLICER_DATA_SIZE(x) __attribute__((size(#x)))
-#else
-#define KSLICER_DATA_SIZE(x) 
 #endif
 
 namespace LiteMath
@@ -554,14 +547,14 @@ namespace LiteMath
       m_col[3] = {{FType.Name}}4{ A3, A7, A11, A15 };
     }
 
-    inline {{FType.Name}}4x4& operator=(const {{FType.Name}}4x4& rhs)
-    {
-      m_col[0] = rhs.m_col[0];
-      m_col[1] = rhs.m_col[1];
-      m_col[2] = rhs.m_col[2]; 
-      m_col[3] = rhs.m_col[3]; 
-      return *this;
-    }
+    //inline {{FType.Name}}4x4& operator=(const {{FType.Name}}4x4& rhs)
+    //{
+    //  m_col[0] = rhs.m_col[0];
+    //  m_col[1] = rhs.m_col[1];
+    //  m_col[2] = rhs.m_col[2]; 
+    //  m_col[3] = rhs.m_col[3]; 
+    //  return *this;
+    //}
 
     inline void identity()
     {
@@ -644,21 +637,21 @@ namespace LiteMath
     return res;
   }
 
-  static inline {{FType.Name}}3 operator*(const {{FType.Name}}4x4& m, const {{FType.Name}}3& v)
-  {
-    {{FType.Name}}4 v2 = {{FType.Name}}4{v.x, v.y, v.z, 1.0f}; 
-    {{FType.Name}}4 res;                             
-    mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v2);
-    return to_{{FType.Name}}3(res);
-  }
+  //static inline {{FType.Name}}3 operator*(const {{FType.Name}}4x4& m, const {{FType.Name}}3& v)
+  //{
+  //  {{FType.Name}}4 v2 = {{FType.Name}}4{v.x, v.y, v.z, 1.0f}; 
+  //  {{FType.Name}}4 res;                             
+  //  mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v2);
+  //  return to_{{FType.Name}}3(res);
+  //}
 
-  static inline {{FType.Name}}3 mul(const {{FType.Name}}4x4& m, const {{FType.Name}}3& v)
-  {
-    {{FType.Name}}4 v2 = {{FType.Name}}4{v.x, v.y, v.z, 1.0f}; 
-    {{FType.Name}}4 res;                             
-    mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v2);
-    return to_{{FType.Name}}3(res);
-  }
+  //static inline {{FType.Name}}3 mul(const {{FType.Name}}4x4& m, const {{FType.Name}}3& v)
+  //{
+  //  {{FType.Name}}4 v2 = {{FType.Name}}4{v.x, v.y, v.z, 1.0f}; 
+  //  {{FType.Name}}4 res;                             
+  //  mat4_colmajor_mul_vec4(({{FType.Name}}*)&res, (const {{FType.Name}}*)&m, (const {{FType.Name}}*)&v2);
+  //  return to_{{FType.Name}}3(res);
+  //}
 
   static inline {{FType.Name}}4x4 transpose(const {{FType.Name}}4x4& rhs)
   {
@@ -880,13 +873,13 @@ namespace LiteMath
       m_col[2] = rhs.m_col[2]; 
     }
 
-    inline {{FType.Name}}3x3& operator=(const {{FType.Name}}3x3& rhs)
-    {
-      m_col[0] = rhs.m_col[0];
-      m_col[1] = rhs.m_col[1];
-      m_col[2] = rhs.m_col[2]; 
-      return *this;
-    }
+    //inline {{FType.Name}}3x3& operator=(const {{FType.Name}}3x3& rhs)
+    //{
+    //  m_col[0] = rhs.m_col[0];
+    //  m_col[1] = rhs.m_col[1];
+    //  m_col[2] = rhs.m_col[2]; 
+    //  return *this;
+    //}
 
     // col-major matrix from row-major array
     inline explicit {{FType.Name}}3x3(const {{FType.Name}} A[9])
@@ -1681,65 +1674,82 @@ namespace LiteMath
 };
 #endif
 
+#ifdef _OPENMP
 #include <omp.h>
-//#ifndef _OPENMP
-//static int omp_get_num_threads() { return 1; }
-//static int omp_get_max_threads() { return 1; }
-//static int omp_get_thread_num()  { return 0; }
-//#endif
+#else
+static int omp_get_num_threads() { return 1; }
+static int omp_get_max_threads() { return 1; }
+static int omp_get_thread_num()  { return 0; }
+#endif
 
 namespace LiteMath
 { 
   
   static inline void InterlockedAdd(float& mem, float data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(float& mem, float data, float& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(double& mem, double data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(double& mem, double data, double& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(int& mem, int data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(int& mem, int data, int& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(uint& mem, uint data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(uint& mem, uint data, uint& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 

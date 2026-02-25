@@ -355,18 +355,18 @@ bool test011_mattranspose()
   float4x4 identity;
   
   float3 p1(0,1,0);
-  float3 p2 = mrotX*p1;
-  float3 p3 = mrotZ*p1;
-  float3 p4 = mul(mrotY, mrotX*p1);
+  float3 p2 = to_float3( mrotX*to_float4(p1,1.0f));
+  float3 p3 = to_float3( mrotZ*to_float4(p1,1.0f));
+  float3 p4 = to_float3( mul(mrotY, mrotX*to_float4(p1,1.0f)));
  
   double error = 0.0;
   for(int i=0;i<4;i++)
     for(int j=0;j<4;j++)
-      error += fabs( m(i,j) - m2(j,i));
+      error += std::abs( m(i,j) - m2(j,i));
   
   for(int i=0;i<4;i++)
     for(int j=0;j<4;j++)
-      error += fabs( check[i][j] - identity[i][j]);
+      error += std::abs( check[i][j] - identity[i][j]);
   
   error += length(p2 - float3(0,0,1));
   error += length(p3 - float3(-1,0,0));

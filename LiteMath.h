@@ -2,6 +2,9 @@
 
 #ifdef __OPENCL_VERSION__
   #include "extended/LiteMathCL.h"  // if this file is included in OpenCL shaders 
+  #ifndef __APPLE__
+  #define __global
+  #endif
 #else
 #ifdef ISPC
   #include "extended/LiteMathISPC.h"
@@ -41,16 +44,6 @@
 //#if defined(__GNUC__)
 #define CVEX_ALIGNED(x) __attribute__ ((aligned(x)))
 //#endif
-#endif
-
-#ifndef __APPLE__
-#define __global
-#endif
-
-#ifdef KERNEL_SLICER
-#define KSLICER_DATA_SIZE(x) __attribute__((size(#x)))
-#else
-#define KSLICER_DATA_SIZE(x) 
 #endif
 
 namespace LiteMath
@@ -1884,14 +1877,14 @@ namespace LiteMath
       m_col[3] = float4{ A3, A7, A11, A15 };
     }
 
-    inline float4x4& operator=(const float4x4& rhs)
-    {
-      m_col[0] = rhs.m_col[0];
-      m_col[1] = rhs.m_col[1];
-      m_col[2] = rhs.m_col[2]; 
-      m_col[3] = rhs.m_col[3]; 
-      return *this;
-    }
+    //inline float4x4& operator=(const float4x4& rhs)
+    //{
+    //  m_col[0] = rhs.m_col[0];
+    //  m_col[1] = rhs.m_col[1];
+    //  m_col[2] = rhs.m_col[2]; 
+    //  m_col[3] = rhs.m_col[3]; 
+    //  return *this;
+    //}
 
     inline void identity()
     {
@@ -1974,21 +1967,21 @@ namespace LiteMath
     return res;
   }
 
-  static inline float3 operator*(const float4x4& m, const float3& v)
-  {
-    float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
-    float4 res;                             
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
-    return to_float3(res);
-  }
+  //static inline float3 operator*(const float4x4& m, const float3& v)
+  //{
+  //  float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
+  //  float4 res;                             
+  //  mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
+  //  return to_float3(res);
+  //}
 
-  static inline float3 mul(const float4x4& m, const float3& v)
-  {
-    float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
-    float4 res;                             
-    mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
-    return to_float3(res);
-  }
+  //static inline float3 mul(const float4x4& m, const float3& v)
+  //{
+  //  float4 v2 = float4{v.x, v.y, v.z, 1.0f}; 
+  //  float4 res;                             
+  //  mat4_colmajor_mul_vec4((float*)&res, (const float*)&m, (const float*)&v2);
+  //  return to_float3(res);
+  //}
 
   static inline float4x4 transpose(const float4x4& rhs)
   {
@@ -2210,13 +2203,13 @@ namespace LiteMath
       m_col[2] = rhs.m_col[2]; 
     }
 
-    inline float3x3& operator=(const float3x3& rhs)
-    {
-      m_col[0] = rhs.m_col[0];
-      m_col[1] = rhs.m_col[1];
-      m_col[2] = rhs.m_col[2]; 
-      return *this;
-    }
+    //inline float3x3& operator=(const float3x3& rhs)
+    //{
+    //  m_col[0] = rhs.m_col[0];
+    //  m_col[1] = rhs.m_col[1];
+    //  m_col[2] = rhs.m_col[2]; 
+    //  return *this;
+    //}
 
     // col-major matrix from row-major array
     inline explicit float3x3(const float A[9])
@@ -2624,14 +2617,14 @@ namespace LiteMath
       m_col[3] = double4{ A3, A7, A11, A15 };
     }
 
-    inline double4x4& operator=(const double4x4& rhs)
-    {
-      m_col[0] = rhs.m_col[0];
-      m_col[1] = rhs.m_col[1];
-      m_col[2] = rhs.m_col[2]; 
-      m_col[3] = rhs.m_col[3]; 
-      return *this;
-    }
+    //inline double4x4& operator=(const double4x4& rhs)
+    //{
+    //  m_col[0] = rhs.m_col[0];
+    //  m_col[1] = rhs.m_col[1];
+    //  m_col[2] = rhs.m_col[2]; 
+    //  m_col[3] = rhs.m_col[3]; 
+    //  return *this;
+    //}
 
     inline void identity()
     {
@@ -2714,21 +2707,21 @@ namespace LiteMath
     return res;
   }
 
-  static inline double3 operator*(const double4x4& m, const double3& v)
-  {
-    double4 v2 = double4{v.x, v.y, v.z, 1.0f}; 
-    double4 res;                             
-    mat4_colmajor_mul_vec4((double*)&res, (const double*)&m, (const double*)&v2);
-    return to_double3(res);
-  }
+  //static inline double3 operator*(const double4x4& m, const double3& v)
+  //{
+  //  double4 v2 = double4{v.x, v.y, v.z, 1.0f}; 
+  //  double4 res;                             
+  //  mat4_colmajor_mul_vec4((double*)&res, (const double*)&m, (const double*)&v2);
+  //  return to_double3(res);
+  //}
 
-  static inline double3 mul(const double4x4& m, const double3& v)
-  {
-    double4 v2 = double4{v.x, v.y, v.z, 1.0f}; 
-    double4 res;                             
-    mat4_colmajor_mul_vec4((double*)&res, (const double*)&m, (const double*)&v2);
-    return to_double3(res);
-  }
+  //static inline double3 mul(const double4x4& m, const double3& v)
+  //{
+  //  double4 v2 = double4{v.x, v.y, v.z, 1.0f}; 
+  //  double4 res;                             
+  //  mat4_colmajor_mul_vec4((double*)&res, (const double*)&m, (const double*)&v2);
+  //  return to_double3(res);
+  //}
 
   static inline double4x4 transpose(const double4x4& rhs)
   {
@@ -2950,13 +2943,13 @@ namespace LiteMath
       m_col[2] = rhs.m_col[2]; 
     }
 
-    inline double3x3& operator=(const double3x3& rhs)
-    {
-      m_col[0] = rhs.m_col[0];
-      m_col[1] = rhs.m_col[1];
-      m_col[2] = rhs.m_col[2]; 
-      return *this;
-    }
+    //inline double3x3& operator=(const double3x3& rhs)
+    //{
+    //  m_col[0] = rhs.m_col[0];
+    //  m_col[1] = rhs.m_col[1];
+    //  m_col[2] = rhs.m_col[2]; 
+    //  return *this;
+    //}
 
     // col-major matrix from row-major array
     inline explicit double3x3(const double A[9])
@@ -3751,65 +3744,82 @@ namespace LiteMath
 };
 #endif
 
+#ifdef _OPENMP
 #include <omp.h>
-//#ifndef _OPENMP
-//static int omp_get_num_threads() { return 1; }
-//static int omp_get_max_threads() { return 1; }
-//static int omp_get_thread_num()  { return 0; }
-//#endif
+#else
+static int omp_get_num_threads() { return 1; }
+static int omp_get_max_threads() { return 1; }
+static int omp_get_thread_num()  { return 0; }
+#endif
 
 namespace LiteMath
 { 
   
   static inline void InterlockedAdd(float& mem, float data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(float& mem, float data, float& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(double& mem, double data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(double& mem, double data, double& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(int& mem, int data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(int& mem, int data, int& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(uint& mem, uint data) 
   { 
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
   static inline void InterlockedAdd(uint& mem, uint data, uint& a_res) 
   { 
     a_res = mem;
+    #ifdef _OPENMP
     #pragma omp atomic
+    #endif
     mem += data;
   }
 
