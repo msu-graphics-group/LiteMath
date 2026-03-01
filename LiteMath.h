@@ -3765,11 +3765,16 @@ namespace LiteMath
 
   static inline void InterlockedAdd(float& mem, float data, float& a_res) 
   { 
-    a_res = mem;
     #ifdef _OPENMP
-    #pragma omp atomic
-    #endif
+    #pragma omp atomic capture
+    {
+      a_res = mem;
+      mem += data;
+    }
+    #else
+    a_res = mem;
     mem += data;
+    #endif
   }
 
   static inline void InterlockedAdd(double& mem, double data) 
@@ -3782,11 +3787,16 @@ namespace LiteMath
 
   static inline void InterlockedAdd(double& mem, double data, double& a_res) 
   { 
-    a_res = mem;
     #ifdef _OPENMP
-    #pragma omp atomic
-    #endif
+    #pragma omp atomic capture
+    {
+      a_res = mem;
+      mem += data;
+    }
+    #else
+    a_res = mem;
     mem += data;
+    #endif
   }
 
   static inline void InterlockedAdd(int& mem, int data) 
@@ -3799,11 +3809,16 @@ namespace LiteMath
 
   static inline void InterlockedAdd(int& mem, int data, int& a_res) 
   { 
-    a_res = mem;
     #ifdef _OPENMP
-    #pragma omp atomic
-    #endif
+    #pragma omp atomic capture
+    {
+      a_res = mem;
+      mem += data;
+    }
+    #else
+    a_res = mem;
     mem += data;
+    #endif
   }
 
   static inline void InterlockedAdd(uint& mem, uint data) 
@@ -3816,11 +3831,16 @@ namespace LiteMath
 
   static inline void InterlockedAdd(uint& mem, uint data, uint& a_res) 
   { 
-    a_res = mem;
     #ifdef _OPENMP
-    #pragma omp atomic
-    #endif
+    #pragma omp atomic capture
+    {
+      a_res = mem;
+      mem += data;
+    }
+    #else
+    a_res = mem;
     mem += data;
+    #endif
   }
 
   template<typename IndexType>
