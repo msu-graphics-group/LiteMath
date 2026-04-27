@@ -1072,20 +1072,15 @@ LiteImage::Image2D<float4> LiteImage::LoadImage<float4>(const char* a_fileName, 
       std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
-    else if(channels < 3)
-    {
-       std::cout << "[LoadImage<float3>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
 
     img.resize(width,height);
     const size_t imSize = size_t(width*height);
     const float  invDiv = 1.0f/255.0f;
     for(size_t i=0;i<imSize;i++)
     {
-      unsigned r = imgData[i*channels+0];
-      unsigned g = imgData[i*channels+1];
-      unsigned b = imgData[i*channels+2];
+      unsigned r = imgData[i*channels+0%channels];
+      unsigned g = imgData[i*channels+1%channels];
+      unsigned b = imgData[i*channels+2%channels];
       float4 colf(std::pow(float(r)*invDiv, a_gamma), 
                   std::pow(float(g)*invDiv, a_gamma), 
                   std::pow(float(b)*invDiv, a_gamma), 0.0f);
@@ -1213,20 +1208,15 @@ LiteImage::Image2D<float3> LiteImage::LoadImage<float3>(const char* a_fileName, 
       std::cout << "[LoadImage<float3>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
-    else if(channels < 3)
-    {
-       std::cout << "[LoadImage<float3>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
 
     img.resize(width,height);
     const size_t imSize = size_t(width*height);
     const float  invDiv = 1.0f/255.0f;
     for(size_t i=0;i<imSize;i++)
     {
-      unsigned r = imgData[i*channels+0];
-      unsigned g = imgData[i*channels+1];
-      unsigned b = imgData[i*channels+2];
+      unsigned r = imgData[i*channels+0%channels];
+      unsigned g = imgData[i*channels+1%channels];
+      unsigned b = imgData[i*channels+2%channels];
       float3 colf(std::pow(float(r)*invDiv, a_gamma), 
                   std::pow(float(g)*invDiv, a_gamma), 
                   std::pow(float(b)*invDiv, a_gamma));
@@ -1390,11 +1380,6 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
       std::cout << "[LoadImage<uint>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
-    else if(channels < 3)
-    {
-      std::cout << "[LoadImage<uint>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
 
     img.resize(width,height);
     
@@ -1404,9 +1389,9 @@ LiteImage::Image2D<uint32_t> LiteImage::LoadImage<uint32_t>(const char* a_fileNa
       for(size_t x = 0; x < size_t(width); ++x)
       {
         size_t idx = x + y * width;
-        unsigned r = imgData[idx * channels + 0];
-        unsigned g = imgData[idx * channels + 1];
-        unsigned b = imgData[idx * channels + 2];
+        unsigned r = imgData[idx * channels + 0%channels];
+        unsigned g = imgData[idx * channels + 1%channels];
+        unsigned b = imgData[idx * channels + 2%channels];
         img.data()[i++] = r | (g << 8) | (b << 16);
       }
     }
@@ -1518,16 +1503,13 @@ LiteImage::Image2D<uchar4> LiteImage::LoadImage<uchar4>(const char* a_fileName, 
       std::cout << "[LoadImage<uchar4>]: can't open file '" << a_fileName << "' " << std::endl;
       return img;
     }
-    else if(channels < 3)
-    {
-      std::cout << "[LoadImage<uchar4>]: bad channels number << '" << channels << "' in file '" << a_fileName << "' " << std::endl;
-      return img;
-    }
 
     img.resize(width,height);
     const size_t imSize = size_t(width*height);
     for(size_t i=0;i<imSize;i++)
-      img.data()[i] = uchar4(imgData[i*channels+0], imgData[i*channels+1], imgData[i*channels+2], 0);
+      img.data()[i] = uchar4(imgData[i*channels+0%channels], 
+                             imgData[i*channels+1%channels], 
+                             imgData[i*channels+2%channels], 0);
 
     stbi_image_free(imgData);
     return img;
