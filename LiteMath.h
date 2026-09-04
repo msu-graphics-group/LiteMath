@@ -67,6 +67,13 @@ namespace LiteMath
   using std::sqrt;
   using std::abs;
 
+  template<typename T, typename U> static inline T bit_cast(U x) 
+  {
+    T res; 
+    memcpy((void*)&res, (void*)&x, sizeof(T)); // modern C++ allow only this way, speed ik ok, check assembly with godbolt
+    return res; 
+  }
+
   static inline int as_int(float x) 
   {
     int res; 
