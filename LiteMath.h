@@ -3748,17 +3748,35 @@ namespace LiteMath
 
   static inline float2 to_float2(half2 v) { return float2(v.x, v.y); }
   static inline float4 to_float4(half4 v) { return float4(v.x, v.y, v.z, v.w); }
+  
   static inline half   as_half(uint16_t x)
   {
     half res; 
     memcpy((void*)&res, (void*)&x, sizeof(uint16_t)); 
     return res; 
   }
+
   static inline uint16_t as_uint16(half x)
   {
     uint16_t res; 
     memcpy((void*)&res, (void*)&x, sizeof(uint16_t)); 
     return res; 
+  }
+
+  static inline uint32_t f32tof16(float value) // Slang/HLSL sematric support
+  {
+    half h(value); 
+    uint16_t bits;
+    std::memcpy(&bits, &h, sizeof(bits)); 
+    return static_cast<uint32_t>(bits); 
+  }
+
+  static inline float f16tof32(uint32_t value) // Slang/HLSL sematric support
+  {
+    uint16_t bits = static_cast<uint16_t>(value & 0xFFFF); 
+    half h;
+    std::memcpy(&h, &bits, sizeof(bits));
+    return static_cast<float>(h);
   }
 };
 #endif
