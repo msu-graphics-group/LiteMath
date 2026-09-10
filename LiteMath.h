@@ -3767,7 +3767,7 @@ namespace LiteMath
   {
     half h(value); 
     uint16_t bits;
-    std::memcpy(&bits, &h, sizeof(bits)); 
+    std::memcpy((void*)&bits, &h, sizeof(bits)); 
     return static_cast<uint32_t>(bits); 
   }
 
@@ -3775,7 +3775,7 @@ namespace LiteMath
   {
     uint16_t bits = static_cast<uint16_t>(value & 0xFFFF); 
     half h;
-    std::memcpy(&h, &bits, sizeof(bits));
+    std::memcpy((void*)&h, &bits, sizeof(bits));
     return static_cast<float>(h);
   }
 };
