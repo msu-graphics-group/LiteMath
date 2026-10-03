@@ -1810,6 +1810,23 @@ namespace LiteMath
     #endif
   }
 
+  // atomic add of 3 floats into 3 consecutive cells; each channel is atomic separately, not the whole triple
+  static inline void InterlockedAdd3f(float* pMem, int offset, float3 data)
+  {
+    #ifdef _OPENMP
+    #pragma omp atomic
+    #endif
+    pMem[offset+0] += data.x;
+    #ifdef _OPENMP
+    #pragma omp atomic
+    #endif
+    pMem[offset+1] += data.y;
+    #ifdef _OPENMP
+    #pragma omp atomic
+    #endif
+    pMem[offset+2] += data.z;
+  }
+
   template<typename IndexType>
   static IndexType align(IndexType a_size, IndexType a_alignment)
   {
