@@ -25,6 +25,8 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         files: build/coverage/coverage.xml
+        disable_search: true # upload only the gcovr report (it already excludes tests, external and Image2d)
+        plugins: noop        # do not run gcov/xcrun/coverage.py plugins on our own
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
       
