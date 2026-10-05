@@ -9,7 +9,9 @@ if(WIN32)
   add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)
 endif()
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm" )
+if (APPLE)
+  # default apple options
+elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
