@@ -272,7 +272,24 @@ bool test{{Test.Number+3}}_cmpv_{{Test.Type}}()
     PrintRR("exp7_res", "exp7_res", result7, expr7, {{Test.VecLen}});
     PrintRR("exp8_res", "exp8_res", result8, expr8, {{Test.VecLen}});
   }
-  
+
+  // each component goes through both branches of each comparison: (a < b), (a > b), (a == b)
+  const {{Test.Type}} CxA[3] = { Cx1, Cx1 + {{Test.TypeS}}(1), Cx1 };
+  const {{Test.Type}} CxB[3] = { Cx1 + {{Test.TypeS}}(1), Cx1, Cx1 };
+  for(int k=0;k<3;k++)
+  {
+    const {{Test.Type}} a = CxA[k];
+    const {{Test.Type}} b = CxB[k];
+    const uint{{Test.VecLen}} cmp[6] = { a < b, a > b, a <= b, a >= b, a == b, a != b };
+    for(int i=0;i<{{Test.VecLen}};i++)
+    {
+      const bool ref[6] = { a[i] < b[i], a[i] > b[i], a[i] <= b[i], a[i] >= b[i], a[i] == b[i], a[i] != b[i] };
+      for(int j=0;j<6;j++)
+        if(cmp[j][i] != (ref[j] ? 0xFFFFFFFF : 0))
+          passed = false;
+    }
+  }
+
   return passed;
 }
 
@@ -874,7 +891,23 @@ bool test{{Test.Number+11}}_any_all_{{Test.Type}}() // dummy test
   const bool a3 = any_of(cmp3);
   const bool a4 = any_of(cmp4);
 
-  return a1 && !a2 && a3 && !a4;
+  // a single zero (for all_of) or a single non-zero (for any_of) in every position
+  {% if Test.IsFloat %}
+  typedef uint{{Test.VecLen}} MaskType;
+  {% else %}
+  typedef {{Test.Type}} MaskType;
+  {% endif %}
+  const MaskType allZero;
+  bool a5 = all_of(MaskType(1)) && !any_of(allZero);
+  for(int i=0;i<{{Test.VecLen}};i++)
+  {
+    MaskType oneZero(1), oneSet;
+    oneZero[i] = 0;
+    oneSet[i]  = 1;
+    a5 = a5 && !all_of(oneZero) && any_of(oneSet);
+  }
+
+  return a1 && !a2 && a3 && !a4 && a5;
 }
 
 ## endfor

@@ -84,8 +84,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_COMPILER_IS_GNUCXX AND CODE_COVE
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fkeep-inline-functions -fno-inline -fno-inline-small-functions -fno-default-inline")
   #set(COVERAGE_EXCLUDES "dir1/*")
   set(COVERAGE_EXCLUDES "${CMAKE_SOURCE_DIR}/external/*")
+  set(GCOVR_ADDITIONAL_ARGS --exclude-throw-branches --exclude-unreachable-branches) # skip compiler generated branches (exception cleanup, etc.)
   setup_target_for_coverage_gcovr_html(NAME            coverage
                                        EXECUTABLE      math_tests
                                        BASE_DIRECTORY  "${PROJECT_SOURCE_DIR}"
-                                       EXCLUDE         "${PROJECT_SOURCE_DIR}/tests/*")  
+                                       EXCLUDE         "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/Image2d.*")
 endif()

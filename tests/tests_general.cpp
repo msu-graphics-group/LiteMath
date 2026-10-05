@@ -428,6 +428,10 @@ bool test013_bitcount_scalar()
   passed = passed && (bitCount(0x00000101u) == 2) && (bitCount64(0xFFFFFFFF00000001ull) == 33);
   passed = passed && (dot(3.0f, -2.0f) == -6.0f) && (SQR(3.0f) == 9.0f);
   passed = passed && (bit_cast<uint32_t>(1.0f) == 0x3f800000u) && (bit_cast<float>(0x3f800000u) == 1.0f);
+  passed = passed && (sign(0.0) == 0.0) && (sign(-2.0) == -1.0) && (sign(0) == 0) && (sign(-2) == -1) && (sign(2) == 1);
+
+  // second call of color_pack_* (after test004) uses already initialized static constant
+  passed = passed && (color_pack_rgba(float4(1.0f)) == 0xFFFFFFFFu) && (color_pack_bgra(float4(0.0f)) == 0u);
   return passed;
 }
 

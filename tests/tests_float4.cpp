@@ -262,7 +262,24 @@ bool test143_cmpv_float4()
     PrintRR("exp7_res", "exp7_res", result7, expr7, 4);
     PrintRR("exp8_res", "exp8_res", result8, expr8, 4);
   }
-  
+
+  // each component goes through both branches of each comparison: (a < b), (a > b), (a == b)
+  const float4 CxA[3] = { Cx1, Cx1 + float(1), Cx1 };
+  const float4 CxB[3] = { Cx1 + float(1), Cx1, Cx1 };
+  for(int k=0;k<3;k++)
+  {
+    const float4 a = CxA[k];
+    const float4 b = CxB[k];
+    const uint4 cmp[6] = { a < b, a > b, a <= b, a >= b, a == b, a != b };
+    for(int i=0;i<4;i++)
+    {
+      const bool ref[6] = { a[i] < b[i], a[i] > b[i], a[i] <= b[i], a[i] >= b[i], a[i] == b[i], a[i] != b[i] };
+      for(int j=0;j<6;j++)
+        if(cmp[j][i] != (ref[j] ? 0xFFFFFFFF : 0))
+          passed = false;
+    }
+  }
+
   return passed;
 }
 
@@ -759,7 +776,21 @@ bool test151_any_all_float4() // dummy test
   const bool a3 = any_of(cmp3);
   const bool a4 = any_of(cmp4);
 
-  return a1 && !a2 && a3 && !a4;
+  // a single zero (for all_of) or a single non-zero (for any_of) in every position
+
+  typedef uint4 MaskType;
+
+  const MaskType allZero;
+  bool a5 = all_of(MaskType(1)) && !any_of(allZero);
+  for(int i=0;i<4;i++)
+  {
+    MaskType oneZero(1), oneSet;
+    oneZero[i] = 0;
+    oneSet[i]  = 1;
+    a5 = a5 && !all_of(oneZero) && any_of(oneSet);
+  }
+
+  return a1 && !a2 && a3 && !a4 && a5;
 }
 
 

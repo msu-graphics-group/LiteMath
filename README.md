@@ -2,7 +2,7 @@
 Lightweight single source math library for graphics without issues
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-[![codecov](https://codecov.io/gh/msu-graphics-group/LiteMath/branch/main/graph/badge.svg?token=KG13KA0LFV)](https://codecov.io/gh/msu-graphics-group/LiteMath)
+[![codecov](https://codecov.io/gh/msu-graphics-group/LiteMath/branch/dev/graph/badge.svg?token=KG13KA0LFV)](https://app.codecov.io/gh/msu-graphics-group/LiteMath/tree/dev)
 
 # LiteImage
 Lightweight image implementation for most common tasts: mainly for algorithms prototyping.
@@ -24,4 +24,5 @@ TBD
 * make -j 8
 * make coverage
 * see results in 'coverage' directory
+* Image2d.h/Image2d.cpp are excluded from the report for now, it measures LiteMath.h only
 

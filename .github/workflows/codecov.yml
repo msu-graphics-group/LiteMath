@@ -15,13 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     
     - name: code-coverage
       working-directory: ${{github.workspace}}
       run: bash coverage.sh
 
     - name: upload-coverage
-      working-directory: ${{github.workspace}}
-      run: bash <(curl -s https://codecov.io/bash) -f build/coverage/coverage.xml
+      uses: codecov/codecov-action@v5
+      with:
+        files: build/coverage/coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
       
