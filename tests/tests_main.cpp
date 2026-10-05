@@ -35,6 +35,14 @@ int main(int argc, const char** argv)
                       {test010_faceforward,   "test010_faceforward"},
                       {test011_mattranspose,  "test011_mattranspose"},
                       {test012_mat_double3x3,  "test012_mat_double3x3"},
+                      {test013_bitcount_scalar,    "test013_bitcount_scalar"},
+                      {test014_short_char_vectors, "test014_short_char_vectors"},
+                      {test015_color_unpack,       "test015_color_unpack"},
+                      {test016_camera_matrices,    "test016_camera_matrices"},
+                      {test017_box4f,              "test017_box4f"},
+                      {test018_ray4f,              "test018_ray4f"},
+                      {test019_bbox3f,             "test019_bbox3f"},
+                      {test020_interlocked_reduce, "test020_interlocked_reduce"},
 
 
                       {test100_basev_uint4,         "test100_basev_uint4"},
@@ -44,6 +52,7 @@ int main(int argc, const char** argv)
                       {test103_cmpv_uint4,          "test103_cmpv_uint4"}, 
                       {test104_shuffle_uint4,       "test104_shuffle_uint4"},
                       {test105_exsplat_uint4,       "test105_exsplat_uint4"},
+                      {test106_misc_uint4,          "test106_misc_uint4"},
                       {test107_funcv_uint4,         "test107_funcv_uint4"},
 
                       {test108_logicv_uint4,        "test108_logicv_uint4"},
@@ -61,6 +70,7 @@ int main(int argc, const char** argv)
                       {test123_cmpv_int4,          "test123_cmpv_int4"}, 
                       {test124_shuffle_int4,       "test124_shuffle_int4"},
                       {test125_exsplat_int4,       "test125_exsplat_int4"},
+                      {test126_misc_int4,          "test126_misc_int4"},
                       {test127_funcv_int4,         "test127_funcv_int4"},
 
                       {test128_logicv_int4,        "test128_logicv_int4"},
@@ -78,6 +88,7 @@ int main(int argc, const char** argv)
                       {test143_cmpv_float4,          "test143_cmpv_float4"}, 
                       {test144_shuffle_float4,       "test144_shuffle_float4"},
                       {test145_exsplat_float4,       "test145_exsplat_float4"},
+                      {test146_misc_float4,          "test146_misc_float4"},
                       {test147_funcv_float4,         "test147_funcv_float4"},
 
                       {test148_funcfv_float4,        "test148_funcfv_float4"},
@@ -95,6 +106,7 @@ int main(int argc, const char** argv)
                       {test163_cmpv_double4,          "test163_cmpv_double4"}, 
                       {test164_shuffle_double4,       "test164_shuffle_double4"},
                       {test165_exsplat_double4,       "test165_exsplat_double4"},
+                      {test166_misc_double4,          "test166_misc_double4"},
                       {test167_funcv_double4,         "test167_funcv_double4"},
 
                       {test168_funcfv_double4,        "test168_funcfv_double4"},
@@ -112,6 +124,7 @@ int main(int argc, const char** argv)
                       {test183_cmpv_uint3,          "test183_cmpv_uint3"}, 
                       {test184_shuffle_uint3,       "test184_shuffle_uint3"},
                       {test185_exsplat_uint3,       "test185_exsplat_uint3"},
+                      {test186_misc_uint3,          "test186_misc_uint3"},
                       {test187_funcv_uint3,         "test187_funcv_uint3"},
 
                       {test188_logicv_uint3,        "test188_logicv_uint3"},
@@ -129,6 +142,7 @@ int main(int argc, const char** argv)
                       {test203_cmpv_int3,          "test203_cmpv_int3"}, 
                       {test204_shuffle_int3,       "test204_shuffle_int3"},
                       {test205_exsplat_int3,       "test205_exsplat_int3"},
+                      {test206_misc_int3,          "test206_misc_int3"},
                       {test207_funcv_int3,         "test207_funcv_int3"},
 
                       {test208_logicv_int3,        "test208_logicv_int3"},
@@ -146,6 +160,7 @@ int main(int argc, const char** argv)
                       {test223_cmpv_float3,          "test223_cmpv_float3"}, 
                       {test224_shuffle_float3,       "test224_shuffle_float3"},
                       {test225_exsplat_float3,       "test225_exsplat_float3"},
+                      {test226_misc_float3,          "test226_misc_float3"},
                       {test227_funcv_float3,         "test227_funcv_float3"},
 
                       {test228_funcfv_float3,        "test228_funcfv_float3"},
@@ -163,6 +178,7 @@ int main(int argc, const char** argv)
                       {test243_cmpv_double3,          "test243_cmpv_double3"}, 
                       {test244_shuffle_double3,       "test244_shuffle_double3"},
                       {test245_exsplat_double3,       "test245_exsplat_double3"},
+                      {test246_misc_double3,          "test246_misc_double3"},
                       {test247_funcv_double3,         "test247_funcv_double3"},
 
                       {test248_funcfv_double3,        "test248_funcfv_double3"},
@@ -180,6 +196,7 @@ int main(int argc, const char** argv)
                       {test263_cmpv_uint2,          "test263_cmpv_uint2"}, 
                       {test264_shuffle_uint2,       "test264_shuffle_uint2"},
                       {test265_exsplat_uint2,       "test265_exsplat_uint2"},
+                      {test266_misc_uint2,          "test266_misc_uint2"},
                       {test267_funcv_uint2,         "test267_funcv_uint2"},
 
                       {test268_logicv_uint2,        "test268_logicv_uint2"},
@@ -197,6 +214,7 @@ int main(int argc, const char** argv)
                       {test283_cmpv_int2,          "test283_cmpv_int2"}, 
                       {test284_shuffle_int2,       "test284_shuffle_int2"},
                       {test285_exsplat_int2,       "test285_exsplat_int2"},
+                      {test286_misc_int2,          "test286_misc_int2"},
                       {test287_funcv_int2,         "test287_funcv_int2"},
 
                       {test288_logicv_int2,        "test288_logicv_int2"},
@@ -214,6 +232,7 @@ int main(int argc, const char** argv)
                       {test303_cmpv_float2,          "test303_cmpv_float2"}, 
                       {test304_shuffle_float2,       "test304_shuffle_float2"},
                       {test305_exsplat_float2,       "test305_exsplat_float2"},
+                      {test306_misc_float2,          "test306_misc_float2"},
                       {test307_funcv_float2,         "test307_funcv_float2"},
 
                       {test308_funcfv_float2,        "test308_funcfv_float2"},
@@ -231,6 +250,7 @@ int main(int argc, const char** argv)
                       {test323_cmpv_double2,          "test323_cmpv_double2"}, 
                       {test324_shuffle_double2,       "test324_shuffle_double2"},
                       {test325_exsplat_double2,       "test325_exsplat_double2"},
+                      {test326_misc_double2,          "test326_misc_double2"},
                       {test327_funcv_double2,         "test327_funcv_double2"},
 
                       {test328_funcfv_double2,        "test328_funcfv_double2"},
@@ -239,6 +259,15 @@ int main(int argc, const char** argv)
                       {test330_other_double2,        "test330_other_double2"},
                       {test331_any_all_double2,      "test331_any_all_double2"},
 
+
+
+                      {test400_mat4x4_float,          "test400_mat4x4_float"},
+                      {test401_mat3x3_float,        "test401_mat3x3_float"},
+                      {test402_complex_float,       "test402_complex_float"},
+
+                      {test410_mat4x4_double,          "test410_mat4x4_double"},
+                      {test411_mat3x3_double,        "test411_mat3x3_double"},
+                      {test412_complex_double,       "test412_complex_double"},
 
                       };
   

@@ -35,6 +35,14 @@ int main(int argc, const char** argv)
                       {test010_faceforward,   "test010_faceforward"},
                       {test011_mattranspose,  "test011_mattranspose"},
                       {test012_mat_double3x3,  "test012_mat_double3x3"},
+                      {test013_bitcount_scalar,    "test013_bitcount_scalar"},
+                      {test014_short_char_vectors, "test014_short_char_vectors"},
+                      {test015_color_unpack,       "test015_color_unpack"},
+                      {test016_camera_matrices,    "test016_camera_matrices"},
+                      {test017_box4f,              "test017_box4f"},
+                      {test018_ray4f,              "test018_ray4f"},
+                      {test019_bbox3f,             "test019_bbox3f"},
+                      {test020_interlocked_reduce, "test020_interlocked_reduce"},
                       {% for Tests in AllTests %}
                       {% for Test  in Tests.Tests %}
                       {test{{Test.Number}}_basev_{{Test.Type}},         "test{{Test.Number}}_basev_{{Test.Type}}"},
@@ -44,6 +52,7 @@ int main(int argc, const char** argv)
                       {test{{Test.Number+3}}_cmpv_{{Test.Type}},          "test{{Test.Number+3}}_cmpv_{{Test.Type}}"}, 
                       {test{{Test.Number+4}}_shuffle_{{Test.Type}},       "test{{Test.Number+4}}_shuffle_{{Test.Type}}"},
                       {test{{Test.Number+5}}_exsplat_{{Test.Type}},       "test{{Test.Number+5}}_exsplat_{{Test.Type}}"},
+                      {test{{Test.Number+6}}_misc_{{Test.Type}},          "test{{Test.Number+6}}_misc_{{Test.Type}}"},
                       {test{{Test.Number+7}}_funcv_{{Test.Type}},         "test{{Test.Number+7}}_funcv_{{Test.Type}}"},
                       {% if Test.IsFloat %}
                       {test{{Test.Number+8}}_funcfv_{{Test.Type}},        "test{{Test.Number+8}}_funcfv_{{Test.Type}}"},
@@ -55,6 +64,11 @@ int main(int argc, const char** argv)
                       {test{{Test.Number+10}}_other_{{Test.Type}},        "test{{Test.Number+10}}_other_{{Test.Type}}"},
                       {test{{Test.Number+11}}_any_all_{{Test.Type}},      "test{{Test.Number+11}}_any_all_{{Test.Type}}"},
                       {% endfor %}
+                      {% endfor %}
+                      {% for FType in MatTypes %}
+                      {test{{FType.Number}}_mat4x4_{{FType.Name}},          "test{{FType.Number}}_mat4x4_{{FType.Name}}"},
+                      {test{{FType.Number+1}}_mat3x3_{{FType.Name}},        "test{{FType.Number+1}}_mat3x3_{{FType.Name}}"},
+                      {test{{FType.Number+2}}_complex_{{FType.Name}},       "test{{FType.Number+2}}_complex_{{FType.Name}}"},
                       {% endfor %}
                       };
   

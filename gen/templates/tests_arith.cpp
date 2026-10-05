@@ -395,6 +395,92 @@ bool test{{Test.Number+5}}_exsplat_{{Test.Type}}()
   return passed;
 }
 
+bool test{{Test.Number+6}}_misc_{{Test.Type}}()
+{
+  const {{Test.Type}} Cx1({% for Val in Test.ValuesA %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
+  const {{Test.Type}} Cx0;
+  const {{Test.Type}} Cx2 = -Cx1;
+  const {{Test.Type}} Cx3 = make_{{Test.Type}}({% for Val in Test.ValuesA %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
+
+  bool passed = true;
+  for(int i=0;i<{{Test.VecLen}};i++)
+  {
+    if(Cx0[i] != {{Test.TypeS}}(0) || Cx2[i] != {{Test.TypeS}}(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+  {% for TypeFrom in Test.TypesCV %}
+  {
+    const {{TypeFrom}}{{Test.VecLen}} src({% for Val in Test.ValuesD %} {{TypeFrom}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
+    const {{Test.Type}} dst(src);
+    for(int i=0;i<{{Test.VecLen}};i++)
+      if(dst[i] != {{Test.TypeS}}(src[i]))
+        passed = false;
+  }
+  {% endfor %}
+
+  {% if Test.VecLen == 4 %}
+  const {{Test.TypeS}}3 Cr3 = to_{{Test.TypeS}}3(Cx1);
+  const {{Test.Type}}  Cr4 = to_{{Test.TypeS}}4(Cr3, {{Test.TypeS}}(7));
+  passed = passed && (Cr3.x == Cx1.x) && (Cr3.y == Cx1.y) && (Cr3.z == Cx1.z);
+  passed = passed && (Cr4.x == Cx1.x) && (Cr4.y == Cx1.y) && (Cr4.z == Cx1.z) && (Cr4.w == {{Test.TypeS}}(7));
+  {% else if Test.VecLen == 2 %}
+  const {{Test.Type}} Cr2 = shuffle_yx(Cx1);
+  passed = passed && (Cr2.x == Cx1.y) && (Cr2.y == Cx1.x);
+  {% endif %}
+
+  {% if Test.IsFloat %}
+  // geometric functions: n is unit normal along x, I is unit grazing direction with dot(I,n) < 0
+  {{Test.Type}} n({{Test.TypeS}}(0)), t({{Test.TypeS}}(0));
+  n[0] = 1;
+  t[1] = 1;
+  const {{Test.Type}}  I   = normalize(t - n*{{Test.TypeS}}(0.1));
+  const {{Test.TypeS}} IdN = dot(I, n);
+  passed = passed && (std::abs(length(I) - {{Test.TypeS}}(1)) < 1e-6f) && (IdN < {{Test.TypeS}}(0));
+
+  const {{Test.Type}} r  = reflect(I, n);
+  const {{Test.Type}} r1 = refract(I, n, {{Test.TypeS}}(1));  // same media, ray goes straight
+  const {{Test.Type}} r2 = refract(I, n, {{Test.TypeS}}(10)); // total internal reflection, returns zero
+  const {{Test.Type}} f1 = faceforward(n, I, n);
+  const {{Test.Type}} f2 = faceforward(n, -I, n);
+  for(int i=0;i<{{Test.VecLen}};i++)
+  {
+    if(std::abs(r[i] - (I[i] - {{Test.TypeS}}(2)*IdN*n[i])) > 1e-6f)
+      passed = false;
+    if(std::abs(r1[i] - I[i]) > 1e-6f || r2[i] != {{Test.TypeS}}(0))
+      passed = false;
+    if(f1[i] != n[i] || f2[i] != -n[i])
+      passed = false;
+  }
+  {% if Test.VecLen == 4 %}
+
+  const {{Test.Type}} Cx4({% for Val in Test.ValuesB %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});
+  const {{Test.TypeS}} d3 = Cx1.x*Cx4.x + Cx1.y*Cx4.y + Cx1.z*Cx4.z;
+  const {{Test.TypeS}} d4 = d3 + Cx1.w*Cx4.w;
+  const {{Test.TypeS}} l3 = std::sqrt(Cx1.x*Cx1.x + Cx1.y*Cx1.y + Cx1.z*Cx1.z);
+  const {{Test.TypeS}} l4 = std::sqrt(Cx1.x*Cx1.x + Cx1.y*Cx1.y + Cx1.z*Cx1.z + Cx1.w*Cx1.w);
+  const {{Test.Type}} dv3 = dot3v(Cx1, Cx4);
+  const {{Test.Type}} dv4 = dot4v(Cx1, Cx4);
+  const {{Test.Type}} lv3 = length3v(Cx1);
+  const {{Test.Type}} lv4 = length4v(Cx1);
+  const {{Test.Type}} n3  = normalize3(Cx1);
+  passed = passed && (std::abs(dot3f(Cx1, Cx4) - d3) < 1e-6f) && (std::abs(dot4f(Cx1, Cx4) - d4) < 1e-6f);
+  passed = passed && (std::abs(length3(Cx1) - l3) < 1e-6f) && (std::abs(length3f(Cx1) - l3) < 1e-6f);
+  passed = passed && (std::abs(length4(Cx1) - l4) < 1e-6f) && (std::abs(length4f(Cx1) - l4) < 1e-6f);
+  for(int i=0;i<4;i++)
+  {
+    if(std::abs(dv3[i] - d3) > 1e-6f || std::abs(dv4[i] - d4) > 1e-6f || std::abs(lv3[i] - l3) > 1e-6f || std::abs(lv4[i] - l4) > 1e-6f)
+      passed = false;
+    if(std::abs(n3[i] - Cx1[i]/l3) > 1e-6f)
+      passed = false;
+  }
+  {% endif %}
+  {% endif %}
+
+  return passed;
+}
+
 bool test{{Test.Number+7}}_funcv_{{Test.Type}}()
 {
   const {{Test.Type}} Cx1({% for Val in Test.ValuesA %} {{Test.TypeS}}({{Val}}){% if loop.index1 != Test.VecLen %}, {% endif %} {% endfor %});

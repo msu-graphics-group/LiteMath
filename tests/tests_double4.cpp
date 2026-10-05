@@ -372,6 +372,97 @@ bool test165_exsplat_double4()
   return passed;
 }
 
+bool test166_misc_double4()
+{
+  const double4 Cx1( double(1),  double(2),  double(-3),  double(4));
+  const double4 Cx0;
+  const double4 Cx2 = -Cx1;
+  const double4 Cx3 = make_double4( double(1),  double(2),  double(-3),  double(4));
+
+  bool passed = true;
+  for(int i=0;i<4;i++)
+  {
+    if(Cx0[i] != double(0) || Cx2[i] != double(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const float4 src( float(1),  float(2),  float(3),  float(4));
+    const double4 dst(src);
+    for(int i=0;i<4;i++)
+      if(dst[i] != double(src[i]))
+        passed = false;
+  }
+
+  {
+    const int4 src( int(1),  int(2),  int(3),  int(4));
+    const double4 dst(src);
+    for(int i=0;i<4;i++)
+      if(dst[i] != double(src[i]))
+        passed = false;
+  }
+
+
+
+  const double3 Cr3 = to_double3(Cx1);
+  const double4  Cr4 = to_double4(Cr3, double(7));
+  passed = passed && (Cr3.x == Cx1.x) && (Cr3.y == Cx1.y) && (Cr3.z == Cx1.z);
+  passed = passed && (Cr4.x == Cx1.x) && (Cr4.y == Cx1.y) && (Cr4.z == Cx1.z) && (Cr4.w == double(7));
+
+
+
+  // geometric functions: n is unit normal along x, I is unit grazing direction with dot(I,n) < 0
+  double4 n(double(0)), t(double(0));
+  n[0] = 1;
+  t[1] = 1;
+  const double4  I   = normalize(t - n*double(0.1));
+  const double IdN = dot(I, n);
+  passed = passed && (std::abs(length(I) - double(1)) < 1e-6f) && (IdN < double(0));
+
+  const double4 r  = reflect(I, n);
+  const double4 r1 = refract(I, n, double(1));  // same media, ray goes straight
+  const double4 r2 = refract(I, n, double(10)); // total internal reflection, returns zero
+  const double4 f1 = faceforward(n, I, n);
+  const double4 f2 = faceforward(n, -I, n);
+  for(int i=0;i<4;i++)
+  {
+    if(std::abs(r[i] - (I[i] - double(2)*IdN*n[i])) > 1e-6f)
+      passed = false;
+    if(std::abs(r1[i] - I[i]) > 1e-6f || r2[i] != double(0))
+      passed = false;
+    if(f1[i] != n[i] || f2[i] != -n[i])
+      passed = false;
+  }
+
+
+  const double4 Cx4( double(5),  double(-5),  double(6),  double(4));
+  const double d3 = Cx1.x*Cx4.x + Cx1.y*Cx4.y + Cx1.z*Cx4.z;
+  const double d4 = d3 + Cx1.w*Cx4.w;
+  const double l3 = std::sqrt(Cx1.x*Cx1.x + Cx1.y*Cx1.y + Cx1.z*Cx1.z);
+  const double l4 = std::sqrt(Cx1.x*Cx1.x + Cx1.y*Cx1.y + Cx1.z*Cx1.z + Cx1.w*Cx1.w);
+  const double4 dv3 = dot3v(Cx1, Cx4);
+  const double4 dv4 = dot4v(Cx1, Cx4);
+  const double4 lv3 = length3v(Cx1);
+  const double4 lv4 = length4v(Cx1);
+  const double4 n3  = normalize3(Cx1);
+  passed = passed && (std::abs(dot3f(Cx1, Cx4) - d3) < 1e-6f) && (std::abs(dot4f(Cx1, Cx4) - d4) < 1e-6f);
+  passed = passed && (std::abs(length3(Cx1) - l3) < 1e-6f) && (std::abs(length3f(Cx1) - l3) < 1e-6f);
+  passed = passed && (std::abs(length4(Cx1) - l4) < 1e-6f) && (std::abs(length4f(Cx1) - l4) < 1e-6f);
+  for(int i=0;i<4;i++)
+  {
+    if(std::abs(dv3[i] - d3) > 1e-6f || std::abs(dv4[i] - d4) > 1e-6f || std::abs(lv3[i] - l3) > 1e-6f || std::abs(lv4[i] - l4) > 1e-6f)
+      passed = false;
+    if(std::abs(n3[i] - Cx1[i]/l3) > 1e-6f)
+      passed = false;
+  }
+
+
+
+  return passed;
+}
+
 bool test167_funcv_double4()
 {
   const double4 Cx1( double(1),  double(2),  double(-3),  double(4));

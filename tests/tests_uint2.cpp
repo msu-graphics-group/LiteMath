@@ -308,6 +308,49 @@ bool test265_exsplat_uint2()
   return passed;
 }
 
+bool test266_misc_uint2()
+{
+  const uint2 Cx1( uint(1),  uint(2));
+  const uint2 Cx0;
+  const uint2 Cx2 = -Cx1;
+  const uint2 Cx3 = make_uint2( uint(1),  uint(2));
+
+  bool passed = true;
+  for(int i=0;i<2;i++)
+  {
+    if(Cx0[i] != uint(0) || Cx2[i] != uint(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const float2 src( float(1),  float(2));
+    const uint2 dst(src);
+    for(int i=0;i<2;i++)
+      if(dst[i] != uint(src[i]))
+        passed = false;
+  }
+
+  {
+    const int2 src( int(1),  int(2));
+    const uint2 dst(src);
+    for(int i=0;i<2;i++)
+      if(dst[i] != uint(src[i]))
+        passed = false;
+  }
+
+
+
+  const uint2 Cr2 = shuffle_yx(Cx1);
+  passed = passed && (Cr2.x == Cx1.y) && (Cr2.y == Cx1.x);
+
+
+
+
+  return passed;
+}
+
 bool test267_funcv_uint2()
 {
   const uint2 Cx1( uint(1),  uint(2));

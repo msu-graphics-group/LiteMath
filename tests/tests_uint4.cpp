@@ -372,6 +372,51 @@ bool test105_exsplat_uint4()
   return passed;
 }
 
+bool test106_misc_uint4()
+{
+  const uint4 Cx1( uint(1),  uint(2),  uint(4294967293),  uint(4));
+  const uint4 Cx0;
+  const uint4 Cx2 = -Cx1;
+  const uint4 Cx3 = make_uint4( uint(1),  uint(2),  uint(4294967293),  uint(4));
+
+  bool passed = true;
+  for(int i=0;i<4;i++)
+  {
+    if(Cx0[i] != uint(0) || Cx2[i] != uint(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const float4 src( float(1),  float(2),  float(3),  float(4));
+    const uint4 dst(src);
+    for(int i=0;i<4;i++)
+      if(dst[i] != uint(src[i]))
+        passed = false;
+  }
+
+  {
+    const int4 src( int(1),  int(2),  int(3),  int(4));
+    const uint4 dst(src);
+    for(int i=0;i<4;i++)
+      if(dst[i] != uint(src[i]))
+        passed = false;
+  }
+
+
+
+  const uint3 Cr3 = to_uint3(Cx1);
+  const uint4  Cr4 = to_uint4(Cr3, uint(7));
+  passed = passed && (Cr3.x == Cx1.x) && (Cr3.y == Cx1.y) && (Cr3.z == Cx1.z);
+  passed = passed && (Cr4.x == Cx1.x) && (Cr4.y == Cx1.y) && (Cr4.z == Cx1.z) && (Cr4.w == uint(7));
+
+
+
+
+  return passed;
+}
+
 bool test107_funcv_uint4()
 {
   const uint4 Cx1( uint(1),  uint(2),  uint(4294967293),  uint(4));

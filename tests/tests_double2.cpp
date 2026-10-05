@@ -308,6 +308,73 @@ bool test325_exsplat_double2()
   return passed;
 }
 
+bool test326_misc_double2()
+{
+  const double2 Cx1( double(-1),  double(2));
+  const double2 Cx0;
+  const double2 Cx2 = -Cx1;
+  const double2 Cx3 = make_double2( double(-1),  double(2));
+
+  bool passed = true;
+  for(int i=0;i<2;i++)
+  {
+    if(Cx0[i] != double(0) || Cx2[i] != double(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const float2 src( float(1),  float(2));
+    const double2 dst(src);
+    for(int i=0;i<2;i++)
+      if(dst[i] != double(src[i]))
+        passed = false;
+  }
+
+  {
+    const int2 src( int(1),  int(2));
+    const double2 dst(src);
+    for(int i=0;i<2;i++)
+      if(dst[i] != double(src[i]))
+        passed = false;
+  }
+
+
+
+  const double2 Cr2 = shuffle_yx(Cx1);
+  passed = passed && (Cr2.x == Cx1.y) && (Cr2.y == Cx1.x);
+
+
+
+  // geometric functions: n is unit normal along x, I is unit grazing direction with dot(I,n) < 0
+  double2 n(double(0)), t(double(0));
+  n[0] = 1;
+  t[1] = 1;
+  const double2  I   = normalize(t - n*double(0.1));
+  const double IdN = dot(I, n);
+  passed = passed && (std::abs(length(I) - double(1)) < 1e-6f) && (IdN < double(0));
+
+  const double2 r  = reflect(I, n);
+  const double2 r1 = refract(I, n, double(1));  // same media, ray goes straight
+  const double2 r2 = refract(I, n, double(10)); // total internal reflection, returns zero
+  const double2 f1 = faceforward(n, I, n);
+  const double2 f2 = faceforward(n, -I, n);
+  for(int i=0;i<2;i++)
+  {
+    if(std::abs(r[i] - (I[i] - double(2)*IdN*n[i])) > 1e-6f)
+      passed = false;
+    if(std::abs(r1[i] - I[i]) > 1e-6f || r2[i] != double(0))
+      passed = false;
+    if(f1[i] != n[i] || f2[i] != -n[i])
+      passed = false;
+  }
+
+
+
+  return passed;
+}
+
 bool test327_funcv_double2()
 {
   const double2 Cx1( double(-1),  double(2));

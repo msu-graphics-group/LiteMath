@@ -39,6 +39,7 @@ add_executable(math_tests tests/tests_main.cpp
                           tests/tests_int4.cpp
                           tests/tests_int3.cpp
                           tests/tests_int2.cpp
+                          tests/tests_matrix.cpp
                           Image2d.cpp
                           )
 

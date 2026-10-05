@@ -349,6 +349,70 @@ bool test225_exsplat_float3()
   return passed;
 }
 
+bool test226_misc_float3()
+{
+  const float3 Cx1( float(-1),  float(2),  float(-3));
+  const float3 Cx0;
+  const float3 Cx2 = -Cx1;
+  const float3 Cx3 = make_float3( float(-1),  float(2),  float(-3));
+
+  bool passed = true;
+  for(int i=0;i<3;i++)
+  {
+    if(Cx0[i] != float(0) || Cx2[i] != float(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const int3 src( int(1),  int(2),  int(3));
+    const float3 dst(src);
+    for(int i=0;i<3;i++)
+      if(dst[i] != float(src[i]))
+        passed = false;
+  }
+
+  {
+    const uint3 src( uint(1),  uint(2),  uint(3));
+    const float3 dst(src);
+    for(int i=0;i<3;i++)
+      if(dst[i] != float(src[i]))
+        passed = false;
+  }
+
+
+
+
+
+  // geometric functions: n is unit normal along x, I is unit grazing direction with dot(I,n) < 0
+  float3 n(float(0)), t(float(0));
+  n[0] = 1;
+  t[1] = 1;
+  const float3  I   = normalize(t - n*float(0.1));
+  const float IdN = dot(I, n);
+  passed = passed && (std::abs(length(I) - float(1)) < 1e-6f) && (IdN < float(0));
+
+  const float3 r  = reflect(I, n);
+  const float3 r1 = refract(I, n, float(1));  // same media, ray goes straight
+  const float3 r2 = refract(I, n, float(10)); // total internal reflection, returns zero
+  const float3 f1 = faceforward(n, I, n);
+  const float3 f2 = faceforward(n, -I, n);
+  for(int i=0;i<3;i++)
+  {
+    if(std::abs(r[i] - (I[i] - float(2)*IdN*n[i])) > 1e-6f)
+      passed = false;
+    if(std::abs(r1[i] - I[i]) > 1e-6f || r2[i] != float(0))
+      passed = false;
+    if(f1[i] != n[i] || f2[i] != -n[i])
+      passed = false;
+  }
+
+
+
+  return passed;
+}
+
 bool test227_funcv_float3()
 {
   const float3 Cx1( float(-1),  float(2),  float(-3));

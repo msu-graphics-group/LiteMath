@@ -349,6 +349,46 @@ bool test205_exsplat_int3()
   return passed;
 }
 
+bool test206_misc_int3()
+{
+  const int3 Cx1( int(1),  int(2),  int(-3));
+  const int3 Cx0;
+  const int3 Cx2 = -Cx1;
+  const int3 Cx3 = make_int3( int(1),  int(2),  int(-3));
+
+  bool passed = true;
+  for(int i=0;i<3;i++)
+  {
+    if(Cx0[i] != int(0) || Cx2[i] != int(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const float3 src( float(1),  float(2),  float(3));
+    const int3 dst(src);
+    for(int i=0;i<3;i++)
+      if(dst[i] != int(src[i]))
+        passed = false;
+  }
+
+  {
+    const uint3 src( uint(1),  uint(2),  uint(3));
+    const int3 dst(src);
+    for(int i=0;i<3;i++)
+      if(dst[i] != int(src[i]))
+        passed = false;
+  }
+
+
+
+
+
+
+  return passed;
+}
+
 bool test207_funcv_int3()
 {
   const int3 Cx1( int(1),  int(2),  int(-3));

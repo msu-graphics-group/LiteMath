@@ -442,6 +442,7 @@ int main(int argc, const char** argv)
     local["Name"]   = "float";
     local["Suffix"] = "";
     local["Align"]  = "16";
+    local["Number"] = 400;
     data["MatTypes"].push_back(local);
   }
   {
@@ -449,6 +450,7 @@ int main(int argc, const char** argv)
     local["Name"]   = "double";
     local["Suffix"] = "d";
     local["Align"]  = "32";
+    local["Number"] = 410;
     data["MatTypes"].push_back(local);
   }
   //{
@@ -461,6 +463,7 @@ int main(int argc, const char** argv)
 
   ApplyJsonToTemplate("templates/tests.h",        "../tests/tests.h", data);
   ApplyJsonToTemplate("templates/tests_main.cpp", "../tests/tests_main.cpp", data);
+  ApplyJsonToTemplate("templates/tests_matrix.cpp", "../tests/tests_matrix.cpp", data);
   ApplyJsonToTemplate("templates/lite_math.h",    "../LiteMath.h", data);
 
   return 0;

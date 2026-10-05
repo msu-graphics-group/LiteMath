@@ -308,6 +308,49 @@ bool test285_exsplat_int2()
   return passed;
 }
 
+bool test286_misc_int2()
+{
+  const int2 Cx1( int(1),  int(2));
+  const int2 Cx0;
+  const int2 Cx2 = -Cx1;
+  const int2 Cx3 = make_int2( int(1),  int(2));
+
+  bool passed = true;
+  for(int i=0;i<2;i++)
+  {
+    if(Cx0[i] != int(0) || Cx2[i] != int(-Cx1[i]) || Cx3[i] != Cx1[i])
+      passed = false;
+  }
+
+  // conversion constructors from other vector types
+
+  {
+    const float2 src( float(1),  float(2));
+    const int2 dst(src);
+    for(int i=0;i<2;i++)
+      if(dst[i] != int(src[i]))
+        passed = false;
+  }
+
+  {
+    const uint2 src( uint(1),  uint(2));
+    const int2 dst(src);
+    for(int i=0;i<2;i++)
+      if(dst[i] != int(src[i]))
+        passed = false;
+  }
+
+
+
+  const int2 Cr2 = shuffle_yx(Cx1);
+  passed = passed && (Cr2.x == Cx1.y) && (Cr2.y == Cx1.x);
+
+
+
+
+  return passed;
+}
+
 bool test287_funcv_int2()
 {
   const int2 Cx1( int(1),  int(2));

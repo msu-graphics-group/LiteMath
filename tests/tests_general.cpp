@@ -420,3 +420,263 @@ bool test012_mat_double3x3()
 
   return error < 1e-6f;
 }
+
+bool test013_bitcount_scalar()
+{
+  bool passed = true;
+  passed = passed && (bitCount16(ushort(0xF0F0)) == 8) && (bitCount32(0xFFFFFFFFu) == 32);
+  passed = passed && (bitCount(0x00000101u) == 2) && (bitCount64(0xFFFFFFFF00000001ull) == 33);
+  passed = passed && (dot(3.0f, -2.0f) == -6.0f) && (SQR(3.0f) == 9.0f);
+  passed = passed && (bit_cast<uint32_t>(1.0f) == 0x3f800000u) && (bit_cast<float>(0x3f800000u) == 1.0f);
+  return passed;
+}
+
+bool test014_short_char_vectors()
+{
+  const ushort sData[4] = { 1, 2, 3, 4 };
+  const ushort4 s0;
+  const ushort4 s1(1, 2, 3, 4);
+  const ushort4 s2(ushort(7));
+  const ushort4 s3(sData);
+  ushort4 s4 = make_ushort4(1, 2, 3, 4);
+  s4[3] = 9;
+
+  const ushort2 h0;
+  const ushort2 h1(1, 2);
+  const ushort2 h2(ushort(7));
+  const ushort2 h3(sData);
+  ushort2 h4(5, 6);
+  h4[1] = 9;
+
+  const uchar cData[4] = { 10, 20, 30, 40 };
+  const uchar4 c0;
+  const uchar4 c1(10, 20, 30, 40);
+  const uchar4 c2(uchar(7));
+  const uchar4 c3(cData);
+  uchar4 c4 = make_uchar4(10, 20, 30, 40);
+  c4[3] = 9;
+
+  bool passed = true;
+  for(int i=0;i<4;i++)
+  {
+    if(s0[i] != 0 || s1[i] != sData[i] || s2[i] != 7 || s3[i] != sData[i])
+      passed = false;
+    if(c0[i] != 0 || c1[i] != cData[i] || c2[i] != 7 || c3[i] != cData[i])
+      passed = false;
+  }
+  for(int i=0;i<2;i++)
+  {
+    if(h0[i] != 0 || h1[i] != sData[i] || h2[i] != 7 || h3[i] != sData[i])
+      passed = false;
+  }
+  passed = passed && (s4[0] == 1) && (s4[3] == 9) && (h4[0] == 5) && (h4[1] == 9) && (c4[0] == 10) && (c4[3] == 9);
+
+  // uchar4 arithmetics
+  const uchar4 a(10, 20, 30, 40);
+  const uchar4 b(2, 4, 5, 6);
+  const uchar4 c(20, 40, 60, 80);
+  const uchar4 r[14] = { a*2.0f, a/2.0f, a+1.0f, a-1.0f, 
+                         2.0f*a, 120.0f/b, 1.0f+a, 50.0f-a, 
+                         a+b, a-b, a*b, a/b, 
+                         lerp(a, c, 0.5f), uchar4() };
+  const uchar ref[14][4] = { {20, 40, 60, 80}, {5, 10, 15, 20}, {11, 21, 31, 41}, {9, 19, 29, 39},
+                             {20, 40, 60, 80}, {60, 30, 24, 20}, {11, 21, 31, 41}, {40, 30, 20, 10},
+                             {12, 24, 35, 46}, {8, 16, 25, 34}, {20, 80, 150, 240}, {5, 5, 6, 6},
+                             {15, 30, 45, 60}, {0, 0, 0, 0} };
+  for(int j=0;j<14;j++)
+  {
+    for(int i=0;i<4;i++)
+    {
+      if(r[j][i] != ref[j][i])
+      {
+        std::cout << "uchar4 op " << j << ", comp " << i << ": " << int(r[j][i]) << " != " << int(ref[j][i]) << std::endl;
+        passed = false;
+      }
+    }
+  }
+
+  passed = passed && (dot(a, b) == 10*2 + 20*4 + 30*5); // only xyz are used
+  return passed;
+}
+
+bool test015_color_unpack()
+{
+  const float4 c1 = color_unpack_bgra(int(0xFF408000));
+  const float4 c2 = color_unpack_rgba(int(0xFF008040));
+  const float4 ref(64.0f/255.0f, 128.0f/255.0f, 0.0f, 1.0f);
+  return length4f(c1 - ref) < 1e-6f && length4f(c2 - ref) < 1e-6f;
+}
+
+bool test016_camera_matrices()
+{
+  bool passed = true;
+
+  // look at
+  const float3 eye(0, 0, 5), center(0, 0, 0), up(0, 1, 0);
+  const float4x4 mView = lookAt(eye, center, up);
+  passed = passed && length(mul4x3(mView, eye)) < 1e-6f;
+  passed = passed && length(mul4x3(mView, center) - float3(0, 0, -5)) < 1e-6f;
+  passed = passed && length(mul4x3(mView, float3(1, 2, 5)) - float3(1, 2, 0)) < 1e-6f;
+
+  // perspective: near plane goes to -1, far plane goes to +1 in NDC
+  const float4x4 mProj = perspectiveMatrix(90.0f, 1.0f, 1.0f, 100.0f);
+  const float4 pNear = mProj*float4(1, 1, -1, 1);
+  const float4 pFar  = mProj*float4(0, 0, -100, 1);
+  passed = passed && std::abs(pNear.z/pNear.w + 1.0f) < 1e-5f && std::abs(pNear.x/pNear.w - 1.0f) < 1e-5f && std::abs(pNear.y/pNear.w - 1.0f) < 1e-5f;
+  passed = passed && std::abs(pFar.z/pFar.w - 1.0f) < 1e-5f;
+
+  // orthographic
+  const float4x4 mOrto = ortoMatrix(-2.0f, 2.0f, -1.0f, 1.0f, 0.5f, 10.0f);
+  passed = passed && length(mul4x3(mOrto, float3( 2,  1, -10.0f)) - float3( 1,  1,  1)) < 1e-6f;
+  passed = passed && length(mul4x3(mOrto, float3(-2, -1, -0.5f)) - float3(-1, -1, -1)) < 1e-6f;
+  
+  // vulkan fix
+  const float4x4 mFix = OpenglToVulkanProjectionMatrixFix();
+  passed = passed && length(mul4x3(mFix, float3(1, 1, -1)) - float3(1, -1, 0)) < 1e-6f;
+  passed = passed && length(mul4x3(mFix, float3(1, 1,  1)) - float3(1, -1, 1)) < 1e-6f;
+
+  // eye rays
+  const float4x4 mProjInv = inverse4x4(mProj);
+  const float4 ray1 = EyeRayDir4f(0.5f, 0.5f, 2.0f, 2.0f, mProjInv); // center of 2x2 image
+  const float4 ray2 = EyeRayDir4f(0.0f, 0.0f, 2.0f, 2.0f, mProjInv); // left-top pixel
+  const float3 ref2 = normalize(float3(-0.5f, -0.5f, -1.0f));
+  passed = passed && length3f(ray1 - float4(0, 0, -1, 0)) < 1e-5f && ray1.w == INF_POSITIVE;
+  passed = passed && length(to_float3(ray2) - ref2) < 1e-5f && ray2.w == INF_POSITIVE;
+
+  return passed;
+}
+
+bool test017_box4f()
+{
+  bool passed = true;
+
+  Box4f box;
+  passed = passed && (box.boxMin.x == INF_POSITIVE) && (box.boxMax.x == INF_NEGATIVE);
+  box.include(float4( 1, 2, 3, 0));
+  box.include(float4(-1, 5, 0, 0));
+  passed = passed && length4f(box.boxMin - float4(-1, 2, 0, 0)) == 0.0f && length4f(box.boxMax - float4(1, 5, 3, 0)) == 0.0f;
+  passed = passed && (box.surfaceArea() == 42.0f) && (box.volume() == 18.0f);
+
+  Box4f box2(float4(0, 0, 0, 0), float4(2, 2, 2, 0));
+  box2.include(box);
+  passed = passed && length4f(box2.boxMin - float4(-1, 0, 0, 0)) == 0.0f && length4f(box2.boxMax - float4(2, 5, 3, 0)) == 0.0f;
+  box2.intersect(Box4f(float4(0, 1, 1, 0), float4(4, 4, 4, 0)));
+  passed = passed && length4f(box2.boxMin - float4(0, 1, 1, 0)) == 0.0f && length4f(box2.boxMax - float4(2, 4, 3, 0)) == 0.0f;
+
+  box2.setStart(5);
+  box2.setCount(7);
+  passed = passed && (box2.getStart() == 5) && (box2.getCount() == 7) && (box2.boxMin.x == 0.0f) && (box2.boxMax.z == 3.0f);
+
+  const float4 pI = packIntW(float4(1, 2, 3, 4), -3);
+  const float4 pF = packFloatW(float4(1, 2, 3, 4), 0.5f);
+  passed = passed && (extractIntW(pI) == -3) && (pI.z == 3.0f) && (pF.w == 0.5f) && (pF.x == 1.0f);
+
+  const Box4f flat(float4(0, 0, 2, 0), float4(1, 1, 2, 0));
+  passed = passed && flat.isAxisAligned(2, 2.0f) && !flat.isAxisAligned(2, 1.0f) && !flat.isAxisAligned(0, 0.0f);
+
+  // overlap of boxes
+  const Box4f b1(float4(0, 0, 0, 0), float4(2, 2, 2, 0));
+  const Box4f b2(float4(1,-1, 1, 0), float4(3, 1, 3, 0));
+  const Box4f b3(float4(5, 5, 5, 0), float4(6, 6, 6, 0));
+  const Box4f o1 = BoxBoxOverlap(b1, b2);
+  const Box4f o2 = BoxBoxOverlap(b1, b3);
+  passed = passed && length3f(o1.boxMin - float4(1, 0, 1, 0)) == 0.0f && length3f(o1.boxMax - float4(2, 1, 2, 0)) == 0.0f;
+  passed = passed && length3f(o2.boxMin - b1.boxMax) == 0.0f && length3f(o2.boxMax - b1.boxMax) == 0.0f;
+
+  return passed;
+}
+
+bool test018_ray4f()
+{
+  bool passed = true;
+
+  Ray4f r0;
+  r0.posAndNear = float4(0, 0, 0, 0);
+  r0.dirAndFar  = float4(0, 0, 1, 0);
+  r0.setNear(0.25f);
+  r0.setFar(50.0f);
+  passed = passed && (r0.getNear() == 0.25f) && (r0.getFar() == 50.0f) && (r0.dirAndFar.z == 1.0f);
+
+  const Ray4f r1(float4(1, 2, 3, 0), float4(0, 0, 1, 0));
+  const Ray4f r2(float4(1, 2, 3, 0), float4(0, 0, 1, 0), 0.5f, 100.0f);
+  const Ray4f r3(float3(1, 2, 3), float3(0, 0, 1), 1.0f, 2.0f);
+  passed = passed && (r1.getNear() == 0.0f) && (r1.getFar() == 0.0f) && (r1.posAndNear.y == 2.0f);
+  passed = passed && (r2.getNear() == 0.5f) && (r2.getFar() == 100.0f) && (r2.posAndNear.y == 2.0f);
+  passed = passed && (r3.getNear() == 1.0f) && (r3.getFar() == 2.0f) && (r3.posAndNear.z == 3.0f);
+
+  // ray-box
+  const float4 boxMin(0, 0, 0, 0), boxMax(1, 1, 1, 0);
+  const float4 dirInv = 1.0f/float4(1, 1, 1, 1);
+  const float2 hit  = Ray4fBox4fIntersection(float4(-1, -1, -1, 0), dirInv, boxMin, boxMax);
+  const float2 miss = Ray4fBox4fIntersection(float4(-1,  5, -1, 0), dirInv, boxMin, boxMax);
+  passed = passed && (hit.x == 1.0f) && (hit.y == 2.0f) && (miss.x > miss.y);
+
+  return passed;
+}
+
+bool test019_bbox3f()
+{
+  BBox3f box;
+  box.boxMin = float3(0, 0, 0);
+  box.boxMax = float3(1, 1, 1);
+  
+  struct TestCase { float3 pos; float3 dir; int face; float t1; float t2; };
+  const TestCase cases[] = { { float3(-1.0f, 0.5f,  0.5f),  float3( 1.0f,   0.25f,   0.25f), 0, 1.0f, 2.0f },
+                             { float3( 0.5f,-1.0f,  0.5f),  float3( 0.25f,  1.0f,    0.25f), 1, 1.0f, 2.0f },
+                             { float3( 0.5f, 0.5f, -1.0f),  float3( 0.25f,  0.125f,  1.0f),  2, 1.0f, 2.0f },
+                             { float3( 0.5f, 0.5f, -1.0f),  float3( 0.125f, 0.25f,   1.0f),  2, 1.0f, 2.0f },
+                             { float3( 2.0f, 0.75f, 0.75f), float3(-1.0f,  -0.25f,  -0.25f), 0, 1.0f, 2.0f } };
+  
+  bool passed = true;
+  for(const auto& tc : cases)
+  {
+    const auto res = box.Intersection(tc.pos, 1.0f/tc.dir, 0.0f, 100.0f);
+    if(res.face != tc.face || std::abs(res.t1 - tc.t1) > 1e-5f || std::abs(res.t2 - tc.t2) > 1e-5f)
+    {
+      std::cout << "BBox3f::Intersection: face = " << res.face << ", t1 = " << res.t1 << ", t2 = " << res.t2 << std::endl;
+      passed = false;
+    }
+  }
+
+  // clip by allowed range
+  const auto res = box.Intersection(float3(-1.0f, 0.5f, 0.5f), 1.0f/float3(1.0f, 0.25f, 0.25f), 1.5f, 1.75f);
+  passed = passed && (res.t1 == 1.5f) && (res.t2 == 1.75f);
+
+  return passed;
+}
+
+bool test020_interlocked_reduce()
+{
+  float  f = 1.0f, fOld = 0.0f;
+  double d = 1.0,  dOld = 0.0;
+  int    i = 1,    iOld = 0;
+  uint   u = 1,    uOld = 0;
+
+  InterlockedAdd(f, 2.0f); InterlockedAdd(f, 3.0f, fOld);
+  InterlockedAdd(d, 2.0);  InterlockedAdd(d, 3.0,  dOld);
+  InterlockedAdd(i, 2);    InterlockedAdd(i, 3,    iOld);
+  InterlockedAdd(u, 2u);   InterlockedAdd(u, 3u,   uOld);
+
+  float arr[4] = { 0, 1, 2, 3 };
+  InterlockedAdd3f(arr, 1, float3(1, 2, 3));
+
+  bool passed = true;
+  passed = passed && (f == 6.0f) && (fOld == 3.0f) && (d == 6.0) && (dOld == 3.0);
+  passed = passed && (i == 6) && (iOld == 3) && (u == 6) && (uOld == 3);
+  passed = passed && (arr[0] == 0.0f) && (arr[1] == 2.0f) && (arr[2] == 4.0f) && (arr[3] == 6.0f);
+  passed = passed && (omp_get_num_threads() >= 1) && (omp_get_max_threads() >= 1) && (omp_get_thread_num() == 0);
+
+  passed = passed && (align(13, 8) == 16) && (align(16, 8) == 16);
+
+  std::vector<float> vec;
+  const size_t sizeAligned = ReduceAddInit(vec, 10);
+  ReduceAdd(vec, 3, 2.0f);
+  ReduceAdd(vec, 3, 1.0f);
+  ReduceAdd(vec, 5, INF_POSITIVE);                     // non finite values are ignored
+  ReduceAdd(vec, size_t(4), sizeAligned, 5.0f);
+  ReduceAdd(vec, size_t(6), sizeAligned, INF_NEGATIVE); // non finite values are ignored
+  ReduceAddComplete(vec);
+  passed = passed && (vec.size() == 10) && (sizeAligned >= 10) && (vec[3] == 3.0f) && (vec[4] == 5.0f) && (vec[5] == 0.0f) && (vec[6] == 0.0f);
+
+  return passed;
+}

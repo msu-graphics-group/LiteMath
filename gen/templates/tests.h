@@ -13,6 +13,14 @@ bool test009_refract();
 bool test010_faceforward();
 bool test011_mattranspose();
 bool test012_mat_double3x3();
+bool test013_bitcount_scalar();
+bool test014_short_char_vectors();
+bool test015_color_unpack();
+bool test016_camera_matrices();
+bool test017_box4f();
+bool test018_ray4f();
+bool test019_bbox3f();
+bool test020_interlocked_reduce();
 
 ## for Tests in AllTests
 ## for Test  in Tests.Tests
@@ -23,6 +31,7 @@ bool test{{Test.Number+2}}_unaryk_{{Test.Type}}();
 bool test{{Test.Number+3}}_cmpv_{{Test.Type}}();
 bool test{{Test.Number+4}}_shuffle_{{Test.Type}}();
 bool test{{Test.Number+5}}_exsplat_{{Test.Type}}();
+bool test{{Test.Number+6}}_misc_{{Test.Type}}();
 bool test{{Test.Number+7}}_funcv_{{Test.Type}}();
 {% if Test.IsFloat %}
 bool test{{Test.Number+8}}_funcfv_{{Test.Type}}();
@@ -35,4 +44,10 @@ bool test{{Test.Number+10}}_other_{{Test.Type}}();
 bool test{{Test.Number+11}}_any_all_{{Test.Type}}();
 
 ## endfor
+## endfor
+
+## for FType in MatTypes
+bool test{{FType.Number}}_mat4x4_{{FType.Name}}();
+bool test{{FType.Number+1}}_mat3x3_{{FType.Name}}();
+bool test{{FType.Number+2}}_complex_{{FType.Name}}();
 ## endfor
