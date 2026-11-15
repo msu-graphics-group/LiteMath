@@ -48,7 +48,7 @@ static inline float4 read_array_uchar4(const uint32_t* a_data, int offset)
 }
 
 static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteImage::Sampler& a_sampler, const int w, const int h,
-                                   const LiteImage::Layout a_layout, const unsigned int a_pitch)
+                                   const LiteImage::Layout a_layout, const unsigned int a_pitch, const unsigned int a_binShift)
 {
 	const int sx = (ffx > 0.0f) ? 1 : -1;
 	const int sy = (ffy > 0.0f) ? 1 : -1;
@@ -92,10 +92,10 @@ static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteI
 		py_w1 = (py_w1 < 0) ? py_w1 + h : py_w1;
 	}
 
-	const int offset0 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w0, py_w0));
-	const int offset1 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w1, py_w0));
-	const int offset2 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w0, py_w1));
-	const int offset3 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w1, py_w1));
+	const int offset0 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w0, py_w0, a_binShift));
+	const int offset1 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w1, py_w0, a_binShift));
+	const int offset2 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w0, py_w1, a_binShift));
+	const int offset3 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w1, py_w1, a_binShift));
 
 	return make_int4(offset0, offset1, offset2, offset3);
 }
@@ -131,7 +131,7 @@ float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, f
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       const float4 f1    = m_data[offsets.x];
       const float4 f2    = m_data[offsets.y];
       const float4 f3    = m_data[offsets.z];
@@ -212,7 +212,7 @@ float4 LiteImage::Image2D<float>::sample(const LiteImage::Sampler& a_sampler, fl
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       const float f1     = m_data[offsets.x];
       const float f2     = m_data[offsets.y];
       const float f3     = m_data[offsets.z];
@@ -303,7 +303,7 @@ float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, f
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       float4 f1 = read_array_uchar4(m_data.data(), offsets.x);
       float4 f2 = read_array_uchar4(m_data.data(), offsets.y);
       float4 f3 = read_array_uchar4(m_data.data(), offsets.z);
@@ -394,7 +394,7 @@ float4 LiteImage::Image2D<uint32_t>::sample(const LiteImage::Sampler& a_sampler,
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       float4 f1 = read_array_uchar4(m_data.data(), offsets.x);
       float4 f2 = read_array_uchar4(m_data.data(), offsets.y);
       float4 f3 = read_array_uchar4(m_data.data(), offsets.z);

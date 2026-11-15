@@ -80,12 +80,23 @@ namespace LiteImage
     LINEAR   = 0, ///< row by row
     TILED4x4 = 1, ///< tiles of 4x4 pixels stored as 16 subsequent pixels (row by row inside a tile), tiles are stored row by row;
                   ///< storage is padded to a multiple of 4 in both dimensions
+    TILED4x4_BINS = 2, ///< two levels: bins of B x B pixels (B = binSize(), a power of 2 >= 4) are stored one after another row by row,
+                       ///< inside a bin tiles 4x4 are stored as in TILED4x4; storage is padded to a multiple of B in both dimensions
   };
 
-  /// offset of pixel (x,y) in storage of an image with layout a_layout; a_pitch is width for LINEAR and number of tiles in a row for TILED4x4
-  static inline unsigned int PixelOffset(Layout a_layout, unsigned int a_pitch, unsigned int x, unsigned int y)
+  /// offset of pixel (x,y) in storage of an image with layout a_layout; a_pitch is width for LINEAR, number of tiles in a row for
+  /// TILED4x4 and number of bins in a row for TILED4x4_BINS; a_binShift is log2 of bin size (TILED4x4_BINS only)
+  static inline unsigned int PixelOffset(Layout a_layout, unsigned int a_pitch, unsigned int x, unsigned int y, unsigned int a_binShift = 6)
   {
-    return (a_layout == Layout::LINEAR) ? y*a_pitch + x : (((y >> 2)*a_pitch + (x >> 2)) << 4) + ((y & 3) << 2) + (x & 3);
+    if(a_layout == Layout::LINEAR)
+      return y*a_pitch + x;
+    const unsigned int inTile = ((y & 3) << 2) + (x & 3);
+    if(a_layout == Layout::TILED4x4)
+      return (((y >> 2)*a_pitch + (x >> 2)) << 4) + inTile;
+    const unsigned int mask = (1u << a_binShift) - 1u;
+    const unsigned int bin  = (y >> a_binShift)*a_pitch + (x >> a_binShift);
+    const unsigned int tile = ((y & mask) >> 2)*((mask + 1u) >> 2) + ((x & mask) >> 2);
+    return (bin << (2*a_binShift)) + (tile << 4) + inTile;
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,26 +121,44 @@ namespace LiteImage
     Image2D& operator=(Image2D&& rhs)      = default; // may cause crash on some old compilers
     Image2D& operator=(const Image2D& rhs) = default; // may cause crash on some old compilers
     
-    void resize(unsigned int w, unsigned int h) { resize(w, h, m_layout); }
-    void resize(unsigned int w, unsigned int h, Layout a_layout)
+    void resize(unsigned int w, unsigned int h) { resize(w, h, m_layout, binSize()); }
+    /// a_binSize is a size of bins for TILED4x4_BINS, a power of 2 from 4 to 1024
+    void resize(unsigned int w, unsigned int h, Layout a_layout, unsigned int a_binSize = 64)
     {
-      m_width  = w;
-      m_height = h;
-      m_layout = a_layout;
-      m_pitch  = (a_layout == Layout::LINEAR) ? w : (w + 3)/4;
-      m_data.resize((a_layout == Layout::LINEAR) ? size_t(w)*size_t(h) : size_t(m_pitch)*size_t((h + 3)/4)*16);
+      m_width    = w;
+      m_height   = h;
+      m_layout   = a_layout;
+      m_binShift = 2;
+      while((1u << m_binShift) < a_binSize && m_binShift < 10)
+        m_binShift++;
+      const unsigned int bs = binSize();
+      if(a_layout == Layout::LINEAR)
+      {
+        m_pitch = w;
+        m_data.resize(size_t(w)*size_t(h));
+      }
+      else if(a_layout == Layout::TILED4x4)
+      {
+        m_pitch = (w + 3)/4;
+        m_data.resize(size_t(m_pitch)*size_t((h + 3)/4)*16);
+      }
+      else
+      {
+        m_pitch = (w + bs - 1)/bs;
+        m_data.resize(size_t(m_pitch)*size_t((h + bs - 1)/bs)*size_t(bs)*size_t(bs));
+      }
       m_fw = float(w);
       m_fh = float(h);
     }
     void clear(const Type val)                  { for(auto& pixel : m_data) pixel = val; }
 
     /// changes layout keeping pixel values
-    void setLayout(Layout a_layout)
+    void setLayout(Layout a_layout, unsigned int a_binSize = 64)
     {
-      if(a_layout == m_layout)
+      if(a_layout == m_layout && (a_layout != Layout::TILED4x4_BINS || a_binSize == binSize()))
         return;
       Image2D res;
-      res.resize(m_width, m_height, a_layout);
+      res.resize(m_width, m_height, a_layout, a_binSize);
       for(unsigned int y = 0; y < m_height; y++)
         for(unsigned int x = 0; x < m_width; x++)
           res.m_data[res.offset(x, y)] = m_data[offset(x, y)];
@@ -139,7 +168,7 @@ namespace LiteImage
 
     float4 sample(const Sampler& a_sampler, float2 a_uv) const;
 
-    unsigned int offset(unsigned int x, unsigned int y) const { return PixelOffset(m_layout, m_pitch, x, y); } ///< offset of pixel (x,y) in data()
+    unsigned int offset(unsigned int x, unsigned int y) const { return PixelOffset(m_layout, m_pitch, x, y, m_binShift); } ///< offset of pixel (x,y) in data()
 
     Type&  operator[](const int2 coord)        { return m_data[offset(coord.x, coord.y)]; }
     Type   operator[](const int2 coord) const  { return m_data[offset(coord.x, coord.y)]; }
@@ -150,7 +179,9 @@ namespace LiteImage
     unsigned int height() const { return m_height; }
     unsigned int bpp()    const { return sizeof(Type); }
     Layout       layout() const { return m_layout; }
-    unsigned int pitch()  const { return m_pitch; } ///< width for LINEAR, number of tiles in a row for TILED4x4
+    unsigned int pitch()  const { return m_pitch; } ///< width for LINEAR, number of tiles in a row for TILED4x4, number of bins in a row for TILED4x4_BINS
+    unsigned int binSize()  const { return 1u << m_binShift; } ///< size of bins of TILED4x4_BINS
+    unsigned int binShift() const { return m_binShift; }       ///< log2(binSize())
    
           Type*              data()         { return m_data.data(); }
     const Type*              data()   const { return m_data.data(); }
@@ -217,6 +248,7 @@ namespace LiteImage
     bool m_srgb = false;
     Layout m_layout = Layout::LINEAR;
     unsigned int m_pitch = 0;
+    unsigned int m_binShift = 6;
   
   };
 
