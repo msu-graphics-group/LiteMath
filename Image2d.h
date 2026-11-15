@@ -13,7 +13,8 @@
 #endif
 
 namespace LiteImage 
-{
+{ 
+  #ifndef CUDA_MATH
   using LiteMath::float2;
   using LiteMath::float3;
   using LiteMath::float4;
@@ -26,6 +27,16 @@ namespace LiteImage
   using LiteMath::ushort4;
   using LiteMath::uchar4;
   using LiteMath::clamp;
+  using LiteMath::dot;
+  using LiteMath::make_float2;
+  using LiteMath::make_float3;
+  using LiteMath::make_float4;
+  using LiteMath::make_int4;
+  using LiteMath::make_uint4;
+  using LiteMath::make_uchar4;
+  #else
+  static inline float  dot (float a, float b) { return a*b;  } 
+  #endif
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +62,7 @@ namespace LiteImage
     AddressMode addressU      = AddressMode::WRAP;
     AddressMode addressV      = AddressMode::WRAP;
     AddressMode addressW      = AddressMode::WRAP;
-    float4      borderColor   = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float4      borderColor   = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
     Filter      filter        = Filter::NEAREST;
     uint32_t    maxAnisotropy = 1;
     uint32_t    maxLOD        = 32;
@@ -61,14 +72,30 @@ namespace LiteImage
 
   template<typename T> uint32_t GetVulkanFormat(bool a_gamma22);
 
+  /**
+  \brief Memory layout of image pixels on CPU, analogue of VkImageTiling (GPU always uses its own optimal tiling).
+  */
+  enum class Layout : uint32_t
+  {
+    LINEAR   = 0, ///< row by row
+    TILED4x4 = 1, ///< tiles of 4x4 pixels stored as 16 subsequent pixels (row by row inside a tile), tiles are stored row by row;
+                  ///< storage is padded to a multiple of 4 in both dimensions
+  };
+
+  /// offset of pixel (x,y) in storage of an image with layout a_layout; a_pitch is width for LINEAR and number of tiles in a row for TILED4x4
+  static inline unsigned int PixelOffset(Layout a_layout, unsigned int a_pitch, unsigned int x, unsigned int y)
+  {
+    return (a_layout == Layout::LINEAR) ? y*a_pitch + x : (((y >> 2)*a_pitch + (x >> 2)) << 4) + ((y & 3) << 2) + (x & 3);
+  }
+
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   template<typename Type>
   struct Image2D
   {
-    Image2D() : m_width(0), m_height(0) {}
-    Image2D(unsigned int w, unsigned int h, const Type* a_data) : m_width(w), m_height(h) 
+    Image2D() : m_width(0), m_height(0), m_fw(0.0f), m_fh(0.0f) {}
+    Image2D(unsigned int w, unsigned int h, const Type* a_data) : m_width(w), m_height(h), m_fw(float(w)), m_fh(float(h))
     {
       resize(w, h);
       memcpy(m_data.data(), a_data, w*h*sizeof(Type));
@@ -83,19 +110,47 @@ namespace LiteImage
     Image2D& operator=(Image2D&& rhs)      = default; // may cause crash on some old compilers
     Image2D& operator=(const Image2D& rhs) = default; // may cause crash on some old compilers
     
-    void resize(unsigned int w, unsigned int h) { m_width = w; m_height = h; m_data.resize(w*h); m_fw = float(w); m_fh = float(h); }
-    void clear(const Type val)                  { for(auto& pixel : m_data) pixel = val; }  
-  
-    float4 sample(const Sampler& a_sampler, float2 a_uv) const;    
-    
-    Type&  operator[](const int2 coord)        { return m_data[coord.y * m_width + coord.x]; }
-    Type   operator[](const int2 coord) const  { return m_data[coord.y * m_width + coord.x]; }
-    Type&  operator[](const uint2 coord)       { return m_data[coord.y * m_width + coord.x]; }
-    Type   operator[](const uint2 coord) const { return m_data[coord.y * m_width + coord.x]; }
-  
+    void resize(unsigned int w, unsigned int h) { resize(w, h, m_layout); }
+    void resize(unsigned int w, unsigned int h, Layout a_layout)
+    {
+      m_width  = w;
+      m_height = h;
+      m_layout = a_layout;
+      m_pitch  = (a_layout == Layout::LINEAR) ? w : (w + 3)/4;
+      m_data.resize((a_layout == Layout::LINEAR) ? size_t(w)*size_t(h) : size_t(m_pitch)*size_t((h + 3)/4)*16);
+      m_fw = float(w);
+      m_fh = float(h);
+    }
+    void clear(const Type val)                  { for(auto& pixel : m_data) pixel = val; }
+
+    /// changes layout keeping pixel values
+    void setLayout(Layout a_layout)
+    {
+      if(a_layout == m_layout)
+        return;
+      Image2D res;
+      res.resize(m_width, m_height, a_layout);
+      for(unsigned int y = 0; y < m_height; y++)
+        for(unsigned int x = 0; x < m_width; x++)
+          res.m_data[res.offset(x, y)] = m_data[offset(x, y)];
+      res.m_srgb = m_srgb;
+      *this = res;
+    }
+
+    float4 sample(const Sampler& a_sampler, float2 a_uv) const;
+
+    unsigned int offset(unsigned int x, unsigned int y) const { return PixelOffset(m_layout, m_pitch, x, y); } ///< offset of pixel (x,y) in data()
+
+    Type&  operator[](const int2 coord)        { return m_data[offset(coord.x, coord.y)]; }
+    Type   operator[](const int2 coord) const  { return m_data[offset(coord.x, coord.y)]; }
+    Type&  operator[](const uint2 coord)       { return m_data[offset(coord.x, coord.y)]; }
+    Type   operator[](const uint2 coord) const { return m_data[offset(coord.x, coord.y)]; }
+
     unsigned int width()  const { return m_width; }
-    unsigned int height() const { return m_height; }  
+    unsigned int height() const { return m_height; }
     unsigned int bpp()    const { return sizeof(Type); }
+    Layout       layout() const { return m_layout; }
+    unsigned int pitch()  const { return m_pitch; } ///< width for LINEAR, number of tiles in a row for TILED4x4
    
           Type*              data()         { return m_data.data(); }
     const Type*              data()   const { return m_data.data(); }
@@ -115,7 +170,9 @@ namespace LiteImage
     {
       assert(width() == rhs.width());
       assert(height() == rhs.height());
-      Image2D res(width(), height());
+      assert(layout() == rhs.layout());
+      Image2D res;
+      res.resize(width(), height(), m_layout);
       for(size_t i=0;i<m_data.size();i++)
         res.m_data[i] = m_data[i] + rhs.m_data[i];
       return res;
@@ -125,7 +182,9 @@ namespace LiteImage
     {
       assert(width() == rhs.width());
       assert(height() == rhs.height());
-      Image2D res(width(), height());
+      assert(layout() == rhs.layout());
+      Image2D res;
+      res.resize(width(), height(), m_layout);
       for(size_t i=0;i<m_data.size();i++)
         res.m_data[i] = m_data[i] - rhs.m_data[i];
       return res;
@@ -133,7 +192,8 @@ namespace LiteImage
   
     Image2D operator*(const float a_mult) const
     {
-      Image2D res(width(), height());
+      Image2D res;
+      res.resize(width(), height(), m_layout);
       for(size_t i=0;i<m_data.size();i++)
         res.m_data[i] = m_data[i]*a_mult;
       return res;
@@ -142,7 +202,8 @@ namespace LiteImage
     Image2D operator/(const float a_div) const
     {
       const float invDiv = 1.0f/a_div;
-      Image2D res(width(), height());
+      Image2D res;
+      res.resize(width(), height(), m_layout);
       for(size_t i=0;i<m_data.size();i++)
         res.m_data[i] = m_data[i]*invDiv;
       return res;
@@ -150,10 +211,12 @@ namespace LiteImage
   
   protected: 
   
-    unsigned int m_width, m_height;
-    float        m_fw,    m_fh;
+    unsigned int m_width = 0, m_height = 0;
+    float        m_fw = 0.0f,    m_fh = 0.0f;
     std::vector<Type> m_data; 
     bool m_srgb = false;
+    Layout m_layout = Layout::LINEAR;
+    unsigned int m_pitch = 0;
   
   };
 
@@ -216,7 +279,7 @@ namespace LiteImage
   template<typename Type> bool          SaveImage(const char* a_fileName, const Image2D<Type>& a_image, float a_gamma = 2.2f);
   template<typename Type> Image2D<Type> LoadImage(const char* a_fileName, float a_gamma = 2.2f);
   
-  template<typename Type> float extDotProd(Type a, Type b) { return LiteMath::dot(a,b); }
+  template<typename Type> float extDotProd(Type a, Type b) { return dot(a,b); }
   template<> inline       float extDotProd<uint32_t>(uint32_t a, uint32_t b) 
   { 
     unsigned r1 = (a & 0x000000FF);
@@ -243,8 +306,18 @@ namespace LiteImage
     return float(summ/double(image1.size()));
   }
 
-  template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(a.vector(), b.vector())/3.0f; }
-  template<> inline    float MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(a.vector(), b.vector()); }
+  /// pixels of an image in LINEAR layout (copy is made only for other layouts)
+  template<typename T> std::vector<T> LinearPixels(const Image2D<T>& a_image)
+  {
+    if(a_image.layout() == Layout::LINEAR)
+      return a_image.vector();
+    Image2D<T> linear = a_image;
+    linear.setLayout(Layout::LINEAR);
+    return linear.vector();
+  }
+
+  template<typename T> float MSE(const Image2D<T>& a, const Image2D<T>& b) { return MSE(LinearPixels(a), LinearPixels(b))/3.0f; }
+  template<> inline    float MSE<float>(const Image2D<float>& a, const Image2D<float>& b) { return MSE(LinearPixels(a), LinearPixels(b)); }
   
   /**
   \brief save 24 bit RGB bitmap images.
