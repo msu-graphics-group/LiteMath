@@ -47,7 +47,8 @@ static inline float4 read_array_uchar4(const uint32_t* a_data, int offset)
   return read_array_uchar4((const uchar4*)a_data, offset);
 }
 
-static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteImage::Sampler& a_sampler, const int w, const int h)
+static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteImage::Sampler& a_sampler, const int w, const int h,
+                                   const LiteImage::Layout a_layout, const unsigned int a_pitch, const unsigned int a_binShift)
 {
 	const int sx = (ffx > 0.0f) ? 1 : -1;
 	const int sy = (ffy > 0.0f) ? 1 : -1;
@@ -91,10 +92,10 @@ static inline int4 bilinearOffsets(const float ffx, const float ffy, const LiteI
 		py_w1 = (py_w1 < 0) ? py_w1 + h : py_w1;
 	}
 
-	const int offset0 = py_w0*w + px_w0;
-	const int offset1 = py_w0*w + px_w1;
-	const int offset2 = py_w1*w + px_w0;
-	const int offset3 = py_w1*w + px_w1;
+	const int offset0 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w0, py_w0, a_binShift));
+	const int offset1 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w1, py_w0, a_binShift));
+	const int offset2 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w0, py_w1, a_binShift));
+	const int offset3 = int(LiteImage::PixelOffset(a_layout, a_pitch, px_w1, py_w1, a_binShift));
 
 	return make_int4(offset0, offset1, offset2, offset3);
 }
@@ -130,7 +131,7 @@ float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, f
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       const float4 f1    = m_data[offsets.x];
       const float4 f2    = m_data[offsets.y];
       const float4 f3    = m_data[offsets.z];
@@ -174,7 +175,7 @@ float4 LiteImage::Image2D<float4>::sample(const LiteImage::Sampler& a_sampler, f
         py = py % m_height;
         py = (py < 0) ? py + m_height : py;
       }
-      res = m_data[py*m_width + px];
+      res = m_data[offset(px, py)];
     }
     break;
   };
@@ -211,7 +212,7 @@ float4 LiteImage::Image2D<float>::sample(const LiteImage::Sampler& a_sampler, fl
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       const float f1     = m_data[offsets.x];
       const float f2     = m_data[offsets.y];
       const float f3     = m_data[offsets.z];
@@ -250,7 +251,7 @@ float4 LiteImage::Image2D<float>::sample(const LiteImage::Sampler& a_sampler, fl
         py = py % m_height;
         py = (py < 0) ? py + m_height : py;
       }
-      res = m_data[py*m_width + px];
+      res = m_data[offset(px, py)];
     }
     break;
   };
@@ -302,7 +303,7 @@ float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, f
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       float4 f1 = read_array_uchar4(m_data.data(), offsets.x);
       float4 f2 = read_array_uchar4(m_data.data(), offsets.y);
       float4 f3 = read_array_uchar4(m_data.data(), offsets.z);
@@ -353,7 +354,7 @@ float4 LiteImage::Image2D<uchar4>::sample(const LiteImage::Sampler& a_sampler, f
         py = py % m_height;
         py = (py < 0) ? py + m_height : py;
       }
-      res = read_array_uchar4(m_data.data(), py*m_width + px);
+      res = read_array_uchar4(m_data.data(), offset(px, py));
       if(m_srgb)
         res = sRGBToLinear4f(res);
     }
@@ -393,7 +394,7 @@ float4 LiteImage::Image2D<uint32_t>::sample(const LiteImage::Sampler& a_sampler,
       const float w3 = fx1 * fy;
       const float w4 = fx  * fy;
   
-      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height);
+      const int4 offsets = bilinearOffsets(ffx, ffy, a_sampler, m_width, m_height, m_layout, m_pitch, m_binShift);
       float4 f1 = read_array_uchar4(m_data.data(), offsets.x);
       float4 f2 = read_array_uchar4(m_data.data(), offsets.y);
       float4 f3 = read_array_uchar4(m_data.data(), offsets.z);
@@ -443,7 +444,7 @@ float4 LiteImage::Image2D<uint32_t>::sample(const LiteImage::Sampler& a_sampler,
         py = py % m_height;
         py = (py < 0) ? py + m_height : py;
       }
-      res = read_array_uchar4(m_data.data(), py*m_width + px);
+      res = read_array_uchar4(m_data.data(), offset(px, py));
       if(m_srgb)
         res = sRGBToLinear4f(res);
     }
@@ -606,6 +607,12 @@ static inline unsigned IntColorUint32(int r, int g, int b) { return unsigned(r |
 template<> 
 bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image2D<float4>& a_image, float a_gamma) 
 {
+  if(a_image.layout() != LiteImage::Layout::LINEAR) // file functions work with linear data
+  {
+    LiteImage::Image2D<float4> linear = a_image;
+    linear.setLayout(LiteImage::Layout::LINEAR);
+    return SaveImage(a_fileName, linear, a_gamma);
+  }
   const float gammaInv = 1.0f/a_gamma;
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
@@ -680,6 +687,12 @@ bool LiteImage::SaveImage<float4>(const char* a_fileName, const LiteImage::Image
 template<> 
 bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image2D<float3>& a_image, float a_gamma) 
 {
+  if(a_image.layout() != LiteImage::Layout::LINEAR) // file functions work with linear data
+  {
+    LiteImage::Image2D<float3> linear = a_image;
+    linear.setLayout(LiteImage::Layout::LINEAR);
+    return SaveImage(a_fileName, linear, a_gamma);
+  }
   const float gammaInv = 1.0f/a_gamma;
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
@@ -754,6 +767,12 @@ bool LiteImage::SaveImage<float3>(const char* a_fileName, const LiteImage::Image
 template<> 
 bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2D<float>& a_image, float a_gamma) 
 {
+  if(a_image.layout() != LiteImage::Layout::LINEAR) // file functions work with linear data
+  {
+    LiteImage::Image2D<float> linear = a_image;
+    linear.setLayout(LiteImage::Layout::LINEAR);
+    return SaveImage(a_fileName, linear, a_gamma);
+  }
   const float gammaInv = 1.0f/a_gamma;
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
@@ -832,6 +851,12 @@ bool LiteImage::SaveImage<float>(const char* a_fileName, const LiteImage::Image2
 template<> 
 bool LiteImage::SaveImage<uint32_t>(const char* a_fileName, const LiteImage::Image2D<uint32_t>& a_image, float a_gamma) 
 {
+  if(a_image.layout() != LiteImage::Layout::LINEAR) // file functions work with linear data
+  {
+    LiteImage::Image2D<uint32_t> linear = a_image;
+    linear.setLayout(LiteImage::Layout::LINEAR);
+    return SaveImage(a_fileName, linear, a_gamma);
+  }
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
 
@@ -905,6 +930,12 @@ bool LiteImage::SaveImage<uint32_t>(const char* a_fileName, const LiteImage::Ima
 template<> 
 bool LiteImage::SaveImage<uchar4>(const char* a_fileName, const LiteImage::Image2D<uchar4>& a_image, float a_gamma) 
 {
+  if(a_image.layout() != LiteImage::Layout::LINEAR) // file functions work with linear data
+  {
+    LiteImage::Image2D<uchar4> linear = a_image;
+    linear.setLayout(LiteImage::Layout::LINEAR);
+    return SaveImage(a_fileName, linear, a_gamma);
+  }
   const std::string fileStr(a_fileName);
   const std::string fileExt = fileStr.substr(fileStr.find_last_of('.'));
 
