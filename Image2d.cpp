@@ -472,6 +472,7 @@ namespace myvulkan
     VK_FORMAT_R16G16B16A16_UNORM = 91,    // ***
     VK_FORMAT_R32_SFLOAT = 100,           // ***
     VK_FORMAT_R32G32_SFLOAT = 103,        // ***
+    VK_FORMAT_R32G32B32A32_UINT = 107,
     VK_FORMAT_R32G32B32A32_SFLOAT = 109,  // ***
   } VkFormat;
 };
@@ -486,6 +487,7 @@ template<> uint32_t LiteImage::GetVulkanFormat<uint16_t>(bool a_gamma22) { (void
 template<> uint32_t LiteImage::GetVulkanFormat<uint8_t>(bool a_gamma22)  { return a_gamma22 ? uint32_t(myvulkan::VK_FORMAT_R8_SRGB) : uint32_t(myvulkan::VK_FORMAT_R8_UNORM); }
 
 template<> uint32_t LiteImage::GetVulkanFormat<float4>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32G32B32A32_SFLOAT); }
+template<> uint32_t LiteImage::GetVulkanFormat<uint4>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32G32B32A32_UINT); }
 template<> uint32_t LiteImage::GetVulkanFormat<float2>(bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32G32_SFLOAT); }
 template<> uint32_t LiteImage::GetVulkanFormat<float> (bool a_gamma22) { (void)a_gamma22; return uint32_t(myvulkan::VK_FORMAT_R32_SFLOAT); }
 

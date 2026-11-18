@@ -9,8 +9,8 @@
 // Shaders are const member functions of the main class, their names start with 'kernelVS_' and 'kernelPS_':
 //   float4 kernelVS_Name(uint32_t a_vertexId, Args... a_args, Varyings* a_out) const; // returns clip space position
 //   float4 kernelVS_Name(uint32_t a_vertexId, Args... a_args) const;                  // depth only pass, no pixel shader
-//   float4 kernelPS_Name(const Varyings& a_in) const;                                 // returns color of target 0
-//   Output kernelPS_Name(const Varyings& a_in) const;                                 // struct of float4: color of targets 0,1,...
+//   float4 kernelPS_Name(const Varyings& a_in) const;                                 // color of target 0; uint4 for a raw integer target
+//   Output kernelPS_Name(const Varyings& a_in) const;                                 // struct of float4/uint4: targets 0,1,...
 // Varyings are a struct of float types (float, float2, float3, float4), all fields are interpolated with perspective
 // correction. The vertex shader reads vertex data from members of the class by a_vertexId (vertex pulling).
 //
@@ -20,6 +20,7 @@
 //   * pixel (x,y) has its center at (x+0.5, y+0.5); top-left fill rule; 8 bits of sub-pixel precision;
 //   * front face is defined as VkFrontFace (COUNTER_CLOCKWISE by default), depth range is [minDepth, maxDepth];
 //   * RGBA8 color target stores R in the lowest byte (VK_FORMAT_R8G8B8A8_UNORM).
+//   * Image2D<uint4> is a raw RGBA32_UINT target: bits are preserved and blending is disabled; clearUintColor sets its clear value.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <cstdint>
@@ -97,8 +98,9 @@ namespace LiteRS
   */
   struct Pipeline
   {
-    void SetColorTarget(Image2D<float4>&   a_image, uint32_t a_index = 0) { assert(a_index < MAX_COLOR_TARGETS); colorF[a_index] = &a_image; colorU[a_index] = nullptr; }
-    void SetColorTarget(Image2D<uint32_t>& a_image, uint32_t a_index = 0) { assert(a_index < MAX_COLOR_TARGETS); colorU[a_index] = &a_image; colorF[a_index] = nullptr; }
+    void SetColorTarget(Image2D<float4>&   a_image, uint32_t a_index = 0) { assert(a_index < MAX_COLOR_TARGETS); colorF[a_index] = &a_image; colorU[a_index] = nullptr; colorU4[a_index] = nullptr; }
+    void SetColorTarget(Image2D<uint32_t>& a_image, uint32_t a_index = 0) { assert(a_index < MAX_COLOR_TARGETS); colorU[a_index] = &a_image; colorF[a_index] = nullptr; colorU4[a_index] = nullptr; }
+    void SetColorTarget(Image2D<LiteMath::uint4>& a_image, uint32_t a_index = 0) { assert(a_index < MAX_COLOR_TARGETS); colorU4[a_index] = &a_image; colorF[a_index] = nullptr; colorU[a_index] = nullptr; }
     void SetDepthTarget(Image2D<float>&    a_image)                       { depth = &a_image; }
     void SetViewport(int a_x, int a_y, int a_width, int a_height)
     {
@@ -115,13 +117,15 @@ namespace LiteRS
     bool        depthWrite   = true;
     CompareOp   depthCompare = CompareOp::LESS;
     BlendMode   blendMode    = BlendMode::NONE;
-    float4      clearColor   = float4(0.0f, 0.0f, 0.0f, 0.0f); ///< for all color targets
+    float4      clearColor   = float4(0.0f, 0.0f, 0.0f, 0.0f); ///< RGBA32F and RGBA8 targets
+    LiteMath::uint4 clearUintColor = LiteMath::uint4(0u); ///< raw RGBA32_UINT targets; no color conversion or blending
     float       clearDepth   = 1.0f;
     CPUSettings cpu;
     CPUStats    stats;
 
     Image2D<float4>*   colorF[MAX_COLOR_TARGETS] = {}; ///< RGBA32F color targets
     Image2D<uint32_t>* colorU[MAX_COLOR_TARGETS] = {}; ///< RGBA8 color targets
+    Image2D<LiteMath::uint4>* colorU4[MAX_COLOR_TARGETS] = {}; ///< raw RGBA32_UINT targets
     Image2D<float>*    depth = nullptr;                ///< D32 depth target
     DrawBackend*       backend = nullptr;              ///< set by generated code (ISPC): it executes draws with known shaders, see DrawBackend
 #ifndef KERNEL_SLICER
@@ -201,6 +205,7 @@ namespace LiteRS
     {
       float4*           colorF[MAX_COLOR_TARGETS] = {};
       uint32_t*         colorU[MAX_COLOR_TARGETS] = {};
+      LiteMath::uint4*   colorU4[MAX_COLOR_TARGETS] = {};
       float*            depth  = nullptr;
       int               width  = 0;
       int               height = 0;
@@ -246,8 +251,10 @@ namespace LiteRS
       {
         AddTarget(t, a_pipe.colorF[i]);
         AddTarget(t, a_pipe.colorU[i]);
+        AddTarget(t, a_pipe.colorU4[i]);
         t.colorF[i] = (a_pipe.colorF[i] != nullptr) ? a_pipe.colorF[i]->data() : nullptr;
         t.colorU[i] = (a_pipe.colorU[i] != nullptr) ? a_pipe.colorU[i]->data() : nullptr;
+        t.colorU4[i] = (a_pipe.colorU4[i] != nullptr) ? a_pipe.colorU4[i]->data() : nullptr;
       }
       AddTarget(t, a_pipe.depth);
       t.depth = (a_pipe.depth != nullptr) ? a_pipe.depth->data() : nullptr;
@@ -635,21 +642,31 @@ namespace LiteRS
       };
     }
 
-    /// writes pixel shader output (float4 or a struct of float4) to color targets 0, 1, ...
+    /// writes pixel shader output (float4/uint4 or a struct of these) to color targets 0, 1, ...
     template<typename PSOut>
     static inline void WriteColors(const Target& a_tgt, int a_offs, const PSOut& a_out)
     {
-      static_assert(sizeof(PSOut) % sizeof(float4) == 0, "LiteRS: pixel shader must return float4 or a struct of float4");
+      static_assert(sizeof(PSOut) % sizeof(float4) == 0, "LiteRS: pixel shader must return float4/uint4 or a struct of these");
       constexpr uint32_t N = uint32_t(sizeof(PSOut)/sizeof(float4));
       static_assert(N <= MAX_COLOR_TARGETS, "LiteRS: too many color targets");
-      const float4* colors = reinterpret_cast<const float4*>(&a_out);
+      const auto* colors = reinterpret_cast<const unsigned char*>(&a_out);
       for(uint32_t i = 0; i < N; i++)
       {
-        const float4 c = colors[i];
-        if(a_tgt.colorF[i] != nullptr)
-          a_tgt.colorF[i][a_offs] = (a_tgt.blendMode == BlendMode::NONE) ? c : Blend(a_tgt.blendMode, c, a_tgt.colorF[i][a_offs]);
-        else if(a_tgt.colorU[i] != nullptr)
-          a_tgt.colorU[i][a_offs] = PackRGBA8((a_tgt.blendMode == BlendMode::NONE) ? c : Blend(a_tgt.blendMode, c, UnpackRGBA8(a_tgt.colorU[i][a_offs])));
+        if(a_tgt.colorU4[i] != nullptr)
+        {
+          LiteMath::uint4 c;
+          std::memcpy(&c, colors + i*sizeof(float4), sizeof(c));
+          a_tgt.colorU4[i][a_offs] = c;
+        }
+        else
+        {
+          float4 c;
+          std::memcpy(&c, colors + i*sizeof(float4), sizeof(c));
+          if(a_tgt.colorF[i] != nullptr)
+            a_tgt.colorF[i][a_offs] = (a_tgt.blendMode == BlendMode::NONE) ? c : Blend(a_tgt.blendMode, c, a_tgt.colorF[i][a_offs]);
+          else if(a_tgt.colorU[i] != nullptr)
+            a_tgt.colorU[i][a_offs] = PackRGBA8((a_tgt.blendMode == BlendMode::NONE) ? c : Blend(a_tgt.blendMode, c, UnpackRGBA8(a_tgt.colorU[i][a_offs])));
+        }
       }
     }
 
@@ -1021,6 +1038,8 @@ namespace LiteRS
         a_pipe.colorF[i]->clear(a_pipe.clearColor);
       if(a_pipe.colorU[i] != nullptr)
         a_pipe.colorU[i]->clear(detail::PackRGBA8(a_pipe.clearColor));
+      if(a_pipe.colorU4[i] != nullptr)
+        a_pipe.colorU4[i]->clear(a_pipe.clearUintColor);
     }
     if(a_pipe.depth != nullptr)
       a_pipe.depth->clear(a_pipe.clearDepth);
