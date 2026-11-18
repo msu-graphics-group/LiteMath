@@ -3,12 +3,14 @@
 // LiteRS: minimal graphics pipeline (vertex shader + pixel shader) for kernel_slicer.
 //
 // This header is the CPU reference implementation. kernel_slicer replaces LiteRS commands (Clear, DrawTriangles,
-// DrawIndexedTriangles) in control functions with a Vulkan graphics pipeline or with a call of the ISPC rasterizer.
+// DrawIndexedTriangles, DrawInstancedTriangles, DrawIndexedInstancedTriangles) in control functions with a Vulkan
+// graphics pipeline or with a call of the ISPC rasterizer.
 // Pipeline state and render targets are set up in ordinary host functions through LiteRS::Pipeline objects.
 //
 // Shaders are const member functions of the main class, their names start with 'kernelVS_' and 'kernelPS_':
 //   float4 kernelVS_Name(uint32_t a_vertexId, Args... a_args, Varyings* a_out) const; // returns clip space position
 //   float4 kernelVS_Name(uint32_t a_vertexId, Args... a_args) const;                  // depth only pass, no pixel shader
+//   float4 kernelVS_Name(uint32_t a_vertexId, uint32_t a_instanceId, Args... a_args, Varyings* a_out) const; // instanced draws
 //   float4 kernelPS_Name(const Varyings& a_in) const;                                 // color of target 0; uint4 for a raw integer target
 //   Output kernelPS_Name(const Varyings& a_in) const;                                 // struct of float4/uint4: targets 0,1,...
 // Varyings are a struct of float types (float, float2, float3, float4), all fields are interpolated with perspective
@@ -164,6 +166,21 @@ namespace LiteRS
 
   template<typename C, typename VSRet, typename... VSArgs, typename... Args>
   void DrawIndexedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, const uint32_t* a_indices, uint32_t a_indexNum, Args... a_args);
+
+  template<typename C, typename VSRet, typename... VSArgs, typename PSRet, typename... PSArgs, typename... Args>
+  void DrawInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, PSRet (C::*a_ps)(PSArgs...) const,
+                              uint32_t a_vertNum, uint32_t a_instNum, Args... a_args);
+
+  template<typename C, typename VSRet, typename... VSArgs, typename... Args>
+  void DrawInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, uint32_t a_vertNum, uint32_t a_instNum, Args... a_args);
+
+  template<typename C, typename VSRet, typename... VSArgs, typename PSRet, typename... PSArgs, typename... Args>
+  void DrawIndexedInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, PSRet (C::*a_ps)(PSArgs...) const,
+                                     const uint32_t* a_indices, uint32_t a_indexNum, uint32_t a_instNum, Args... a_args);
+
+  template<typename C, typename VSRet, typename... VSArgs, typename... Args>
+  void DrawIndexedInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const,
+                                     const uint32_t* a_indices, uint32_t a_indexNum, uint32_t a_instNum, Args... a_args);
 
 #else
 
@@ -791,6 +808,40 @@ namespace LiteRS
       }
     }
 
+    /**
+    \brief Instanced draw: vertex shader is executed for every instance and every used vertex, the vertices of instance k
+           are stored after the vertices of instance k-1. Triangles are drawn in the order of Vulkan: all triangles of
+           instance 0, then all triangles of instance 1 and so on.
+    \param a_indices -- index buffer or nullptr for non indexed draw
+    \param a_num     -- number of indices (or vertices for non indexed draw) of one instance
+    \param a_instNum -- number of instances
+    \param a_vs      -- functor 'void(uint32_t a_vertexId, uint32_t a_instanceId, Vertex<V>&)'
+    \param a_ps      -- functor 'PSOut(const V&)' or nullptr for depth only pass
+    */
+    template<typename V, typename VSFn, typename PSFn>
+    static void DrawInstancedStream(Pipeline& a_pipe, const uint32_t* a_indices, uint32_t a_num, uint32_t a_instNum, VSFn a_vs, PSFn a_ps)
+    {
+      const uint32_t num = a_num - a_num % 3; // as in Vulkan, an incomplete last triangle is ignored
+      if(num == 0 || a_instNum == 0)
+        return;
+      uint32_t first = 0, last = num - 1;
+      if(a_indices != nullptr)
+        IndexRange(a_indices, num, first, last);
+      const uint32_t range = last - first + 1;
+      const auto verts = RunVertexShader<V>(a_pipe, 0, range*a_instNum, [&](uint32_t a_id, Vertex<V>& a_vert) { a_vs(first + a_id % range, a_id / range, a_vert); });
+      if(a_indices == nullptr)
+      {
+        DrawVertexStream(a_pipe, verts.data(), nullptr, num*a_instNum, 0, a_ps);
+        return;
+      }
+      std::vector<uint32_t> indices(size_t(num)*size_t(a_instNum)); // index buffer of all instances
+      #pragma omp parallel for if(a_pipe.cpu.multithreaded && indices.size() >= 65536)
+      for(int inst = 0; inst < int(a_instNum); inst++)
+        for(uint32_t i = 0; i < num; i++)
+          indices[size_t(inst)*num + i] = a_indices[i] - first + uint32_t(inst)*range;
+      DrawVertexStream(a_pipe, verts.data(), indices.data(), uint32_t(indices.size()), 0, a_ps);
+    }
+
     template<typename... VSArgs>
     using VaryingsOf = typename std::remove_cv<typename std::remove_pointer<typename std::tuple_element<sizeof...(VSArgs) - 1, std::tuple<VSArgs...> >::type>::type>::type;
 
@@ -1130,6 +1181,65 @@ namespace LiteRS
       return;
     const auto verts = detail::RunVertexShader<V>(a_pipe, first, last - first + 1, [&](uint32_t a_id, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_args...); });
     detail::DrawVertexStream(a_pipe, verts.data(), a_indices, a_indexNum, first, nullptr);
+  }
+
+  /**
+  \brief Draws a_instNum instances of a triangle list (as vkCmdDraw with instanceCount = a_instNum).
+  \param a_vs      -- vertex shader 'float4 VS(uint32_t a_vertexId, uint32_t a_instanceId, Args..., V* a_out) const',
+                      a_instanceId is 0, 1, ..., a_instNum-1; data of instances are read from members of the class by a_instanceId
+  \param a_vertNum -- number of vertices of one instance
+  \param a_instNum -- number of instances
+  The other parameters are the same as in DrawTriangles. Triangles of instance k are drawn after all triangles of instance k-1.
+  */
+  template<typename C, typename VSRet, typename... VSArgs, typename PSRet, typename... PSArgs, typename... Args>
+  static void DrawInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, PSRet (C::*a_ps)(PSArgs...) const,
+                                     uint32_t a_vertNum, uint32_t a_instNum, Args... a_args)
+  {
+    using V = detail::VaryingsOf<VSArgs...>; // DrawBackend (ISPC) does not support instancing yet, the C++ implementation is used
+    detail::DrawInstancedStream<V>(a_pipe, nullptr, a_vertNum, a_instNum,
+                                   [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args..., &a_vert.attr); },
+                                   [a_self, a_ps](const V& a_in) { return (a_self->*a_ps)(a_in); });
+  }
+
+  /**
+  \brief Depth only pass with instances: vertex shader 'float4 VS(uint32_t a_vertexId, uint32_t a_instanceId, Args...) const'.
+  */
+  template<typename C, typename VSRet, typename... VSArgs, typename... Args>
+  static void DrawInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, uint32_t a_vertNum, uint32_t a_instNum, Args... a_args)
+  {
+    using V = detail::NoVaryings;
+    detail::DrawInstancedStream<V>(a_pipe, nullptr, a_vertNum, a_instNum,
+                                   [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args...); },
+                                   nullptr);
+  }
+
+  /**
+  \brief Draws a_instNum instances of an indexed triangle list (as vkCmdDrawIndexed with instanceCount = a_instNum).
+  \param a_indices  -- index buffer of one instance, usually 'm_indices.data()' of a member vector
+  \param a_indexNum -- number of indices of one instance
+  The other parameters are the same as in DrawInstancedTriangles.
+  */
+  template<typename C, typename VSRet, typename... VSArgs, typename PSRet, typename... PSArgs, typename... Args>
+  static void DrawIndexedInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, PSRet (C::*a_ps)(PSArgs...) const,
+                                            const uint32_t* a_indices, uint32_t a_indexNum, uint32_t a_instNum, Args... a_args)
+  {
+    using V = detail::VaryingsOf<VSArgs...>;
+    detail::DrawInstancedStream<V>(a_pipe, a_indices, a_indexNum, a_instNum,
+                                   [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args..., &a_vert.attr); },
+                                   [a_self, a_ps](const V& a_in) { return (a_self->*a_ps)(a_in); });
+  }
+
+  /**
+  \brief Depth only pass with instances of an indexed triangle list.
+  */
+  template<typename C, typename VSRet, typename... VSArgs, typename... Args>
+  static void DrawIndexedInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const,
+                                            const uint32_t* a_indices, uint32_t a_indexNum, uint32_t a_instNum, Args... a_args)
+  {
+    using V = detail::NoVaryings;
+    detail::DrawInstancedStream<V>(a_pipe, a_indices, a_indexNum, a_instNum,
+                                   [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args...); },
+                                   nullptr);
   }
 
 #endif // KERNEL_SLICER
