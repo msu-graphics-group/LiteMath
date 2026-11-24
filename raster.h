@@ -1127,19 +1127,35 @@ namespace LiteRS
   /**
   \brief Clears all color targets of a_pipe with a_pipe.clearColor and the depth target with a_pipe.clearDepth.
   */
+  namespace detail
+  {
+    /// fills an image by several threads: large targets are limited by memory bandwidth, one thread does not use it
+    template<typename T>
+    static void ClearImage(Image2D<T>& a_image, const T a_val, bool a_multithreaded)
+    {
+      T*                   data  = a_image.data();
+      const int64_t        size  = int64_t(a_image.vector().size());
+      constexpr int64_t    CHUNK = 65536;
+      #pragma omp parallel for if(a_multithreaded && size >= 4*CHUNK)
+      for(int64_t start = 0; start < size; start += CHUNK)
+        std::fill(data + start, data + std::min(start + CHUNK, size), a_val);
+    }
+  };
+
   static inline void Clear(Pipeline& a_pipe)
   {
+    const bool mt = a_pipe.cpu.multithreaded;
     for(uint32_t i = 0; i < MAX_COLOR_TARGETS; i++)
     {
       if(a_pipe.colorF[i] != nullptr)
-        a_pipe.colorF[i]->clear(a_pipe.clearColor);
+        detail::ClearImage(*a_pipe.colorF[i], a_pipe.clearColor, mt);
       if(a_pipe.colorU[i] != nullptr)
-        a_pipe.colorU[i]->clear(detail::PackRGBA8(a_pipe.clearColor));
+        detail::ClearImage(*a_pipe.colorU[i], detail::PackRGBA8(a_pipe.clearColor), mt);
       if(a_pipe.colorU4[i] != nullptr)
-        a_pipe.colorU4[i]->clear(a_pipe.clearUintColor);
+        detail::ClearImage(*a_pipe.colorU4[i], a_pipe.clearUintColor, mt);
     }
     if(a_pipe.depth != nullptr)
-      a_pipe.depth->clear(a_pipe.clearDepth);
+      detail::ClearImage(*a_pipe.depth, a_pipe.clearDepth, mt);
   }
 
   /**
