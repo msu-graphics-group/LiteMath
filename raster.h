@@ -745,11 +745,43 @@ namespace LiteRS
     \param a_indexBase  -- vertex 'i' is stored in a_verts[i - a_indexBase]
     \param a_ps         -- functor 'PSOut(const V&)' or nullptr for depth only pass
     */
+    template<typename V, typename BinFn>
+    static void DrawVertexStreamByBins(Pipeline& a_pipe, const Vertex<V>* a_verts, const uint32_t* a_indices, uint32_t a_num, uint32_t a_indexBase, BinFn a_binFn);
+
     template<typename V, typename PSFn>
     static void DrawVertexStream(Pipeline& a_pipe, const Vertex<V>* a_verts, const uint32_t* a_indices, uint32_t a_num, uint32_t a_indexBase, PSFn a_ps)
     {
       static_assert(sizeof(V) % sizeof(float) == 0, "LiteRS: varyings must consist of float, float2, float3, float4 fields");
       const Target tgt = MakeTarget(a_pipe);
+
+      auto shadePixel = [&](const Triangle<V>& tri, int x, int y, float b0, float b1, float b2)
+      {
+        const int   offs = tgt.Offset(x, y);
+        const float z    = b0*tri.z[0] + b1*tri.z[1] + b2*tri.z[2];
+        if(!DepthTest(tgt, offs, z))
+          return;
+        if constexpr(!std::is_same<PSFn, std::nullptr_t>::value)
+        {
+          V in;
+          Interpolate(tri, b0, b1, b2, in);
+          WriteColors(tgt, offs, a_ps(in));
+        }
+      };
+
+      if(a_pipe.cpu.multithreaded && a_num/3 >= 4*16384) // large draws: setup and binning in parallel as well (the same order of triangles in bins)
+      {
+        DrawVertexStreamByBins<V>(a_pipe, a_verts, a_indices, a_num, a_indexBase,
+                                  [&](const Triangle<V>* a_tris, const uint32_t* a_ids, uint32_t a_count, const Rect& a_bin)
+        {
+          for(uint32_t k = 0; k < a_count; k++)
+          {
+            const Triangle<V>& tri = a_tris[a_ids[k]];
+            auto frag = [&](int x, int y, float b0, float b1, float b2) { shadePixel(tri, x, y, b0, b1, b2); };
+            Rasterize(tri, a_bin, a_pipe.cpu, frag);
+          }
+        });
+        return;
+      }
 
       StageTimer setupTimer(a_pipe.cpu.collectStats);
       std::vector< Triangle<V> > tris;
@@ -765,19 +797,6 @@ namespace LiteRS
       a_pipe.stats.triangles += tris.size();
       a_pipe.stats.draws     += a_pipe.cpu.collectStats ? 1 : 0;
 
-      auto shadePixel = [&](const Triangle<V>& tri, int x, int y, float b0, float b1, float b2)
-      {
-        const int   offs = tgt.Offset(x, y);
-        const float z    = b0*tri.z[0] + b1*tri.z[1] + b2*tri.z[2];
-        if(!DepthTest(tgt, offs, z))
-          return;
-        if constexpr(!std::is_same<PSFn, std::nullptr_t>::value)
-        {
-          V in;
-          Interpolate(tri, b0, b1, b2, in);
-          WriteColors(tgt, offs, a_ps(in));
-        }
-      };
       StageTimer rasterTimer(a_pipe.cpu.collectStats);
       RasterizeAll(a_pipe.cpu, tgt, tris, shadePixel);
       a_pipe.stats.rasterMs += rasterTimer.Ms();
@@ -818,6 +837,24 @@ namespace LiteRS
     \param a_vs      -- functor 'void(uint32_t a_vertexId, uint32_t a_instanceId, Vertex<V>&)'
     \param a_ps      -- functor 'PSOut(const V&)' or nullptr for depth only pass
     */
+    /// number of instances which are processed together: vertices of a batch take at most a few hundreds of megabytes
+    static inline uint32_t InstancesPerBatch(uint32_t a_vertsOfInstance)
+    {
+      constexpr uint32_t MAX_BATCH_VERTICES = 1u << 21;
+      return std::max<uint32_t>(1u, MAX_BATCH_VERTICES / std::max<uint32_t>(1u, a_vertsOfInstance));
+    }
+
+    /// index buffer of instances [a_instFirst, a_instFirst + a_instNum) of a batch: vertices of instance k of the batch start at k*a_range
+    static inline void InstancedIndices(const uint32_t* a_indices, uint32_t a_num, uint32_t a_first, uint32_t a_range, uint32_t a_instNum, bool a_multithreaded,
+                                        std::vector<uint32_t>& a_out)
+    {
+      a_out.resize(size_t(a_num)*size_t(a_instNum));
+      #pragma omp parallel for if(a_multithreaded && a_out.size() >= 65536)
+      for(int inst = 0; inst < int(a_instNum); inst++)
+        for(uint32_t i = 0; i < a_num; i++)
+          a_out[size_t(inst)*a_num + i] = a_indices[i] - a_first + uint32_t(inst)*a_range;
+    }
+
     template<typename V, typename VSFn, typename PSFn>
     static void DrawInstancedStream(Pipeline& a_pipe, const uint32_t* a_indices, uint32_t a_num, uint32_t a_instNum, VSFn a_vs, PSFn a_ps)
     {
@@ -828,18 +865,20 @@ namespace LiteRS
       if(a_indices != nullptr)
         IndexRange(a_indices, num, first, last);
       const uint32_t range = last - first + 1;
-      const auto verts = RunVertexShader<V>(a_pipe, 0, range*a_instNum, [&](uint32_t a_id, Vertex<V>& a_vert) { a_vs(first + a_id % range, a_id / range, a_vert); });
-      if(a_indices == nullptr)
+      const uint32_t batch = InstancesPerBatch(range); // memory for vertices and indices of all instances may be too large
+      std::vector<uint32_t> indices;
+      for(uint32_t instFirst = 0; instFirst < a_instNum; instFirst += batch)
       {
-        DrawVertexStream(a_pipe, verts.data(), nullptr, num*a_instNum, 0, a_ps);
-        return;
+        const uint32_t instNum = std::min(batch, a_instNum - instFirst);
+        const auto verts = RunVertexShader<V>(a_pipe, 0, range*instNum, [&](uint32_t a_id, Vertex<V>& a_vert) { a_vs(first + a_id % range, instFirst + a_id / range, a_vert); });
+        if(a_indices == nullptr)
+          DrawVertexStream(a_pipe, verts.data(), nullptr, num*instNum, 0, a_ps);
+        else
+        {
+          InstancedIndices(a_indices, num, first, range, instNum, a_pipe.cpu.multithreaded, indices);
+          DrawVertexStream(a_pipe, verts.data(), indices.data(), uint32_t(indices.size()), 0, a_ps);
+        }
       }
-      std::vector<uint32_t> indices(size_t(num)*size_t(a_instNum)); // index buffer of all instances
-      #pragma omp parallel for if(a_pipe.cpu.multithreaded && indices.size() >= 65536)
-      for(int inst = 0; inst < int(a_instNum); inst++)
-        for(uint32_t i = 0; i < num; i++)
-          indices[size_t(inst)*num + i] = a_indices[i] - first + uint32_t(inst)*range;
-      DrawVertexStream(a_pipe, verts.data(), indices.data(), uint32_t(indices.size()), 0, a_ps);
     }
 
     template<typename... VSArgs>
@@ -851,6 +890,10 @@ namespace LiteRS
     /// std::tuple of additional arguments of vertex shader: 'VS(uint32_t a_vertexId, Args..., V* a_out)' ==> std::tuple<Args...>
     template<size_t Count, typename... VSArgs>
     using UserArgsOf = decltype(SubTupleType<1, std::tuple<VSArgs...>>(std::make_index_sequence<Count>{}));
+
+    /// the same for vertex shader of instanced draws 'VS(uint32_t a_vertexId, uint32_t a_instanceId, Args..., V* a_out)'
+    template<size_t Count, typename... VSArgs>
+    using InstancedUserArgsOf = decltype(SubTupleType<2, std::tuple<VSArgs...>>(std::make_index_sequence<Count>{}));
 
     /// varyings as an array of floats: back ends interpolate them without knowing their structure
     template<int N>
@@ -1072,6 +1115,9 @@ namespace LiteRS
   {
     virtual ~DrawBackend() {}
     virtual bool Draw(Pipeline& a_pipe, const ShaderKey& a_vs, const ShaderKey& a_ps, const uint32_t* a_indices, uint32_t a_num, const void* a_args) = 0;
+    /// instanced draws: a_num indices (or vertices) of one instance, a_instNum instances; 'false' -- LiteRS executes the draw itself
+    virtual bool DrawInstanced(Pipeline& a_pipe, const ShaderKey& a_vs, const ShaderKey& a_ps, const uint32_t* a_indices, uint32_t a_num, uint32_t a_instNum,
+                               const void* a_args) { return false; }
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1195,7 +1241,13 @@ namespace LiteRS
   static void DrawInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, PSRet (C::*a_ps)(PSArgs...) const,
                                      uint32_t a_vertNum, uint32_t a_instNum, Args... a_args)
   {
-    using V = detail::VaryingsOf<VSArgs...>; // DrawBackend (ISPC) does not support instancing yet, the C++ implementation is used
+    if(a_pipe.backend != nullptr)
+    {
+      const detail::InstancedUserArgsOf<sizeof...(VSArgs) - 3, VSArgs...> args(a_args...);
+      if(a_pipe.backend->DrawInstanced(a_pipe, MakeShaderKey(a_vs), MakeShaderKey(a_ps), nullptr, a_vertNum, a_instNum, &args))
+        return;
+    }
+    using V = detail::VaryingsOf<VSArgs...>;
     detail::DrawInstancedStream<V>(a_pipe, nullptr, a_vertNum, a_instNum,
                                    [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args..., &a_vert.attr); },
                                    [a_self, a_ps](const V& a_in) { return (a_self->*a_ps)(a_in); });
@@ -1207,6 +1259,12 @@ namespace LiteRS
   template<typename C, typename VSRet, typename... VSArgs, typename... Args>
   static void DrawInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, uint32_t a_vertNum, uint32_t a_instNum, Args... a_args)
   {
+    if(a_pipe.backend != nullptr)
+    {
+      const detail::InstancedUserArgsOf<sizeof...(VSArgs) - 2, VSArgs...> args(a_args...);
+      if(a_pipe.backend->DrawInstanced(a_pipe, MakeShaderKey(a_vs), ShaderKey(), nullptr, a_vertNum, a_instNum, &args))
+        return;
+    }
     using V = detail::NoVaryings;
     detail::DrawInstancedStream<V>(a_pipe, nullptr, a_vertNum, a_instNum,
                                    [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args...); },
@@ -1223,6 +1281,12 @@ namespace LiteRS
   static void DrawIndexedInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const, PSRet (C::*a_ps)(PSArgs...) const,
                                             const uint32_t* a_indices, uint32_t a_indexNum, uint32_t a_instNum, Args... a_args)
   {
+    if(a_pipe.backend != nullptr)
+    {
+      const detail::InstancedUserArgsOf<sizeof...(VSArgs) - 3, VSArgs...> args(a_args...);
+      if(a_pipe.backend->DrawInstanced(a_pipe, MakeShaderKey(a_vs), MakeShaderKey(a_ps), a_indices, a_indexNum, a_instNum, &args))
+        return;
+    }
     using V = detail::VaryingsOf<VSArgs...>;
     detail::DrawInstancedStream<V>(a_pipe, a_indices, a_indexNum, a_instNum,
                                    [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args..., &a_vert.attr); },
@@ -1236,6 +1300,12 @@ namespace LiteRS
   static void DrawIndexedInstancedTriangles(Pipeline& a_pipe, C* a_self, VSRet (C::*a_vs)(VSArgs...) const,
                                             const uint32_t* a_indices, uint32_t a_indexNum, uint32_t a_instNum, Args... a_args)
   {
+    if(a_pipe.backend != nullptr)
+    {
+      const detail::InstancedUserArgsOf<sizeof...(VSArgs) - 2, VSArgs...> args(a_args...);
+      if(a_pipe.backend->DrawInstanced(a_pipe, MakeShaderKey(a_vs), ShaderKey(), a_indices, a_indexNum, a_instNum, &args))
+        return;
+    }
     using V = detail::NoVaryings;
     detail::DrawInstancedStream<V>(a_pipe, a_indices, a_indexNum, a_instNum,
                                    [&](uint32_t a_id, uint32_t a_inst, Vertex<V>& a_vert) { a_vert.pos = (a_self->*a_vs)(a_id, a_inst, a_args...); },
